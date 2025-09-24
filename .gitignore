@@ -1,0 +1,5 @@
+# ignore PSSE junk files
+*.log
+*.out
+*.sav
+*.seq
