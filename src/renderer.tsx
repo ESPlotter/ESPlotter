@@ -26,18 +26,15 @@
  * ```
  */
 
+import ReactDOM from 'react-dom/client';
+import { App } from './app';
 import './index.css';
 
-console.log(
-  '👋 This message is being logged by "renderer.ts", included via Vite',
-);
+const element = document.getElementById('root');
 
-const information = document.getElementById('info')
-information.innerText = `This app is using Chrome (v${versions.chrome()}), Node.js (v${versions.node()}), and Electron (v${versions.electron()})`
-
-const func = async () => {
-  const response = await versions.ping()
-  console.log(response) // prints out 'pong'
+if (!element) {
+  throw new Error('Failed to find the root element');
 }
 
-func()
+const root = ReactDOM.createRoot(element);
+root.render(<App/>);

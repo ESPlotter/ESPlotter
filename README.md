@@ -1,7 +1,7 @@
 # Uniplot
 
 ## Requirements
-- Node.js
+- Node.js >= v16.4.0
 - npm
 
 ## Setup
