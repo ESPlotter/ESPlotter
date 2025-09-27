@@ -3,7 +3,7 @@ export function App() {
     const response = await versions.ping()
     console.log(response)
   }
-  
+
   return (
     <>
       <h1>Hello from React!</h1>
