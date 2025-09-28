@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist/main",
+    "module": "CommonJS",
+    "types": [
+      "node",
+      "electron"
+    ]
+  },
+  "include": [
+    "src/main",
+    "forge.env.d.ts"
+  ]
+}
