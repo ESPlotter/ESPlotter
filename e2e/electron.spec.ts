@@ -60,7 +60,7 @@ test.describe('Electron App', () => {
     expect(newBounds.height).not.toBe(initialBounds.height);
   });
 
-  test('should have working  preload script with versions API', async () => {
+  test('should have working preload script with versions API', async () => {
     const nodeVersion = await mainPage.evaluate(() => {
       return (window as any).versions.node();
     });

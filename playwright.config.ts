@@ -13,10 +13,14 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   forbidOnly: true,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: 'playwright-output/report', open: 'never' }],
+  ],
   use: {
     trace: 'on-first-retry',
   },
+  outputDir: 'playwright-output/test-results',
   timeout: 60 * 1000,
   workers: 1,
   webServer: {
