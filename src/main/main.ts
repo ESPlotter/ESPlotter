@@ -17,12 +17,24 @@ const createWindow = () => {
     },
   });
 
+  const rendererDevServerUrl =
+    process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL ??
+    (typeof MAIN_WINDOW_VITE_DEV_SERVER_URL !== 'undefined'
+      ? MAIN_WINDOW_VITE_DEV_SERVER_URL
+      : undefined);
+
+  const rendererBundleName =
+    process.env.MAIN_WINDOW_VITE_NAME ??
+    (typeof MAIN_WINDOW_VITE_NAME !== 'undefined'
+      ? MAIN_WINDOW_VITE_NAME
+      : 'main_window');
+
   // and load the index.html of the app.
-  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+  if (rendererDevServerUrl) {
+    mainWindow.loadURL(rendererDevServerUrl);
   } else {
     mainWindow.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
+      path.join(__dirname, `../renderer/${rendererBundleName}/index.html`),
     );
   }
 
