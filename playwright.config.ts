@@ -27,7 +27,7 @@ export default defineConfig({
     command: 'npm run dev:renderer',
     url: 'http://127.0.0.1:5173',
     reuseExistingServer: !process.env.CI,
-    timeout: 30 * 1000,
+    timeout: process.env.CI ? 120_000 : 30_000,
   },
   projects: [
     {
