@@ -84,7 +84,7 @@ test.describe('Electron App', () => {
 
   test('should render React UI', async () => {
     const heading = mainPage.getByRole('heading', { level: 1 });
-    await expect(heading).toHaveText('Hello from wrong React!');
+    await expect(heading).toHaveText('Hello from React!');
 
     const versionsParagraph = mainPage.locator('p');
     await expect(versionsParagraph).toContainText('Chrome');
