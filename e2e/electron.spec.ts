@@ -46,7 +46,7 @@ test.describe('Electron App', () => {
 
     await electronApp.evaluate(async (electron) => {
       const mainWindow = electron.BrowserWindow.getAllWindows()[0];
-      mainWindow.setSize(10, 20);
+      mainWindow.setSize(600, 700);
     });
 
     const newBounds = await electronApp.evaluate((electron) => {
@@ -54,8 +54,8 @@ test.describe('Electron App', () => {
       return mainWindow.getBounds();
     });
 
-    expect(newBounds.width).toBe(10);
-    expect(newBounds.height).toBe(20);
+    expect(newBounds.width).toBe(600);
+    expect(newBounds.height).toBe(700);
     expect(newBounds.width).not.toBe(initialBounds.width);
     expect(newBounds.height).not.toBe(initialBounds.height);
   });
@@ -87,4 +87,3 @@ test.describe('Electron App', () => {
     await expect(pingButton).toBeEnabled();
   });
 });
-
