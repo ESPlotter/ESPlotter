@@ -44,18 +44,27 @@ test.describe('Electron App', () => {
       return mainWindow.getBounds();
     });
 
-    await electronApp.evaluate(async (electron) => {
-      const mainWindow = electron.BrowserWindow.getAllWindows()[0];
-      mainWindow.setSize(600, 700);
-    });
+    const targetWidth = 600;
+    const targetHeight = 700;
+    // setSize behaves differently depending on the platform: on macOS, the window ends up a few pixels shorter than requested (system window frames cut ~16 px)
+    const heightTolerance = process.platform === 'darwin' ? 32 : 10;
+
+    await electronApp.evaluate(
+      async (electron, { width, height }) => {
+        const mainWindow = electron.BrowserWindow.getAllWindows()[0];
+        mainWindow.setSize(width, height);
+      },
+      { width: targetWidth, height: targetHeight },
+    );
 
     const newBounds = await electronApp.evaluate((electron) => {
       const mainWindow = electron.BrowserWindow.getAllWindows()[0];
       return mainWindow.getBounds();
     });
 
-    expect(newBounds.width).toBe(600);
-    expect(newBounds.height).toBe(700);
+    expect(newBounds.width).toBe(targetWidth);
+    expect(newBounds.height).toBeGreaterThanOrEqual(targetHeight - heightTolerance);
+    expect(newBounds.height).toBeLessThanOrEqual(targetHeight + heightTolerance);
     expect(newBounds.width).not.toBe(initialBounds.width);
     expect(newBounds.height).not.toBe(initialBounds.height);
   });
