@@ -31,28 +31,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Workaround for npm optional dependency bug (https://github.com/npm/cli/issues/4828)
-      - name: Patch rollup optional dependency (macOS)
-        if: matrix.os == 'macos-latest'
-        run: npm install @rollup/rollup-darwin-arm64 --no-save
-
-      # Workaround for npm optional dependency bug (https://github.com/npm/cli/issues/4828)
-      - name: Patch rollup optional dependency (Windows)
-        if: matrix.os == 'windows-latest'
-        run: npm install @rollup/rollup-win32-x64-msvc --no-save
-
-      - name: Install Playwright browsers (Linux)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Install Playwright browsers (all OS)
         run: npx playwright install --with-deps
 
-      - name: Install Playwright browsers (macOS/Windows)
-        if: matrix.os != 'ubuntu-latest'
-        run: npx playwright install
-
       - name: Run Playwright tests
-        env:
-          DEBUG: pw:webServer
-        run: npm run test:e2e
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: npm run test:e2e
 
       - name: Upload Playwright artifacts on failure
         if: failure()
