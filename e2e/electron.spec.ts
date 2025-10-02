@@ -1,4 +1,4 @@
-import { test, expect, ElectronApplication, Page } from '@playwright/test';
+import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
 
 import { waitForReactContent } from './support/waitForReactContent';
 import { waitForPreloadScript } from './support/waitForPreloadScript';
@@ -71,13 +71,9 @@ test.describe('Electron App', () => {
   });
 
   test('should have working preload script with versions API', async () => {
-    const nodeVersion = await mainPage.evaluate(() => {
-      return window.versions.node();
-    });
+    const nodeVersion = await mainPage.evaluate(() => window.versions.node());
 
-    const pingResult = await mainPage.evaluate(async () => {
-      return window.versions.ping();
-    });
+    const pingResult = await mainPage.evaluate(async () => await window.versions.ping());
 
     expect(typeof nodeVersion).toBe('string');
     expect(pingResult).toBe('pong');

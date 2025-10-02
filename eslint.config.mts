@@ -1,35 +1,46 @@
-import js from "@eslint/js";
-import { FlatCompat } from "@eslint/eslintrc";
+import { defineConfig } from "eslint/config";
+import tseslint from "typescript-eslint";
+import eslintPluginImport from "eslint-plugin-import";
+import eslintPluginUnicorn from "eslint-plugin-unicorn";
+import globals from "globals";
 
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
-
-const tsCompatConfigs = compat.config({
-  env: {
-    browser: true,
-    es6: true,
-    node: true,
-  },
-  extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:import/recommended",
-    "plugin:import/electron",
-    "plugin:import/typescript",
-  ],
-  parser: "@typescript-eslint/parser",
-}).map((config) => ({
-  ...config,
-  files: config.files ?? ["**/*.{ts,tsx}"],
-}));
-
-export default [
+export default defineConfig([
   {
-    ignores: ["**/.vite/**", "out/**"],
+    ignores: ["**/.vite/**", "out/**", "dist/**", "coverage/**"],
   },
-  ...tsCompatConfigs,
-];
+  ...tseslint.configs.recommended,
+  {
+    files: ["**/*.{ts,tsx,cts,mts}"],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: false,
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tseslint.plugin,
+      import: eslintPluginImport,
+      unicorn: eslintPluginUnicorn,
+    },
+    settings: {
+      "import/resolver": {
+        typescript: {
+          project: [
+            "./tsconfig.node.json",
+            "./tsconfig.web.json",
+            "./tsconfig.playwright.json",
+          ],
+        },
+        node: true,
+      },
+    },
+    rules: {
+      ...eslintPluginImport.configs.recommended.rules,
+      ...eslintPluginUnicorn.configs.recommended.rules,
+    },
+  },
+]);
