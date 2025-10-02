@@ -1,4 +1,4 @@
-import { Page } from "@playwright/test";
+import { Page } from '@playwright/test';
 
 export async function waitForPreloadScript(page: Page): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -10,7 +10,7 @@ export async function waitForPreloadScript(page: Page): Promise<void> {
 
       if (attempts > maxAttempts) {
         clearInterval(interval);
-        reject(new Error("Timeout waiting for preload script"));
+        reject(new Error('Timeout waiting for preload script'));
         return;
       }
 
