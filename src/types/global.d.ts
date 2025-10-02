@@ -5,10 +5,6 @@ export interface ExposedVersions {
   ping: () => Promise<string>;
 }
 
-export interface Preload {
-  versions: ExposedVersions;
-}
-
 declare global {
   interface Window {
     versions: ExposedVersions;
