@@ -10,6 +10,11 @@
 npm install
 ```
 
+- Install chromium for Playwright (test e2e):
+```sh
+npx playwright install chromium
+```
+
 - Make the Electron binary executable (only on Linux):
 ```sh
 sudo chown root:root node_modules/electron/dist/chrome-sandbox 

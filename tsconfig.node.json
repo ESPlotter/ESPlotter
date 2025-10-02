@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist/main",
+    "outDir": ".vite/build",
     "module": "CommonJS",
     "types": [
       "node",

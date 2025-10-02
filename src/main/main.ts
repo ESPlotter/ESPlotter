@@ -17,17 +17,22 @@ const createWindow = () => {
     },
   });
 
+  // Retrieve renderer configuration from environment variables or electron-forge injected variables.
+  // Environment variables are used for testing with Playwright.
+  const rendererDevServerUrl = process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL ?? MAIN_WINDOW_VITE_DEV_SERVER_URL;
+  const rendererBundleName = process.env.MAIN_WINDOW_VITE_NAME ?? MAIN_WINDOW_VITE_NAME;
+
   // and load the index.html of the app.
-  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+  if (rendererDevServerUrl) {
+    mainWindow.loadURL(rendererDevServerUrl);
   } else {
     mainWindow.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
+      path.join(__dirname, `../renderer/${rendererBundleName}/index.html`),
     );
   }
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished

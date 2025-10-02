@@ -6,11 +6,15 @@
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
+    "dev:renderer": "vite --config vite.renderer.config.mts",
+    "build:electron": "tsc -p tsconfig.node.json",
+    "pretest:e2e": "npm run build:electron",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
-    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.json"
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "keywords": [],
   "author": {
@@ -28,6 +32,7 @@
     "@electron-forge/plugin-fuses": "7.9.0",
     "@electron-forge/plugin-vite": "7.9.0",
     "@electron/fuses": "1.8.0",
+    "@playwright/test": "^1.55.1",
     "@tailwindcss/vite": "4.1.13",
     "@types/electron-squirrel-startup": "1.0.2",
     "@types/node": "24.5.2",
@@ -39,6 +44,8 @@
     "electron": "38.1.2",
     "eslint": "9.36.0",
     "eslint-plugin-import": "2.32.0",
+    "lightningcss": "^1.30.2",
+    "rollup": "4.52.3",
     "tailwindcss": "4.1.13",
     "typescript": "5.9.2",
     "vite": "7.1.7"

@@ -1,0 +1,42 @@
+import { defineConfig, devices } from '@playwright/test';
+
+/**
+ * Read environment variables from file.
+ * https://github.com/motdotla/dotenv
+ */
+// require('dotenv').config();
+
+/**
+ * See https://playwright.dev/docs/test-configuration.
+ */
+export default defineConfig({
+  testDir: './e2e',
+  fullyParallel: false,
+  forbidOnly: true,
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: 'playwright-output/report', open: 'never' }],
+  ],
+  use: {
+    trace: 'on-first-retry',
+  },
+  outputDir: 'playwright-output/test-results',
+  timeout: 60 * 1000,
+  workers: 1,
+  webServer: {
+    command: 'npm run dev:renderer',
+    url: 'http://127.0.0.1:5173',
+    reuseExistingServer: !process.env.CI,
+    timeout: process.env.CI ? 120_000 : 30_000,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
+  ],
+});
