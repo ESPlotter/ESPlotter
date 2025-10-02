@@ -44,7 +44,12 @@ jobs:
       - name: Setup Playwright
         uses: microsoft/playwright-github-action@v1
 
-      - name: Run Playwright tests
+      - name: Run Playwright tests (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run npm run test:e2e
+
+      - name: Run Playwright tests (macOS & Windows)
+        if: runner.os != 'Linux'
         run: npm run test:e2e
 
       - name: Upload Playwright artifacts
