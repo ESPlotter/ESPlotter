@@ -17,9 +17,9 @@ const createWindow = () => {
     },
   });
 
-  const rendererDevServerUrl = MAIN_WINDOW_VITE_DEV_SERVER_URL;
-
-  const rendererBundleName = MAIN_WINDOW_VITE_NAME;
+  // Load environment variables or variables injected by electron-forge for renderer configuration
+  const rendererDevServerUrl = process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL ?? MAIN_WINDOW_VITE_DEV_SERVER_URL;
+  const rendererBundleName = process.env.MAIN_WINDOW_VITE_NAME ?? MAIN_WINDOW_VITE_NAME;
 
   // and load the index.html of the app.
   if (rendererDevServerUrl) {
