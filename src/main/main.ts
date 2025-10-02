@@ -17,17 +17,9 @@ const createWindow = () => {
     },
   });
 
-  const rendererDevServerUrl =
-    process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL ??
-    (typeof MAIN_WINDOW_VITE_DEV_SERVER_URL !== 'undefined'
-      ? MAIN_WINDOW_VITE_DEV_SERVER_URL
-      : undefined);
+  const rendererDevServerUrl = MAIN_WINDOW_VITE_DEV_SERVER_URL;
 
-  const rendererBundleName =
-    process.env.MAIN_WINDOW_VITE_NAME ??
-    (typeof MAIN_WINDOW_VITE_NAME !== 'undefined'
-      ? MAIN_WINDOW_VITE_NAME
-      : 'main_window');
+  const rendererBundleName = MAIN_WINDOW_VITE_NAME;
 
   // and load the index.html of the app.
   if (rendererDevServerUrl) {
