@@ -1,4 +1,5 @@
-import { test, expect, _electron as electron, ElectronApplication, Page } from '@playwright/test';
+import { test, expect, ElectronApplication, Page } from '@playwright/test';
+
 import { waitForReactContent } from './support/waitForReactContent';
 import { waitForPreloadScript } from './support/waitForPreloadScript';
 import { getElectronAppForE2eTest } from './support/getElectronAppForE2eTest';
@@ -71,11 +72,11 @@ test.describe('Electron App', () => {
 
   test('should have working preload script with versions API', async () => {
     const nodeVersion = await mainPage.evaluate(() => {
-      return (window as any).versions.node();
+      return window.versions.node();
     });
-    
+
     const pingResult = await mainPage.evaluate(async () => {
-      return await (window as any).versions.ping();
+      return window.versions.ping();
     });
 
     expect(typeof nodeVersion).toBe('string');

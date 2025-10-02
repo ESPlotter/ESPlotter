@@ -1,5 +1,4 @@
-import { ElectronApplication } from "@playwright/test";
-import { _electron as electron } from '@playwright/test';
+import { ElectronApplication, _electron as electron } from "@playwright/test";
 
 export async function getElectronAppForE2eTest(): Promise<ElectronApplication> {
   return electron.launch({

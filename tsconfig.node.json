@@ -10,6 +10,6 @@
   },
   "include": [
     "src/main",
-    "forge.env.d.ts"
+    "src/types/**/*.d.ts"
   ]
 }
