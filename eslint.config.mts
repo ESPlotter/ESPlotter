@@ -48,6 +48,8 @@ export default defineConfig([
       'unicorn/filename-case': 'off',
       'unicorn/prevent-abbreviations': 'off',
       'unicorn/prefer-module': 'off',
+      'unicorn/prefer-top-level-await': 'off',
+      'unicorn/consistent-function-scoping': 'off',
       'unicorn/prefer-query-selector': 'off',
     },
   },
