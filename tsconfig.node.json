@@ -2,6 +2,7 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "outDir": ".vite/build",
+    "rootDir": "src/main",
     "module": "CommonJS",
     "types": [
       "node",
@@ -9,8 +10,7 @@
     ]
   },
   "include": [
-    "src/main",
-    "src/types/**/*.d.ts",
-    "forge.config.ts"
+    "src/main/**/*.ts",
+    "src/types/**/*.d.ts"
   ]
 }
