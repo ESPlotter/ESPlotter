@@ -1,4 +1,4 @@
-import { Page } from "@playwright/test";
+import { Page } from '@playwright/test';
 
 export async function waitForReactContent(page: Page) {
   await page.waitForSelector('#root', { timeout: 20_000 });

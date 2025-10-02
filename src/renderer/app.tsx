@@ -1,7 +1,8 @@
 export function App() {
+  
   async function ping() {
-    const response = await versions.ping()
-    console.log(response)
+    const response = await versions.ping();
+    console.log(response);
   }
 
   return (

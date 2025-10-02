@@ -11,6 +11,6 @@
   },
   "include": [
     "src/renderer",
-    "src/main/preload.d.ts"
+    "src/types/**/*.d.ts"
   ]
 }
