@@ -41,8 +41,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Setup Playwright
-        uses: microsoft/playwright-github-action@v1
+      - name: Restore Playwright browsers cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/Library/Caches/ms-playwright
+              C:\Users\runneradmin\AppData\Local\ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json', 'playwright.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright browsers (Linux)
+        if: runner.os == 'Linux'
+        run: npx playwright install --with-deps
+
+      - name: Install Playwright browsers (macOS & Windows)
+        if: runner.os != 'Linux'
+        run: npx playwright install
 
       - name: Run Playwright tests (Linux)
         if: runner.os == 'Linux'
