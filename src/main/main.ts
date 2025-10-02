@@ -17,7 +17,8 @@ const createWindow = () => {
     },
   });
 
-  // Load environment variables or variables injected by electron-forge for renderer configuration
+  // Retrieve renderer configuration from environment variables or electron-forge injected variables.
+  // Environment variables are used for testing with Playwright.
   const rendererDevServerUrl = process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL ?? MAIN_WINDOW_VITE_DEV_SERVER_URL;
   const rendererBundleName = process.env.MAIN_WINDOW_VITE_NAME ?? MAIN_WINDOW_VITE_NAME;
 
