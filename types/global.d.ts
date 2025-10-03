@@ -9,8 +9,6 @@ declare global {
   interface Window {
     versions: ExposedVersions;
   }
-
-  const versions: ExposedVersions;
 }
 
 export {};
