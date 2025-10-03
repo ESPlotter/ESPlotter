@@ -42,6 +42,7 @@ export default defineConfig([
     rules: {
       ...eslintPluginImport.configs.recommended.rules,
       ...eslintPluginUnicorn.configs.recommended.rules,
+      indent: ['error', 2],
       quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
       semi: ['error', 'always'],
       'unicorn/expiring-todo-comments': 'off',
