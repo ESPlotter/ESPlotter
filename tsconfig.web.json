@@ -10,7 +10,7 @@
     ]
   },
   "include": [
-    "src/renderer",
-    "src/types/**/*.d.ts"
+    "src/app/renderer",
+    "types/**/*.d.ts"
   ]
 }
