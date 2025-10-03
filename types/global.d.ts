@@ -1,16 +1,12 @@
-export interface ExposedVersions {
-  node: () => string;
-  chrome: () => string;
-  electron: () => string;
-  ping: () => Promise<string>;
-}
+import type { RendererExposureMap } from './ipc-contracts';
 
 declare global {
-  interface Window {
-    versions: ExposedVersions;
+  interface Window extends RendererExposureMap {
+    /**
+     * Brands the interface so lint rules accept the extension while keeping it structurally typed.
+     */
+    readonly __ipcExposuresBrand?: never;
   }
-
-  const versions: ExposedVersions;
 }
 
 export {};
