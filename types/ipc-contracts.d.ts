@@ -16,7 +16,9 @@ export type RendererExposure<TName extends RendererExposureKey> = RendererExposu
 
 export type IpcChannelKey = keyof IpcChannelMap;
 export type IpcInvokeArgs<TKey extends IpcChannelKey> = Parameters<IpcChannelMap[TKey]>;
-export type IpcInvokeResult<TKey extends IpcChannelKey> = Promise<ReturnType<IpcChannelMap[TKey]>>;
+export type IpcInvokeResult<TKey extends IpcChannelKey> = Promise<Awaited<ReturnType<IpcChannelMap[TKey]>>>;
+
+export type IpcInvokeHandlerResult<TKey extends IpcChannelKey> = ReturnType<IpcChannelMap[TKey]>;
 export type IpcInvokeHandler<TKey extends IpcChannelKey> = (
   ...args: IpcInvokeArgs<TKey>
-) => IpcInvokeResult<TKey>;
+) => IpcInvokeHandlerResult<TKey>;

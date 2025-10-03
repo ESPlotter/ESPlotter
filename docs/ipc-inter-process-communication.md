@@ -1,28 +1,55 @@
 # IPC: Inter-Process Communication
 
-For communication between the main process and the renderer process, use specific wrapper functions that correctly check types and encapsulate Electron's IPC logic.
+Electron apps run in two processes:
+- **Main process** → controls lifecycle, manages APIs, registers handlers.
+- **Renderer process** → runs UI, calls safe wrappers.
+- **Preload script** → the only bridge between them.
+Direct use of `ipcRenderer` or `ipcMain` is not allowed.
 
-If you add a new function exposed from the preload, update `types/global.d.ts` to maintain typing for interprocess communication.
+## Core Rules
+### IPC Wrapper Functions
+1. Never call `ipcRenderer`, `ipcMain`, or `contextBridge` directly. Always go through wrappers.
+2. Use `contextBridgeExposeInMainWorld` in preload to expose grouped APIs.
+3. Use `ipcRendererInvoke` in preload only (never in renderer directly).
+4. Use `ipcMainHandle` only in the main process to register handlers.
+5. Keep the main ↔ renderer contract symmetrical (invoke signatures match handler signatures).
 
-Group the things you want to communicate between the "main" and "renderer" processes into objects, such that you use the `exposeInMainWorld` function multiple times, once for each object you want to expose. For example, encapsulating the functions related to system versions in `versions`.
+### IPC Strong Types 
+3. Update `ipc-contracts.d.ts` whenever preload exposes new APIs or main registers new handlers.
+4. Use the type `IpcChannelMap` to define channels between main and renderer.
+5. Use the type `RendererExposureMap` to define what the renderer can access.
+
+### API Exposure
+1. Group related API surface areas when exposing them to the renderer.
+  - correct: `window.versions.ping()`
+  - wrong: `window.ping()`
+
+## Available Wrappers
+- `contextBridgeExposeInMainWorld(key, api)` → exposes grouped APIs on `window` from the preload.
+- `ipcRendererInvoke(channel, ...args)` → typed wrapper over `ipcRenderer.invoke` for ad-hoc calls.
+- `ipcMainHandle(channel, handler)` → registers typed `ipcMain.handle` implementations in the main process.
+If you need another helper, add it alongside their types.
+
+## Grouping Example
+Group related functions into objects (namespaces).
 
 ```ts
-contextBridge.exposeInMainWorld('versions', {
+// preload.ts
+contextBridgeExposeInMainWorld('versions', {
   node: () => process.versions.node,
   chrome: () => process.versions.chrome,
   electron: () => process.versions.electron,
+  ping: () => ipcRendererInvoke('ping'),
 });
 
-contextBridge.exposeInMainWorld('data', {
-  foo: () => ipcRenderer.invoke('foo'),
-  bar: (param: string) => ipcRenderer.invoke('bar', param),
+contextBridgeExposeInMainWorld('data', {
+  foo: () => ipcRendererInvoke('foo'),
+  bar: (param: string) => ipcRendererInvoke('bar', param),
 });
 ``` 
-This allows you to group related functions together and avoid cluttering the window object with too many separate functions.
-
-When using them in the renderer, you would do this:
+## Usage in the Renderer
 
 ```ts
 window.versions.electron();
-window.data.foo();
+window.data.bar("example");
 ```
