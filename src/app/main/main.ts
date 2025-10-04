@@ -1,10 +1,26 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
-import started from 'electron-squirrel-startup';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 import { ipcMainHandle } from './ipc/ipcMainHandle';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function shouldQuitForSquirrel(): boolean {
+  if (process.platform !== 'win32') {
+    return false;
+  }
+  
+  try {
+    const requireForEsm = createRequire(import.meta.url);
+    return requireForEsm('electron-squirrel-startup') as boolean;
+  } catch {
+    return false;
+  }
+}
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (started) {
+if (shouldQuitForSquirrel()) {
   app.quit();
 }
 

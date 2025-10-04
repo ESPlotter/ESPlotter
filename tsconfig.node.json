@@ -1,9 +1,9 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "outDir": ".vite/build",
-    "rootDir": "src/app",
-    "module": "CommonJS",
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
     "types": [
       "node",
       "electron"
