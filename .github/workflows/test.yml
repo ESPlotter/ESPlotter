@@ -80,7 +80,9 @@ jobs:
 
   e2e:
     name: E2E test on ${{ matrix.os }}
-    needs: unit,components
+    needs:
+      - unit
+      - components
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
     strategy:
