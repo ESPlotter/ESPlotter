@@ -9,7 +9,7 @@ export default defineConfig({
     emptyOutDir: false,
     lib: {
       entry: 'src/app/main/main.ts',
-      formats: ['cjs'],
+      formats: ['es'],
       fileName: () => 'main',
     },
     rollupOptions: {
@@ -19,7 +19,7 @@ export default defineConfig({
         ...nodeBuiltins,
       ],
       output: {
-        entryFileNames: 'main.js',
+        entryFileNames: 'main.mjs',
       },
     },
     target: 'node18',

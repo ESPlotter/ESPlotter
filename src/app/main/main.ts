@@ -1,15 +1,19 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 import { ipcMainHandle } from './ipc/ipcMainHandle';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function shouldQuitForSquirrel(): boolean {
   if (process.platform !== 'win32') {
     return false;
   }
-
+  
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires -- electron-squirrel-startup only exists in Windows builds
-    return require('electron-squirrel-startup') as boolean;
+    const requireForEsm = createRequire(import.meta.url);
+    return requireForEsm('electron-squirrel-startup') as boolean;
   } catch {
     return false;
   }
