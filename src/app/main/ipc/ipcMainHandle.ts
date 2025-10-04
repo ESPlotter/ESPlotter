@@ -3,7 +3,7 @@ import type {
   IpcChannelKey,
   IpcInvokeArgs,
   IpcInvokeHandler,
-} from '../../../types/ipc-contracts';
+} from '../../../../types/ipc-contracts';
 
 export function ipcMainHandle<TChannel extends IpcChannelKey>(
   channel: TChannel,
@@ -13,4 +13,3 @@ export function ipcMainHandle<TChannel extends IpcChannelKey>(
     handler(...(args as IpcInvokeArgs<TChannel>)),
   );
 };
-
