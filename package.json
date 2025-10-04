@@ -7,7 +7,7 @@
   "scripts": {
     "start": "electron-forge start",
     "dev:renderer": "vite --config vite.renderer.config.mts",
-    "build:electron": "tsc -p tsconfig.node.json",
+    "build:electron": "tsc -p tsconfig.node.json && vite build --config vite.preload.config.mts",
     "pretest:e2e": "npm run build:electron",
     "package": "electron-forge package",
     "make": "electron-forge make",
