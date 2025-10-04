@@ -25,4 +25,3 @@ export async function waitForPreloadScript(page: Page): Promise<void> {
     }, 100);
   });
 }
-

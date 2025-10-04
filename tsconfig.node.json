@@ -4,14 +4,7 @@
     "noEmit": true,
     "module": "ESNext",
     "moduleResolution": "node",
-    "types": [
-      "node",
-      "electron"
-    ]
+    "types": ["node", "electron"]
   },
-  "include": [
-    "src/app/main/**/*.ts",
-    "src/app/preload/**/*.ts",
-    "types/**/*.d.ts"
-  ]
+  "include": ["src/app/main/**/*.ts", "src/app/preload/**/*.ts", "types/**/*.d.ts"]
 }

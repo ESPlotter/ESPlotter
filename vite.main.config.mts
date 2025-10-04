@@ -1,7 +1,9 @@
 import { builtinModules } from 'node:module';
 import { defineConfig } from 'vite';
 
-const nodeBuiltins = [...new Set([...builtinModules, ...builtinModules.map((moduleName) => `node:${moduleName}`)])];
+const nodeBuiltins = [
+  ...new Set([...builtinModules, ...builtinModules.map((moduleName) => `node:${moduleName}`)]),
+];
 
 export default defineConfig({
   build: {
@@ -13,11 +15,7 @@ export default defineConfig({
       fileName: () => 'main',
     },
     rollupOptions: {
-      external: [
-        'electron',
-        'electron-squirrel-startup',
-        ...nodeBuiltins,
-      ],
+      external: ['electron', 'electron-squirrel-startup', ...nodeBuiltins],
       output: {
         entryFileNames: 'main.mjs',
       },

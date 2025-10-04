@@ -8,7 +8,6 @@ let electronApp: ElectronApplication;
 let mainPage: Page;
 
 test.describe('Electron App', () => {
-
   test.beforeEach(async () => {
     electronApp = await getElectronAppForE2eTest();
 
