@@ -1,10 +1,22 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
-import started from 'electron-squirrel-startup';
 import { ipcMainHandle } from './ipc/ipcMainHandle';
 
+function shouldQuitForSquirrel(): boolean {
+  if (process.platform !== 'win32') {
+    return false;
+  }
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires -- electron-squirrel-startup only exists in Windows builds
+    return require('electron-squirrel-startup') as boolean;
+  } catch {
+    return false;
+  }
+}
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (started) {
+if (shouldQuitForSquirrel()) {
   app.quit();
 }
 
