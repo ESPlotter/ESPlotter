@@ -88,8 +88,8 @@ jobs:
           ROLLUP_VERSION=$(node -p "require('./package.json').devDependencies.rollup")
           case "$RUNNER_OS" in
             macOS)
-              npm install --package-lock-only --ignore-scripts --platform=darwin --arch=arm64 "@rollup/rollup-darwin-arm64@${ROLLUP_VERSION}"
-              npm install --package-lock-only --ignore-scripts --platform=darwin --arch=x64 "@rollup/rollup-darwin-x64@${ROLLUP_VERSION}"
+              ROLLUP_ARCH=$(uname -m | sed 's/x86_64/x64/')
+              npm install --package-lock-only --ignore-scripts --platform=darwin --arch="$ROLLUP_ARCH" "@rollup/rollup-darwin-${ROLLUP_ARCH}@${ROLLUP_VERSION}"
               ;;
             Windows)
               npm install --package-lock-only --ignore-scripts --platform=win32 --arch=x64 "@rollup/rollup-win32-x64-msvc@${ROLLUP_VERSION}"
