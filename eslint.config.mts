@@ -1,8 +1,11 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 import eslintPluginImport from 'eslint-plugin-import';
 import globals from 'globals';
 import eslintConfigPrettier from 'eslint-config-prettier';
+
+const tsconfigRootDir = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig([
   {
@@ -29,6 +32,8 @@ export default defineConfig([
     settings: {
       'import/resolver': {
         typescript: {
+          alwaysTryTypes: true,
+          tsconfigRootDir,
           project: ['./tsconfig.node.json', './tsconfig.web.json', './tsconfig.playwright.json'],
         },
         node: true,
