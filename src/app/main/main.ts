@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { ipcMainHandle } from './ipc/ipcMainHandle';
+import { ipcMainHandle } from '@main/ipc/ipcMainHandle';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

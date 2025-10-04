@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@components/*": ["src/app/renderer/components/*"],
+      "@main/*": ["src/app/main/*"],
+      "@preload/*": ["src/app/preload/*"],
+      "@renderer/*": ["src/app/renderer/*"]
+    }
+  }
+}
