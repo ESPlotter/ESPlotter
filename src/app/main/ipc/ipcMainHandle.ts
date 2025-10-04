@@ -9,7 +9,5 @@ export function ipcMainHandle<TChannel extends IpcChannelKey>(
   channel: TChannel,
   handler: IpcInvokeHandler<TChannel>,
 ) {
-  ipcMain.handle(channel, async (_event, ...args) =>
-    handler(...(args as IpcInvokeArgs<TChannel>)),
-  );
-};
+  ipcMain.handle(channel, async (_event, ...args) => handler(...(args as IpcInvokeArgs<TChannel>)));
+}

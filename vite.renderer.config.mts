@@ -10,9 +10,6 @@ export default defineConfig(async () => {
       port: 5173,
       strictPort: true,
     },
-    plugins: [
-      react(),
-      tailwindcss(),
-    ],
+    plugins: [react(), tailwindcss()],
   };
 });

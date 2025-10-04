@@ -82,6 +82,45 @@ jobs:
             package-lock.json
             playwright.config.ts
 
+      - name: Ensure Rollup native bindings in lockfile
+        shell: bash
+        run: |
+          ROLLUP_VERSION=$(node -p "require('./package.json').devDependencies.rollup")
+          case "$RUNNER_OS" in
+            macOS)
+              ROLLUP_ARCH=$(uname -m | sed 's/x86_64/x64/')
+              npm install --package-lock-only --ignore-scripts --platform=darwin --arch="$ROLLUP_ARCH" "@rollup/rollup-darwin-${ROLLUP_ARCH}@${ROLLUP_VERSION}"
+              ;;
+            Windows)
+              npm install --package-lock-only --ignore-scripts --platform=win32 --arch=x64 "@rollup/rollup-win32-x64-msvc@${ROLLUP_VERSION}"
+              ;;
+            *)
+              ;;
+          esac
+
+      - name: Ensure Lightning CSS native bindings in lockfile
+        shell: bash
+        run: |
+          LIGHTNINGCSS_VERSIONS=$(node -p "(() => { const versions = new Set(); const pkg = require('./package.json'); if (pkg.devDependencies?.lightningcss) versions.add(pkg.devDependencies.lightningcss); try { const lock = require('./package-lock.json'); const keys = ['node_modules/lightningcss', 'node_modules/@tailwindcss/node/node_modules/lightningcss']; for (const key of keys) { const entry = lock.packages?.[key]; if (entry?.version) versions.add(entry.version); } } catch (_) {} return Array.from(versions).join(' '); })()")
+          if [ -z "$LIGHTNINGCSS_VERSIONS" ]; then
+            exit 0
+          fi
+          case "$RUNNER_OS" in
+            macOS)
+              LIGHTNING_ARCH=$(uname -m | sed 's/x86_64/x64/')
+              for VERSION in $LIGHTNINGCSS_VERSIONS; do
+                npm install --package-lock-only --ignore-scripts --platform=darwin --arch="$LIGHTNING_ARCH" "lightningcss-darwin-${LIGHTNING_ARCH}@${VERSION}"
+              done
+              ;;
+            Windows)
+              for VERSION in $LIGHTNINGCSS_VERSIONS; do
+                npm install --package-lock-only --ignore-scripts --platform=win32 --arch=x64 "lightningcss-win32-x64-msvc@${VERSION}"
+              done
+              ;;
+            *)
+              ;;
+          esac
+
       - name: Install dependencies
         run: npm ci
 
