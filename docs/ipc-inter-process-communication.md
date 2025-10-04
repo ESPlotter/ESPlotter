@@ -24,11 +24,21 @@ Direct use of `ipcRenderer` or `ipcMain` is not allowed.
   - correct: `window.versions.ping()`
   - wrong: `window.ping()`
 
-## Available Wrappers
-- `contextBridgeExposeInMainWorld(key, api)` → exposes grouped APIs on `window` from the preload.
-- `ipcRendererInvoke(channel, ...args)` → typed wrapper over `ipcRenderer.invoke` for ad-hoc calls.
-- `ipcMainHandle(channel, handler)` → registers typed `ipcMain.handle` implementations in the main process.
-If you need another helper, add it alongside their types.
+## Wrapper Locations
+- `contextBridgeExposeInMainWorld(key, api)` exposes APIs on `window` from the preload.
+  - Defined in `src/app/preload/ipc/contextBridgeExposeInMainWorld.ts`.
+- `ipcRendererInvoke(channel, ...args)` is the typed wrapper around `ipcRenderer.invoke`.
+  - Defined in `src/app/preload/ipc/ipcRendererInvoke.ts`.
+- `ipcMainHandle(channel, handler)` registers typed `ipcMain.handle` implementations in the main process.
+  - Defined in `src/app/main/ipc/ipcMainHandle.ts`.
+Shared IPC contracts live in `types/ipc-contracts.d.ts`.
+
+### Import Boundaries
+ESLint enforces this boundary.
+- Renderer code (`src/app/renderer/**`) cannot import from `src/app/preload/**` or `src/app/main/**`.
+- Main-process code (`src/app/main/**`) cannot import modules from the renderer or the preload bundles.
+- Preload code (`src/app/preload/**`) cannot import renderer or main modules.
+If a module must be shared across processes, place it under a neutral location such as `src/shared/**` and document its responsibility.
 
 ## Grouping Example
 Group related functions into objects (namespaces).

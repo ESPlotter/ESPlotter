@@ -54,4 +54,70 @@ export default defineConfig([
       'unicorn/prefer-query-selector': 'off',
     },
   },
+  {
+    files: ['src/app/renderer/**/*.{ts,tsx}'],
+    rules: {
+      'import/no-restricted-paths': [
+        'error',
+        {
+          zones: [
+            {
+              target: './src/app/renderer',
+              from: './src/app/preload',
+              message: 'Renderer cannot import modules from the preload bundle.',
+            },
+            {
+              target: './src/app/renderer',
+              from: './src/app/main',
+              message: 'Renderer cannot import modules from the main bundle.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/app/main/**/*.{ts,tsx}'],
+    rules: {
+      'import/no-restricted-paths': [
+        'error',
+        {
+          zones: [
+            {
+              target: './src/app/main',
+              from: './src/app/renderer',
+              message: 'Main process cannot import modules from the renderer bundle.',
+            },
+            {
+              target: './src/app/main',
+              from: './src/app/preload',
+              message: 'Main process cannot import modules from the preload bundle.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/app/preload/**/*.{ts,tsx}'],
+    rules: {
+      'import/no-restricted-paths': [
+        'error',
+        {
+          zones: [
+            {
+              target: './src/app/preload',
+              from: './src/app/renderer',
+              message: 'Preload bundle cannot import modules from the renderer bundle.',
+            },
+            {
+              target: './src/app/preload',
+              from: './src/app/main',
+              message: 'Preload bundle cannot import modules from the main bundle.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);
