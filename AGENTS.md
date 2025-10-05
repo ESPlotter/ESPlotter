@@ -9,8 +9,7 @@ Before generating or modifying code, identify the relevant topic in the table an
 | Topic                  | Documentation Path                      | keywords                           |
 | ---------------------- | --------------------------------------- | ---------------------------------- |
 | IPC Main ↔ Renderer   | docs/ipc-inter-process-communication.md | Message channels, contracts, sync  |
-| UI (React + Renderer)  | docs/ui.md                              | Components, layouts, accessibility |
-| UI Styles              | docs/ui-styles.md                       | Tailwind, shadcn, design system    |
+| Components             | docs/components.md                      | Component, ui, design system       |
 | Business Logic         | docs/business-logic.md                  | Services, use cases, validations   |
 | Architecture           | docs/architecture.md                    | Modules, layers, patterns          |
 | Project Configuration  | docs/project-setup.md                   | Scripts, packaging, Electron setup |
