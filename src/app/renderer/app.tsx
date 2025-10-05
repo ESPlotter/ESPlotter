@@ -1,4 +1,4 @@
-import { Button } from '@components/Button/Button';
+import { Button } from '@shadcn/components/ui/button';
 
 export function App() {
   async function ping() {
@@ -13,7 +13,7 @@ export function App() {
         This app is using Chrome (v{window.versions.chrome()}), Node.js (v{window.versions.node()}),
         and Electron (v{window.versions.electron()})
       </p>
-      <Button text="ping" onClick={ping} />
+      <Button onClick={ping}>ping</Button>
     </div>
   );
 }
