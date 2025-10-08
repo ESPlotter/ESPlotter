@@ -6,5 +6,10 @@
     "moduleResolution": "node",
     "types": ["node", "electron"]
   },
-  "include": ["src/app/main/**/*.ts", "src/app/preload/**/*.ts", "types/**/*.d.ts"]
+  "include": [
+    "src/app/main/**/*.ts",
+    "src/app/preload/**/*.ts",
+    "src/test/main/**/*.ts",
+    "types/**/*.d.ts"
+  ]
 }

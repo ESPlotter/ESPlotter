@@ -3,6 +3,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { ipcMainHandle } from '@main/ipc/ipcMainHandle';
+import { getChartData } from './getChartData/GetChartData';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -56,6 +57,7 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   ipcMainHandle('ping', () => 'pong');
+  ipcMainHandle('getChartData', getChartData);
   createWindow();
 });
 
