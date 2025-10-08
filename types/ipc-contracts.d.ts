@@ -1,3 +1,5 @@
+import { ChartSerie } from "@main/getChartData/ChartSerie";
+
 export interface RendererExposureMap {
   versions: {
     node: () => string;
@@ -5,10 +7,14 @@ export interface RendererExposureMap {
     electron: () => string;
     ping: () => Promise<string>;
   };
+  uniplot: {
+    getChartData: () => Promise<ChartSerie[]>;
+  }
 }
 
 export interface IpcChannelMap {
   ping: () => string;
+  getChartData: () => Promise<ChartSerie[]>;
 }
 
 export type RendererExposureKey = keyof RendererExposureMap;

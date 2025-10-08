@@ -1,10 +1,23 @@
 import { Button } from '@shadcn/components/ui/button';
+import { Chart, ChartSerie } from '@renderer/components/Chart/Chart';
+import { useEffect, useState } from 'react';
 
 export function HomePage() {
+  const [data, setData] = useState<ChartSerie[]>([]);
+
   async function ping() {
     const response = await window.versions.ping();
     console.log(response);
   }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await window.uniplot.getChartData();
+      setData(data);
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className="p-4">
@@ -14,6 +27,7 @@ export function HomePage() {
         and Electron (v{window.versions.electron()})
       </p>
       <Button onClick={ping}>ping</Button>
+      <Chart series={data} />
     </div>
   );
 }

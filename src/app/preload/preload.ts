@@ -9,3 +9,7 @@ contextBridgeExposeInMainWorld('versions', {
   electron: () => process.versions.electron,
   ping: () => ipcRendererInvoke('ping'),
 });
+
+contextBridgeExposeInMainWorld('uniplot', {
+  getChartData: () => ipcRendererInvoke('getChartData'),
+});
