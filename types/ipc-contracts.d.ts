@@ -1,4 +1,4 @@
-import { ChartSerie } from "@main/getChartData/ChartSerie";
+import { ChartSerie } from '@main/getChartData/ChartSerie';
 
 export interface RendererExposureMap {
   versions: {
@@ -9,7 +9,7 @@ export interface RendererExposureMap {
   };
   uniplot: {
     getChartData: () => Promise<ChartSerie[]>;
-  }
+  };
 }
 
 export interface IpcChannelMap {

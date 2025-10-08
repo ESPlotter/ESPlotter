@@ -1,5 +1,5 @@
-import { ChartSerie } from "./ChartSerie";
-import { TestData } from "./TestData";
+import { ChartSerie } from './ChartSerie';
+import { TestData } from './TestData';
 
 export function mapTestData(data: TestData): ChartSerie[] {
   const xValues = data?.x?.values ?? [];
