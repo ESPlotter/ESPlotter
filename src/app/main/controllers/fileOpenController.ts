@@ -1,5 +1,5 @@
 import { readFileUtf8 } from '@main/files/fileService';
-import { setLastOpenedFilePath } from '@main/state/appState';
+import { setLastOpenedFilePath, clearLastOpenedFilePath } from '@main/state/appState';
 import { webContentsBroadcast } from '@main/ipc/webContentsSend';
 import { parseAllowedFileStructure } from '@shared/AllowedFileStructure';
 
@@ -19,6 +19,7 @@ export async function openByPathController(path: string): Promise<void> {
   } catch (e: any) {
     const reason = e?.message === 'invalid_json' ? 'invalid_json' : 'invalid_format';
     webContentsBroadcast('fileOpenFailed', { path, reason, message: e?.message });
+    await clearLastOpenedFilePath();
     return;
   }
 

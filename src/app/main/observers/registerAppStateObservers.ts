@@ -13,7 +13,7 @@ export function registerAppStateObservers() {
       return;
     }
 
-    webContentsBroadcast('lastOpenedFileChanged', file);
+    webContentsBroadcast('lastOpenedFileParsedChanged', file);
   });
 
   app.on('will-quit', () => {

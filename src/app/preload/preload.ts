@@ -26,11 +26,11 @@ contextBridgeExposeInMainWorld('files', {
   onFileOpenFailed: (
     listener: (payload: {
       path: string;
-      reason: 'not_found' | 'unreadable' | 'unknown';
+      reason: 'not_found' | 'unreadable' | 'invalid_json' | 'invalid_format' | 'unknown';
       message?: string;
     }) => void,
   ) => ipcRendererOn('fileOpenFailed', listener),
-  onLastOpenedFileChanged: (
+  onLastOpenedFileParsedChanged: (
     listener: (file: { path: string; data: AllowedFileStructure }) => void,
-  ) => ipcRendererOn('lastOpenedFileChanged', listener),
+  ) => ipcRendererOn('lastOpenedFileParsedChanged', listener),
 });

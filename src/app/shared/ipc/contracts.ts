@@ -27,7 +27,7 @@ export interface RendererExposureMap {
       }) => void,
     ) => () => void;
     openByPath: (path: string) => Promise<void>;
-    onLastOpenedFileChanged: (listener: (file: OpenedFile) => void) => () => void;
+    onLastOpenedFileParsedChanged: (listener: (file: OpenedFile) => void) => () => void;
   };
 }
 
@@ -44,7 +44,7 @@ export interface IpcChannelMap {
 
 // Typed push-event channels (main → renderer)
 export interface IpcEventMap {
-  lastOpenedFileChanged: (payload: OpenedFile) => void;
+  lastOpenedFileParsedChanged: (payload: OpenedFile) => void;
   fileOpenFailed: (payload: {
     path: string;
     reason: 'not_found' | 'unreadable' | 'invalid_json' | 'invalid_format' | 'unknown';

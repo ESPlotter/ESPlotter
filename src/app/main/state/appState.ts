@@ -22,6 +22,7 @@ const stateStore = new Store<AppState>({
 }) as unknown as {
   get<K extends keyof AppState>(key: K): AppState[K] | undefined;
   set<K extends keyof AppState>(key: K, value: AppState[K]): void;
+  delete: (key: keyof AppState | string) => void;
   onDidChange: (
     key: keyof AppState | string,
     cb: (
@@ -40,28 +41,31 @@ export async function setLastOpenedFilePath(filePath: string): Promise<void> {
   }
 }
 
+export async function clearLastOpenedFilePath(): Promise<void> {
+  try {
+    stateStore.delete('lastOpenedFilePath');
+  } catch {}
+}
+
 export async function getLastOpenedFilePath(): Promise<string | null> {
   return stateStore.get('lastOpenedFilePath') ?? null;
 }
 
 export async function getLastOpenedFile(): Promise<OpenedFile | null> {
   const path = await getLastOpenedFilePath();
-  if (!path) {
-    return null;
-  }
+  if (!path) return null;
 
   try {
     const content = await readFileUtf8(path);
     const data: unknown = JSON.parse(content);
     if (!isAllowedFileStructure(data)) {
+      await clearLastOpenedFilePath();
       return null;
     }
-
-    return {
-      path,
-      data: data as AllowedFileStructure,
-    };
+    return { path, data: data as AllowedFileStructure };
   } catch {
+    // If corrupted JSON or unreadable, clear stored path per decision
+    await clearLastOpenedFilePath();
     return null;
   }
 }

@@ -13,7 +13,7 @@ export function HomePage() {
   }
 
   useEffect(() => {
-    const offLast = window.files.onLastOpenedFileChanged((file) => {
+    const offLast = window.files.onLastOpenedFileParsedChanged((file) => {
       setSeries(mapAllowedFileStructure(file.data));
     });
 
