@@ -5,6 +5,7 @@
       "@main/*": ["src/app/main/*"],
       "@preload/*": ["src/app/preload/*"],
       "@renderer/*": ["src/app/renderer/*"],
+      "@components/*": ["src/app/renderer/components/*"],
       "@shadcn/*": ["src/app/renderer/shadcn/*"]
     }
   }
