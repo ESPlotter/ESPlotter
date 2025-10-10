@@ -4,7 +4,10 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { ipcMainHandle } from '@main/ipc/ipcMainHandle';
 import { getChartData } from './getChartData/GetChartData';
-import fs from 'node:fs/promises'
+import { setMainMenu } from './menu';
+import fs from 'node:fs/promises';
+import { getLastOpenedFile, getLastOpenedFilePath, onLastOpenedFilePathChange } from './saveFilePath';
+import { webContentsBroadcast } from './ipc/webContentsSend';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -60,12 +63,27 @@ app.whenReady().then(() => {
   ipcMainHandle('ping', () => 'pong');
   ipcMainHandle('getChartData', getChartData);
   ipcMainHandle('saveNewFile', async (fileData: { name: string; content: string }) => {
-    console.log('file on main:', fileData)
-    const uniplotPath = path.join(app.getPath('appData'), 'uniplot')
-    await fs.mkdir(uniplotPath, { recursive: true })
-    const filePath = path.join(uniplotPath, fileData.name)
-    await fs.writeFile(filePath, Buffer.from(fileData.content, 'base64'))
+    console.log('file on main:', fileData);
+    const uniplotPath = path.join(app.getPath('appData'), 'uniplot');
+    await fs.mkdir(uniplotPath, { recursive: true });
+    const filePath = path.join(uniplotPath, fileData.name);
+    await fs.writeFile(filePath, Buffer.from(fileData.content, 'base64'));
   });
+  ipcMainHandle('getLastOpenedFilePath', getLastOpenedFilePath);
+  ipcMainHandle('getLastOpenedFile', getLastOpenedFile);
+  ipcMainHandle('readFile', async (filePath: string) => {
+    return fs.readFile(filePath, 'utf-8');
+  });
+  // Subscribe to state changes and push updates to all windows
+  onLastOpenedFilePathChange(async (newPath) => {
+    if (!newPath) return;
+    const file = await getLastOpenedFile();
+    if (file) {
+      webContentsBroadcast('lastOpenedFileChanged', file);
+    }
+  });
+
+  setMainMenu();
   createWindow();
 });
 

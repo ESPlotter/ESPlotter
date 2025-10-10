@@ -2,6 +2,7 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 import { contextBridgeExposeInMainWorld } from '@preload/ipc/contextBridgeExposeInMainWorld';
 import { ipcRendererInvoke } from '@preload/ipc/ipcRendererInvoke';
+import { ipcRendererOn } from '@preload/ipc/ipcRendererOn';
 
 contextBridgeExposeInMainWorld('versions', {
   node: () => process.versions.node,
@@ -13,4 +14,12 @@ contextBridgeExposeInMainWorld('versions', {
 contextBridgeExposeInMainWorld('uniplot', {
   getChartData: () => ipcRendererInvoke('getChartData'),
   saveNewFile: (fileData: { name: string; content: string }) => ipcRendererInvoke('saveNewFile', fileData),
+});
+
+contextBridgeExposeInMainWorld('files', {
+  getLastOpenedFilePath: () => ipcRendererInvoke('getLastOpenedFilePath'),
+  getLastOpenedFile: () => ipcRendererInvoke('getLastOpenedFile'),
+  readFile: (path: string) => ipcRendererInvoke('readFile', path),
+  onLastOpenedFileChanged: (listener: (file: { path: string; content: string }) => void) =>
+    ipcRendererOn('lastOpenedFileChanged', listener),
 });
