@@ -3,6 +3,7 @@
 import { contextBridgeExposeInMainWorld } from '@preload/ipc/contextBridgeExposeInMainWorld';
 import { ipcRendererInvoke } from '@preload/ipc/ipcRendererInvoke';
 import { ipcRendererOn } from '@preload/ipc/ipcRendererOn';
+import type { AllowedFileStructure } from '@shared/AllowedFileStructure';
 
 contextBridgeExposeInMainWorld('versions', {
   node: () => process.versions.node,
@@ -29,6 +30,7 @@ contextBridgeExposeInMainWorld('files', {
       message?: string;
     }) => void,
   ) => ipcRendererOn('fileOpenFailed', listener),
-  onLastOpenedFileChanged: (listener: (file: { path: string; content: string }) => void) =>
-    ipcRendererOn('lastOpenedFileChanged', listener),
+  onLastOpenedFileChanged: (
+    listener: (file: { path: string; data: AllowedFileStructure }) => void,
+  ) => ipcRendererOn('lastOpenedFileChanged', listener),
 });

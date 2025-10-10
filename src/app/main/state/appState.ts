@@ -1,6 +1,7 @@
 import { app } from 'electron';
 import Store, { type Schema } from 'electron-store';
 import { readFileUtf8 } from '@main/files/fileService';
+import { isAllowedFileStructure, type AllowedFileStructure } from '@shared/AllowedFileStructure';
 import type { OpenedFile } from '@shared/ipc/contracts';
 
 type AppState = {
@@ -44,11 +45,22 @@ export async function getLastOpenedFilePath(): Promise<string | null> {
 }
 
 export async function getLastOpenedFile(): Promise<OpenedFile | null> {
-  const p = await getLastOpenedFilePath();
-  if (!p) return null;
+  const path = await getLastOpenedFilePath();
+  if (!path) {
+    return null;
+  }
+
   try {
-    const content = await readFileUtf8(p);
-    return { path: p, content };
+    const content = await readFileUtf8(path);
+    const data: unknown = JSON.parse(content);
+    if (!isAllowedFileStructure(data)) {
+      return null;
+    }
+
+    return {
+      path,
+      data: data as AllowedFileStructure,
+    };
   } catch {
     return null;
   }

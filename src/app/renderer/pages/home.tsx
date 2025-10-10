@@ -1,8 +1,11 @@
 import { Button } from '@shadcn/components/ui/button';
 import { useEffect, useState } from 'react';
+import { Chart } from '@renderer/components/Chart/Chart';
+import type { ChartSerie } from '@shared/chart/ChartSerie';
+import { mapAllowedFileStructure } from '@shared/chart/mapAllowedFileStructure';
 
 export function HomePage() {
-  const [lastFile, setLastFile] = useState<{ path: string; content: string } | null>(null);
+  const [series, setSeries] = useState<ChartSerie[]>([]);
 
   async function ping() {
     const response = await window.versions.ping();
@@ -11,12 +14,14 @@ export function HomePage() {
 
   useEffect(() => {
     const offLast = window.files.onLastOpenedFileChanged((file) => {
-      setLastFile(file);
+      setSeries(mapAllowedFileStructure(file.data));
     });
 
     (async () => {
       const file = await window.files.getLastOpenedFile();
-      if (file) setLastFile(file);
+      if (file) {
+        setSeries(mapAllowedFileStructure(file.data));
+      }
     })();
 
     return () => {
@@ -33,16 +38,7 @@ export function HomePage() {
       </p>
       <Button onClick={ping}>ping</Button>
 
-      {lastFile && (
-        <div className="mt-4 p-3 border rounded-md">
-          <div className="font-medium">Last opened file</div>
-          <div className="text-sm text-muted-foreground break-all">{lastFile.path}</div>
-          <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap text-sm">
-            {lastFile.content.slice(0, 1000)}
-          </pre>
-        </div>
-      )}
-      {/* <Chart series={data} /> */}
+      {series.length > 0 && <Chart series={series} />}
     </div>
   );
 }

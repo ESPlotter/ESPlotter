@@ -1,6 +1,7 @@
 import type { ChartSerie } from '@shared/chart/ChartSerie';
+import type { AllowedFileStructure } from '@shared/AllowedFileStructure';
 
-export type OpenedFile = { path: string; content: string };
+export type OpenedFile = { path: string; data: AllowedFileStructure };
 
 // Typed objects exposed in the renderer process (via contextBridge)
 export interface RendererExposureMap {
@@ -17,18 +18,16 @@ export interface RendererExposureMap {
   files: {
     getLastOpenedFilePath: () => Promise<string | null>;
     getLastOpenedFile: () => Promise<OpenedFile | null>;
-    readFile: (path: string) => Promise<string>;
+    readFile: (path: string) => Promise<AllowedFileStructure>;
     onFileOpenFailed: (
       listener: (payload: {
         path: string;
-        reason: 'not_found' | 'unreadable' | 'unknown';
+        reason: 'not_found' | 'unreadable' | 'invalid_json' | 'invalid_format' | 'unknown';
         message?: string;
       }) => void,
     ) => () => void;
     openByPath: (path: string) => Promise<void>;
-    onLastOpenedFileChanged: (
-      listener: (file: { path: string; content: string }) => void,
-    ) => () => void;
+    onLastOpenedFileChanged: (listener: (file: OpenedFile) => void) => () => void;
   };
 }
 
@@ -39,7 +38,7 @@ export interface IpcChannelMap {
   saveNewFile: (fileData: { name: string; content: string }) => Promise<void>;
   getLastOpenedFilePath: () => Promise<string | null>;
   getLastOpenedFile: () => Promise<OpenedFile | null>;
-  readFile: (path: string) => Promise<string>;
+  readFile: (path: string) => Promise<AllowedFileStructure>;
   openByPath: (path: string) => Promise<void>;
 }
 
@@ -48,7 +47,7 @@ export interface IpcEventMap {
   lastOpenedFileChanged: (payload: OpenedFile) => void;
   fileOpenFailed: (payload: {
     path: string;
-    reason: 'not_found' | 'unreadable' | 'unknown';
+    reason: 'not_found' | 'unreadable' | 'invalid_json' | 'invalid_format' | 'unknown';
     message?: string;
   }) => void;
 }
