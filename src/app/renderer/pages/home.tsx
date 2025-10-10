@@ -44,31 +44,18 @@ export function HomePage() {
 
   async function handleFileOpen(file: File) {
     const arrayBuffer = await file.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = '';
+    const chunkSize = 0x8000; // 32 KB
+
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize);
+      binary += String.fromCharCode(...chunk);
+    }
+
+    const base64 = btoa(binary);
+
     await window.uniplot.saveNewFile({ name: file.name, content: base64 });
-    // try {
-    // const content = await file.text();
-    // let parsedData;
-    // if (file.name.endsWith('.json')) {
-    //   parsedData = await parseJsonFile(file, content);
-    // } else if (file.name.endsWith('.out')) {
-    //   parsedData = await parseOutFile(file, content);
-    // } else {
-    //   throw new Error('Unsupported file format. Please use .json or .out files.');
-    // }
-    //   const newFile: DataFile = {
-    //     ...parsedData,
-    //     expanded: true,
-    //     channels: parsedData.channels.map((channel) => ({
-    //       ...channel,
-    //       selected: false,
-    //     })),
-    //   };
-    //   setDataFiles((prev) => [...prev, newFile]);
-    // } catch (error) {
-    //   console.error('Error loading file:', error);
-    //   alert(`Error loading file: ${error}`);
-    // }
   }
 
   // const handleChannelToggle = (fileId: string, channelId: string) => {
