@@ -42,8 +42,10 @@ export function HomePage() {
   //   setDataFiles(sampleFiles);
   // }, []);
 
-  const handleFileOpen = async (file: File) => {
-    console.log(file);
+  async function handleFileOpen(file: File) {
+    const arrayBuffer = await file.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    await window.uniplot.saveNewFile({ name: file.name, content: base64 });
     // try {
     // const content = await file.text();
     // let parsedData;
@@ -67,7 +69,7 @@ export function HomePage() {
     //   console.error('Error loading file:', error);
     //   alert(`Error loading file: ${error}`);
     // }
-  };
+  }
 
   // const handleChannelToggle = (fileId: string, channelId: string) => {
   //   const channelKey = `${fileId}-${channelId}`;

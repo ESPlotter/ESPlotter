@@ -9,12 +9,14 @@ export interface RendererExposureMap {
   };
   uniplot: {
     getChartData: () => Promise<ChartSerie[]>;
+    saveNewFile: (fileData: { name: string; content: string }) => Promise<void>;
   };
 }
 
 export interface IpcChannelMap {
   ping: () => string;
   getChartData: () => Promise<ChartSerie[]>;
+  saveNewFile: (fileData: { name: string; content: string }) => Promise<void>;
 }
 
 export type RendererExposureKey = keyof RendererExposureMap;

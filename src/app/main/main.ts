@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { ipcMainHandle } from '@main/ipc/ipcMainHandle';
 import { getChartData } from './getChartData/GetChartData';
+import fs from 'node:fs/promises'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -58,6 +59,13 @@ const createWindow = () => {
 app.whenReady().then(() => {
   ipcMainHandle('ping', () => 'pong');
   ipcMainHandle('getChartData', getChartData);
+  ipcMainHandle('saveNewFile', async (fileData: { name: string; content: string }) => {
+    console.log('file on main:', fileData)
+    const uniplotPath = path.join(app.getPath('appData'), 'uniplot')
+    await fs.mkdir(uniplotPath, { recursive: true })
+    const filePath = path.join(uniplotPath, fileData.name)
+    await fs.writeFile(filePath, Buffer.from(fileData.content, 'base64'))
+  });
   createWindow();
 });
 

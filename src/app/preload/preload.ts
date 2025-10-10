@@ -12,4 +12,5 @@ contextBridgeExposeInMainWorld('versions', {
 
 contextBridgeExposeInMainWorld('uniplot', {
   getChartData: () => ipcRendererInvoke('getChartData'),
+  saveNewFile: (fileData: { name: string; content: string }) => ipcRendererInvoke('saveNewFile', fileData),
 });
