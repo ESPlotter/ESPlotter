@@ -1,4 +1,4 @@
-import { ChartSerie } from './ChartSerie';
+import { ChartSerie } from '@shared/chart/ChartSerie';
 import { TestData } from './TestData';
 
 export function mapTestData(data: TestData): ChartSerie[] {

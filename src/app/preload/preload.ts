@@ -13,19 +13,21 @@ contextBridgeExposeInMainWorld('versions', {
 
 contextBridgeExposeInMainWorld('uniplot', {
   getChartData: () => ipcRendererInvoke('getChartData'),
-  saveNewFile: (fileData: { name: string; content: string }) => ipcRendererInvoke('saveNewFile', fileData),
+  saveNewFile: (fileData: { name: string; content: string }) =>
+    ipcRendererInvoke('saveNewFile', fileData),
 });
 
 contextBridgeExposeInMainWorld('files', {
   getLastOpenedFilePath: () => ipcRendererInvoke('getLastOpenedFilePath'),
   getLastOpenedFile: () => ipcRendererInvoke('getLastOpenedFile'),
   readFile: (path: string) => ipcRendererInvoke('readFile', path),
-  getRecentFiles: () => ipcRendererInvoke('getRecentFiles'),
   openByPath: (path: string) => ipcRendererInvoke('openByPath', path),
-  onRecentFilesChanged: (listener: (paths: string[]) => void) =>
-    ipcRendererOn('recentFilesChanged', listener),
   onFileOpenFailed: (
-    listener: (payload: { path: string; reason: 'not_found' | 'unreadable' | 'unknown'; message?: string }) => void,
+    listener: (payload: {
+      path: string;
+      reason: 'not_found' | 'unreadable' | 'unknown';
+      message?: string;
+    }) => void,
   ) => ipcRendererOn('fileOpenFailed', listener),
   onLastOpenedFileChanged: (listener: (file: { path: string; content: string }) => void) =>
     ipcRendererOn('lastOpenedFileChanged', listener),

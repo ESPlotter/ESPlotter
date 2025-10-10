@@ -1,5 +1,5 @@
 import data from '../../../../fixtures/test3.json';
-import { ChartSerie } from './ChartSerie';
+import { ChartSerie } from '@shared/chart/ChartSerie';
 import { mapTestData } from './mapTestData';
 
 export async function getChartData(): Promise<ChartSerie[]> {

@@ -1,18 +1,14 @@
 import { app } from 'electron';
 import Store, { type Schema } from 'electron-store';
 import { readFileUtf8 } from '@main/files/fileService';
-import type { OpenedFile } from '../../../../types/ipc-contracts';
-
-const MAX_RECENT_FILES = 10;
+import type { OpenedFile } from '@shared/ipc/contracts';
 
 type AppState = {
   lastOpenedFilePath?: string;
-  recentFiles: string[];
 };
 
 const schema: Schema<AppState> = {
   lastOpenedFilePath: { type: 'string' },
-  recentFiles: { type: 'array', items: { type: 'string' }, default: [] },
 };
 
 // Electron Store v11 type resolution can hide inherited Conf methods in some setups.
@@ -27,17 +23,15 @@ const stateStore = new Store<AppState>({
   set<K extends keyof AppState>(key: K, value: AppState[K]): void;
   onDidChange: (
     key: keyof AppState | string,
-    cb: (newValue: AppState[keyof AppState] | undefined, oldValue: AppState[keyof AppState] | undefined) => void,
+    cb: (
+      newValue: AppState[keyof AppState] | undefined,
+      oldValue: AppState[keyof AppState] | undefined,
+    ) => void,
   ) => () => void;
 };
 
 export async function setLastOpenedFilePath(filePath: string): Promise<void> {
-  // Update last opened
   stateStore.set('lastOpenedFilePath', filePath);
-  // Update recents list (most recent first, unique, max length)
-  const current = (stateStore.get('recentFiles') ?? []) as string[];
-  const next = [filePath, ...current.filter((p) => p !== filePath)].slice(0, MAX_RECENT_FILES);
-  stateStore.set('recentFiles', next);
   try {
     app.addRecentDocument(filePath);
   } catch {
@@ -60,26 +54,15 @@ export async function getLastOpenedFile(): Promise<OpenedFile | null> {
   }
 }
 
+function onStateChange<K extends keyof AppState>(
+  key: K,
+  cb: (newValue: AppState[K] | undefined) => void,
+): () => void {
+  return stateStore.onDidChange(key as string, (newValue) => {
+    cb((newValue as AppState[K] | undefined) ?? undefined);
+  });
+}
+
 export function onLastOpenedFilePathChange(cb: (newPath: string | undefined) => void): () => void {
-  return stateStore.onDidChange('lastOpenedFilePath', (newValue) => {
-    cb((newValue as string | undefined) ?? undefined);
-  });
-}
-
-export async function getRecentFiles(): Promise<string[]> {
-  return (stateStore.get('recentFiles') ?? []) as string[];
-}
-
-export async function removeFromRecentFiles(path: string): Promise<void> {
-  const current = (stateStore.get('recentFiles') ?? []) as string[];
-  const next = current.filter((p) => p !== path);
-  if (next.length !== current.length) {
-    stateStore.set('recentFiles', next);
-  }
-}
-
-export function onRecentFilesChange(cb: (paths: string[]) => void): () => void {
-  return stateStore.onDidChange('recentFiles', (newValue) => {
-    cb(((newValue as unknown) as string[]) ?? []);
-  });
+  return onStateChange('lastOpenedFilePath', cb);
 }

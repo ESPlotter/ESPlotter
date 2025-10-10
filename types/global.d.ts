@@ -1,4 +1,4 @@
-import type { RendererExposureMap } from './ipc-contracts';
+import type { RendererExposureMap } from '@shared/ipc/contracts';
 
 declare global {
   interface Window extends RendererExposureMap {

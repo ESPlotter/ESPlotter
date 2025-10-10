@@ -33,6 +33,9 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
     },
   });
 
@@ -49,13 +52,9 @@ const createWindow = () => {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${rendererBundleName}/index.html`));
   }
 
-  // Open the DevTools.
   // mainWindow.webContents.openDevTools();
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   registerIpcHandlers();
   registerAppStateObservers();

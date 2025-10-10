@@ -1,30 +1,24 @@
 import { app } from 'electron';
-import {
-  getLastOpenedFile,
-  onLastOpenedFilePathChange,
-  onRecentFilesChange,
-} from '@main/state/appState';
+import { getLastOpenedFile, onLastOpenedFilePathChange } from '@main/state/appState';
 import { webContentsBroadcast } from '@main/ipc/webContentsSend';
 
 export function registerAppStateObservers() {
-  // When the last opened file path changes, broadcast the loaded file to all windows.
   const offLast = onLastOpenedFilePathChange(async (newPath) => {
-    if (!newPath) return;
-    const file = await getLastOpenedFile();
-    if (file) webContentsBroadcast('lastOpenedFileChanged', file);
-  });
+    if (!newPath) {
+      return;
+    }
 
-  const offRecents = onRecentFilesChange((paths) => {
-    webContentsBroadcast('recentFilesChanged', paths);
+    const file = await getLastOpenedFile();
+    if (!file) {
+      return;
+    }
+
+    webContentsBroadcast('lastOpenedFileChanged', file);
   });
 
   app.on('will-quit', () => {
     try {
       offLast();
-    } catch {}
-
-    try {
-      offRecents();
     } catch {}
   });
 }

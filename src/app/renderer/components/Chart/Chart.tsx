@@ -10,6 +10,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsOption } from 'echarts';
+import type { ChartSerie } from '@shared/chart/ChartSerie';
 
 echarts.use([
   TitleComponent,
@@ -19,13 +20,6 @@ echarts.use([
   CanvasRenderer,
   LegendComponent,
 ]);
-
-export interface ChartSerie {
-  name: string;
-  type: 'line';
-  data: [number, number][];
-  symbol?: string;
-}
 
 export function Chart({ series }: { series: ChartSerie[] }) {
   const options = useMemo(() => mergeSeriesWithDefaultParams(series), [series]);

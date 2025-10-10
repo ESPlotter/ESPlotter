@@ -1,5 +1,5 @@
 import { BrowserWindow } from 'electron';
-import type { IpcEventKey, IpcEventPayload } from '../../../../types/ipc-contracts';
+import type { IpcEventKey, IpcEventPayload } from '@shared/ipc/contracts';
 
 /**
  * Typed wrapper to send events from main to a specific BrowserWindow.

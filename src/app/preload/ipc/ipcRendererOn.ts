@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron';
-import type { IpcEventKey, IpcEventListener } from '../../../../types/ipc-contracts';
+import type { IpcEventKey, IpcEventListener } from '@shared/ipc/contracts';
 
 export function ipcRendererOn<TKey extends IpcEventKey>(
   channel: TKey,
