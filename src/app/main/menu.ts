@@ -1,5 +1,6 @@
 import { app, BrowserWindow, Menu } from 'electron';
-import { saveFilePath } from './saveFilePath';
+import { openByPathController } from '@main/controllers/fileOpenController';
+import { showOpenFileDialog } from '@main/files/fileService';
 
 export function setMainMenu() {
   const isMac = process.platform === 'darwin';
@@ -31,16 +32,11 @@ export function setMainMenu() {
           label: 'Open File',
           accelerator: 'CmdOrCtrl+O',
           click: async () => {
-            const { dialog } = await import('electron');
             const win = BrowserWindow.getFocusedWindow();
             if (!win) return;
-            const { canceled, filePaths } = await dialog.showOpenDialog(win, {
-              properties: ['openFile'],
-            });
-
-            if (canceled) return;
-
-            await saveFilePath(filePaths[0]);
+            const selected = await showOpenFileDialog(win);
+            if (!selected) return;
+            await openByPathController(selected);
           },
         },
       ],
