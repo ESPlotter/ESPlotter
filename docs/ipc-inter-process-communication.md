@@ -20,7 +20,7 @@ Direct use of `ipcRenderer` or `ipcMain` is not allowed.
 
 ### IPC Strong Types
 
-3. Update `ipc-contracts.d.ts` whenever preload exposes new APIs or main registers new handlers.
+3. Update `src/app/shared/ipc/contracts.ts` whenever preload exposes new APIs or main registers new handlers.
 4. Use the type `IpcChannelMap` to define channels between main and renderer.
 5. Use the type `RendererExposureMap` to define what the renderer can access.
 
@@ -35,12 +35,27 @@ Direct use of `ipcRenderer` or `ipcMain` is not allowed.
 
 - `contextBridgeExposeInMainWorld(key, api)` exposes APIs on `window` from the preload.
   - Defined in `src/app/preload/ipc/contextBridgeExposeInMainWorld.ts`.
+
 - `ipcRendererInvoke(channel, ...args)` is the typed wrapper around `ipcRenderer.invoke`.
   - Defined in `src/app/preload/ipc/ipcRendererInvoke.ts`.
+
 - `ipcMainHandle(channel, handler)` registers typed `ipcMain.handle` implementations in the main process.
   - Defined in `src/app/main/ipc/ipcMainHandle.ts`.
 
-Shared IPC contracts live in `types/ipc-contracts.d.ts`.
+- `ipcRendererOn(channel, listener): () => void`
+  - Typed push events from main to the renderer.
+  - Returns an `unsubscribe` function to unsubscribe.
+  - Location: `src/app/preload/ipc/ipcRendererOn.ts`.
+
+- `webContentsSend(win, channel, payload)`
+  - Typed send from main to a specific window.
+  - Location: `src/app/main/ipc/webContentsSend.ts`.
+
+- `webContentsBroadcast(channel, payload)`
+  - Typed broadcast send to all windows.
+  - Location: `src/app/main/ipc/webContentsSend.ts`.
+
+Shared IPC contracts live in `src/app/shared/ipc/contracts.ts`.
 
 ### Import Boundaries
 
@@ -50,7 +65,7 @@ ESLint enforces this boundary.
 - Main-process code (`src/app/main/**`) cannot import modules from the renderer or the preload bundles.
 - Preload code (`src/app/preload/**`) cannot import renderer or main modules.
 
-If a module must be shared across processes, place it under a neutral location such as `src/shared/**` and document its responsibility.
+If a module must be shared across processes, place it under a neutral location such as `src/app/shared/**` and document its responsibility.
 
 ## Grouping Example
 

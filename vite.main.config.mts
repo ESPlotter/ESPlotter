@@ -21,6 +21,7 @@ const nodeBuiltins = [
 export default defineConfig({
   resolve: {
     alias: appPathAlias,
+    conditions: ['node'],
   },
   build: {
     outDir: '.vite/build',

@@ -8,6 +8,7 @@ Before generating or modifying code, identify the relevant topic in the table an
 
 | Topic                  | Documentation Path                      | keywords                           |
 | ---------------------- | --------------------------------------- | ---------------------------------- |
+| New Features           | docs/new-features.md                    | Priority, libraries, Electron APIs |
 | IPC Main ↔ Renderer   | docs/ipc-inter-process-communication.md | Message channels, contracts, sync  |
 | Components             | docs/components.md                      | Component, ui, design system       |
 | Business Logic         | docs/business-logic.md                  | Services, use cases, validations   |

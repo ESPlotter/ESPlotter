@@ -2,8 +2,9 @@ import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { ipcMainHandle } from '@main/ipc/ipcMainHandle';
-import { getChartData } from './getChartData/GetChartData';
+import { setMainMenu } from './menu';
+import { registerIpcHandlers } from '@main/ipc/registerIpcHandlers';
+import { registerAppStateObservers } from '@main/observers/registerAppStateObservers';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -32,6 +33,9 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
     },
   });
 
@@ -48,16 +52,13 @@ const createWindow = () => {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${rendererBundleName}/index.html`));
   }
 
-  // Open the DevTools.
   // mainWindow.webContents.openDevTools();
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  ipcMainHandle('ping', () => 'pong');
-  ipcMainHandle('getChartData', getChartData);
+  registerIpcHandlers();
+  registerAppStateObservers();
+  setMainMenu();
   createWindow();
 });
 

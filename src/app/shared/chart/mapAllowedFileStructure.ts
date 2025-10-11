@@ -1,7 +1,7 @@
-import { ChartSerie } from '@shared/chart/ChartSerie';
-import { TestData } from './TestData';
+import type { ChartSerie } from '@shared/chart/ChartSerie';
+import type { AllowedFileStructure } from '@shared/AllowedFileStructure';
 
-export function mapTestData(data: TestData): ChartSerie[] {
+export function mapAllowedFileStructure(data: AllowedFileStructure): ChartSerie[] {
   const xValues = data?.x?.values ?? [];
   const series = Array.isArray(data?.series) ? data.series : [];
 
