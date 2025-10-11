@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Chart } from '@renderer/components/Chart/Chart';
 import type { ChartSerie } from '@shared/chart/ChartSerie';
 import { mapAllowedFileStructure } from '@shared/chart/mapAllowedFileStructure';
+import Layout from '@renderer/components/Layout/layout';
 
 export function HomePage() {
   const [series, setSeries] = useState<ChartSerie[]>([]);
@@ -30,15 +31,17 @@ export function HomePage() {
   }, []);
 
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-bold underline">Hello from React!</h1>
-      <p>
-        This app is using Chrome (v{window.versions.chrome()}), Node.js (v{window.versions.node()}),
-        and Electron (v{window.versions.electron()})
-      </p>
-      <Button onClick={ping}>ping</Button>
+    <Layout>
+      <div className="p-4">
+        <h1 className="text-3xl font-bold underline">Hello from React!</h1>
+        <p>
+          This app is using Chrome (v{window.versions.chrome()}), Node.js (v{window.versions.node()}
+          ), and Electron (v{window.versions.electron()})
+        </p>
+        <Button onClick={ping}>ping</Button>
 
-      {series.length > 0 && <Chart series={series} />}
-    </div>
+        {series.length > 0 && <Chart series={series} />}
+      </div>
+    </Layout>
   );
 }
