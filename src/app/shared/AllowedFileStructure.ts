@@ -22,7 +22,8 @@ export interface AllowedFileStructure {
 // Runtime validator and type guard
 export function isAllowedFileStructure(value: unknown): value is AllowedFileStructure {
   const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
-  const isNumArray = (v: unknown): v is number[] => Array.isArray(v) && v.every((n) => typeof n === 'number' && Number.isFinite(n));
+  const isNumArray = (v: unknown): v is number[] =>
+    Array.isArray(v) && v.every((n) => typeof n === 'number' && Number.isFinite(n));
 
   if (!isObj(value)) return false;
   if (typeof value.schemaVersion !== 'number') return false;
@@ -56,7 +57,7 @@ export function parseAllowedFileStructure(json: string): AllowedFileStructure {
   let data: unknown;
   try {
     data = JSON.parse(json);
-  } catch (e) {
+  } catch {
     throw new Error('invalid_json');
   }
   if (!isAllowedFileStructure(data)) {

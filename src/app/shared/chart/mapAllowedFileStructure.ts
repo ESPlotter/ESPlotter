@@ -37,4 +37,3 @@ export function mapAllowedFileStructure(data: AllowedFileStructure): ChartSerie[
     return acc;
   }, []);
 }
-

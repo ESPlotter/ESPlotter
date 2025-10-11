@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { readFileUtf8 } from '@main/files/fileService';
 import { setLastOpenedFilePath, clearLastOpenedFilePath } from '@main/state/appState';
 import { webContentsBroadcast } from '@main/ipc/webContentsSend';
