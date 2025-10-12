@@ -21,6 +21,8 @@ contextBridgeExposeInMainWorld('uniplot', {
 contextBridgeExposeInMainWorld('files', {
   getLastOpenedFilePath: () => ipcRendererInvoke('getLastOpenedFilePath'),
   getLastOpenedFile: () => ipcRendererInvoke('getLastOpenedFile'),
+  getOpenedFilePaths:  () => ipcRendererInvoke('getOpenedFilePaths'),
+  getLastOpenedFiles: () => ipcRendererInvoke('getLastOpenedFiles'),
   readFile: (path: string) => ipcRendererInvoke('readFile', path),
   openByPath: (path: string) => ipcRendererInvoke('openByPath', path),
   onFileOpenFailed: (

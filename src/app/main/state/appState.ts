@@ -6,10 +6,12 @@ import type { OpenedFile } from '@shared/ipc/contracts';
 
 type AppState = {
   lastOpenedFilePath?: string;
+  openedFilePaths?: string[];
 };
 
 const schema: Schema<AppState> = {
   lastOpenedFilePath: { type: 'string' },
+  openedFilePaths: {type: 'array'}
 };
 
 // Electron Store v11 type resolution can hide inherited Conf methods in some setups.
@@ -49,6 +51,34 @@ export async function clearLastOpenedFilePath(): Promise<void> {
 
 export async function getLastOpenedFilePath(): Promise<string | null> {
   return stateStore.get('lastOpenedFilePath') ?? null;
+}
+
+export async function getOpenedFilePaths(): Promise<string[]> {
+  return stateStore.get('openedFilePaths') ?? [];
+}
+
+export async function getLastOpenedFiles(): Promise<OpenedFile[] | null> {
+  const paths = await getOpenedFilePaths();
+  if (paths.length === 0) return null;
+
+  const files: OpenedFile[] = [];
+
+  for (const path of paths) {
+    try {
+      const content = await readFileUtf8(path);
+      const data: unknown = JSON.parse(content);
+
+      if (!isAllowedFileStructure(data)) {
+        continue;
+      }
+
+      files.push({ path, data: data as AllowedFileStructure });
+    } catch {
+      continue;
+    }
+  }
+
+  return files.length > 0 ? files : null;
 }
 
 export async function getLastOpenedFile(): Promise<OpenedFile | null> {
