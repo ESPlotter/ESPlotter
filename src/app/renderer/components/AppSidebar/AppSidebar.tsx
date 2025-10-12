@@ -1,5 +1,3 @@
-import { Calendar, Home, Inbox, Search, Settings } from 'lucide-react';
-
 import {
   Sidebar,
   SidebarContent,
@@ -10,12 +8,21 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@shadcn/components/ui/sidebar';
+
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@shadcn/components/ui/accordion';
+
 import { useEffect, useState } from 'react';
 import { AllowedFileStructure } from '@shared/AllowedFileStructure';
 
 interface MenuItem {
   label: string;
-  unit: string;
+  unit?: string;
+  children?: MenuItem[];
 }
 
 export function AppSidebar() {
@@ -28,15 +35,21 @@ export function AppSidebar() {
 
     (async () => {
       const file = await window.files.getLastOpenedFile();
+      const lastPart: string =
+        file?.path
+          .split(/[\\/]/)
+          .pop()
+          ?.replace(/\.[^/.]+$/, '') || 'test';
+
       if (file) {
-        setItems(mapAllowedFileStructureToMenuItems(file.data));
+        setItems(mapAllowedFileStructureToMenuItems(file.data, lastPart));
       }
     })();
 
     return () => {
       offLast();
     };
-  }, []);
+  });
 
   return (
     <Sidebar>
@@ -46,11 +59,25 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild>
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <Accordion type="single" collapsible key={item.label}>
+                  <AccordionItem value={item.label}>
+                    <AccordionTrigger className="text-sm font-medium">
+                      {item.label}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      {item.children?.map((child) => (
+                        <SidebarMenuItem key={child.label}>
+                          <SidebarMenuButton asChild>
+                            <span>
+                              {child.label}
+                              {child.unit ? ` (${child.unit})` : ''}
+                            </span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -60,9 +87,17 @@ export function AppSidebar() {
   );
 }
 
-function mapAllowedFileStructureToMenuItems(data: AllowedFileStructure): MenuItem[] {
-  return data.series.map((item) => ({
-    label: item.label,
-    unit: item.unit,
-  }));
+function mapAllowedFileStructureToMenuItems(
+  data: AllowedFileStructure,
+  lastPart?: string,
+): MenuItem[] {
+  return [
+    {
+      label: lastPart || 'test',
+      children: data.series.map((s) => ({
+        label: s.label,
+        unit: s.unit,
+      })),
+    },
+  ];
 }
