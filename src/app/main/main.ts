@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, globalShortcut } from 'electron';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -39,6 +39,15 @@ const createWindow = () => {
     },
   });
 
+
+  // registrar el atajo Ctrl+Shift+I para abrir/cerrar DevTools
+  globalShortcut.register('CommandOrControl+Shift+I', () => {
+    const focusedWindow = BrowserWindow.getFocusedWindow();
+    if (focusedWindow) {
+      focusedWindow.webContents.toggleDevTools();
+    }
+  });
+
   // Retrieve renderer configuration from environment variables or electron-forge injected variables.
   // Environment variables are used for testing with Playwright.
   const rendererDevServerUrl =
@@ -52,7 +61,7 @@ const createWindow = () => {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${rendererBundleName}/index.html`));
   }
 
-  // mainWindow.webContents.openDevTools();
+   mainWindow.webContents.openDevTools();
 };
 
 app.whenReady().then(() => {
@@ -67,6 +76,7 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
+    globalShortcut.unregisterAll()
     app.quit();
   }
 });
