@@ -30,26 +30,20 @@ export function AppSidebar() {
 
   useEffect(() => {
     const offLast = window.files.onLastOpenedFileParsedChanged((file) => {
-      setItems(mapAllowedFileStructureToMenuItems(file.data));
+      const lastPart = getLastPart(file.path);
+      setItems((prev) => [...prev, ...mapAllowedFileStructureToMenuItems(file.data, lastPart)]);
     });
 
     (async () => {
       const file = await window.files.getLastOpenedFile();
-      const lastPart: string =
-        file?.path
-          .split(/[\\/]/)
-          .pop()
-          ?.replace(/\.[^/.]+$/, '') || 'test';
-
       if (file) {
-        setItems(mapAllowedFileStructureToMenuItems(file.data, lastPart));
+        const lastPart = getLastPart(file.path);
+        setItems((prev) => [...prev, ...mapAllowedFileStructureToMenuItems(file.data, lastPart)]);
       }
     })();
 
-    return () => {
-      offLast();
-    };
-  });
+    return () => offLast();
+  }, []);
 
   return (
     <Sidebar>
@@ -100,4 +94,14 @@ function mapAllowedFileStructureToMenuItems(
       })),
     },
   ];
+}
+
+function getLastPart(filePath: string): string {
+  const lastPart: string =
+    filePath
+      .split(/[\\/]/)
+      .pop()
+      ?.replace(/\.[^/.]+$/, '') || 'test';
+
+  return lastPart;
 }
