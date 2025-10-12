@@ -40,7 +40,7 @@ const createWindow = () => {
   });
 
 
-  // registrar el atajo Ctrl+Shift+I para abrir/cerrar DevTools
+  // register shortcut Ctrl+Shift+I to open/close DevTools
   globalShortcut.register('CommandOrControl+Shift+I', () => {
     const focusedWindow = BrowserWindow.getFocusedWindow();
     if (focusedWindow) {
