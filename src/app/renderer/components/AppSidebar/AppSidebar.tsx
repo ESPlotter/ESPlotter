@@ -31,14 +31,14 @@ export function AppSidebar() {
   useEffect(() => {
     const offLast = window.files.onLastOpenedFileParsedChanged((file) => {
       const lastPart = getLastPart(file.path);
-      setItems((prev) => [...prev, ...mapAllowedFileStructureToMenuItems(file.data, lastPart)]);
+      setItems(mapAllowedFileStructureToMenuItems(file.data, lastPart));
     });
 
     (async () => {
       const file = await window.files.getLastOpenedFile();
       if (file) {
         const lastPart = getLastPart(file.path);
-        setItems((prev) => [...prev, ...mapAllowedFileStructureToMenuItems(file.data, lastPart)]);
+        setItems(mapAllowedFileStructureToMenuItems(file.data, lastPart));
       }
     })();
 
