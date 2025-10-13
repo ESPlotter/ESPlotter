@@ -83,6 +83,35 @@ export async function getLastOpenedFile(): Promise<OpenedFile | null> {
   }
 }
 
+export async function getLastOpenedFiles(): Promise<OpenedFile[] | null> {
+  const paths = await getLastOpenedFilePath();
+
+  if (!paths) return null;
+
+    const openedFiles: OpenedFile[] = [];
+
+  for (const path of paths) {
+    try {
+      const content = await readFileUtf8(path);
+      const data: unknown = JSON.parse(content);
+
+      if (!isAllowedFileStructure(data)) {
+        const filteredPaths = paths.filter(p => p !== path);
+        await stateStore.set('lastOpenedFilePath', filteredPaths);
+        continue;
+      }
+
+      openedFiles.push({ path, data: data as AllowedFileStructure });
+    } catch {
+      // Si JSON corrupto o archivo no accesible, eliminar del store
+      const filteredPaths = paths.filter(p => p !== path);
+      await stateStore.set('lastOpenedFilePath', filteredPaths);
+      continue;
+    }
+  }
+  return openedFiles.length > 0 ? openedFiles : null;
+}
+
 function onStateChange<K extends keyof AppState>(
   key: K,
   cb: (newValue: AppState[K] | undefined) => void,

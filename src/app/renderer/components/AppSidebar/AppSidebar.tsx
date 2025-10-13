@@ -31,14 +31,19 @@ export function AppSidebar() {
   useEffect(() => {
     const offLast = window.files.onLastOpenedFileParsedChanged((file) => {
       const lastPart = getLastPart(file.path);
-      setItems(mapAllowedFileStructureToMenuItems(file.data, lastPart));
+      setItems((prevItems) => [
+        ...prevItems,
+        ...mapAllowedFileStructureToMenuItems(file.data, lastPart),
+      ]);
     });
-
     (async () => {
-      const file = await window.files.getLastOpenedFile();
-      if (file) {
-        const lastPart = getLastPart(file.path);
-        setItems(mapAllowedFileStructureToMenuItems(file.data, lastPart));
+      const files = await window.files.getLastOpenedFiles();
+      if (files && files.length > 0) {
+        const allItems = files.flatMap((file) => {
+          const lastPart = getLastPart(file.path);
+          return mapAllowedFileStructureToMenuItems(file.data, lastPart);
+        });
+        setItems(allItems);
       }
     })();
 
@@ -49,7 +54,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Channels</SidebarGroupLabel>
+          <SidebarGroupLabel>CHANNELS</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (

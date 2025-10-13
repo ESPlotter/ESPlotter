@@ -18,6 +18,7 @@ export interface RendererExposureMap {
   files: {
     getLastOpenedFilePath: () => Promise<string[] | null>;
     getLastOpenedFile: () => Promise<OpenedFile | null>;
+    getLastOpenedFiles: () => Promise<OpenedFile[] | null>
     readFile: (path: string) => Promise<AllowedFileStructure>;
     onFileOpenFailed: (
       listener: (payload: {
@@ -38,6 +39,7 @@ export interface IpcChannelMap {
   saveNewFile: (fileData: { name: string; content: string }) => Promise<void>;
   getLastOpenedFilePath: () => Promise<string[] | null>;
   getLastOpenedFile: () => Promise<OpenedFile | null>;
+  getLastOpenedFiles: () => Promise<OpenedFile[] | null>
   readFile: (path: string) => Promise<AllowedFileStructure>;
   openByPath: (path: string) => Promise<void>;
 }
