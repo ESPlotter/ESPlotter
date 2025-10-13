@@ -19,7 +19,7 @@ contextBridgeExposeInMainWorld('uniplot', {
 });
 
 contextBridgeExposeInMainWorld('files', {
-  getLastOpenedFilePath: () => ipcRendererInvoke('getLastOpenedFilePath'),
+  getLastOpenedFilesPath: () => ipcRendererInvoke('getLastOpenedFilesPath'),
   getLastOpenedFile: () => ipcRendererInvoke('getLastOpenedFile'),
   getLastOpenedFiles: () => ipcRendererInvoke('getLastOpenedFiles'),
   readFile: (path: string) => ipcRendererInvoke('readFile', path),

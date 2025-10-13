@@ -16,7 +16,7 @@ export interface RendererExposureMap {
     saveNewFile: (fileData: { name: string; content: string }) => Promise<void>;
   };
   files: {
-    getLastOpenedFilePath: () => Promise<string[] | null>;
+    getLastOpenedFilesPath: () => Promise<string[] | null>;
     getLastOpenedFile: () => Promise<OpenedFile | null>;
     getLastOpenedFiles: () => Promise<OpenedFile[] | null>
     readFile: (path: string) => Promise<AllowedFileStructure>;
@@ -37,7 +37,7 @@ export interface IpcChannelMap {
   ping: () => string;
   getChartData: () => Promise<ChartSerie[]>;
   saveNewFile: (fileData: { name: string; content: string }) => Promise<void>;
-  getLastOpenedFilePath: () => Promise<string[] | null>;
+  getLastOpenedFilesPath: () => Promise<string[] | null>;
   getLastOpenedFile: () => Promise<OpenedFile | null>;
   getLastOpenedFiles: () => Promise<OpenedFile[] | null>
   readFile: (path: string) => Promise<AllowedFileStructure>;

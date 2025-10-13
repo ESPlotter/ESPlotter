@@ -53,7 +53,7 @@ test.describe('Open file flow', () => {
     await expect(mainPage.locator('canvas').first()).toBeVisible();
 
     // Last opened file path should be stored
-    const lastPath = await mainPage.evaluate(() => window.files.getLastOpenedFilePath());
+    const lastPath = await mainPage.evaluate(() => window.files.getLastOpenedFilesPath());
     expect(lastPath).toBe(validPath);
   });
 
@@ -76,7 +76,7 @@ test.describe('Open file flow', () => {
     expect(payload.reason).toBe('invalid_format');
 
     // App state should be cleared after invalid file
-    const lastPath = await mainPage.evaluate(() => window.files.getLastOpenedFilePath());
+    const lastPath = await mainPage.evaluate(() => window.files.getLastOpenedFilesPath());
     expect(lastPath).toBeNull();
 
     // No chart should be rendered
@@ -101,7 +101,7 @@ test.describe('Open file flow', () => {
     expect(payload.path).toBe(missingPath);
     expect(payload.reason).toBe('not_found');
 
-    const lastPath = await mainPage.evaluate(() => window.files.getLastOpenedFilePath());
+    const lastPath = await mainPage.evaluate(() => window.files.getLastOpenedFilesPath());
     expect(lastPath).toBeNull();
 
     await expect(mainPage.locator('canvas')).toHaveCount(0);

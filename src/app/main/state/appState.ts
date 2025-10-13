@@ -59,12 +59,12 @@ export async function clearLastOpenedFilePath(): Promise<void> {
   } catch {}
 }
 
-export async function getLastOpenedFilePath(): Promise<string[] | null> {
+export async function getLastOpenedFilesPath(): Promise<string[] | null> {
   return stateStore.get('lastOpenedFilePath') ?? null;
 }
 
 export async function getLastOpenedFile(): Promise<OpenedFile | null> {
-  const paths = await getLastOpenedFilePath();
+  const paths = await getLastOpenedFilesPath();
   const path = paths?.[0]
   if (!path) return null;
 
@@ -84,7 +84,7 @@ export async function getLastOpenedFile(): Promise<OpenedFile | null> {
 }
 
 export async function getLastOpenedFiles(): Promise<OpenedFile[] | null> {
-  const paths = await getLastOpenedFilePath();
+  const paths = await getLastOpenedFilesPath();
 
   if (!paths) return null;
 
