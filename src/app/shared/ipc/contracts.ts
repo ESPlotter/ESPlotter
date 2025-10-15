@@ -27,7 +27,6 @@ export interface RendererExposureMap {
         message?: string;
       }) => void,
     ) => () => void;
-    openByPath: (path: string) => Promise<void>;
     onLastOpenedFileParsedChanged: (listener: (file: OpenedFile) => void) => () => void;
   };
 }
@@ -41,7 +40,6 @@ export interface IpcChannelMap {
   getLastOpenedFile: () => Promise<OpenedFile | null>;
   getLastOpenedFiles: () => Promise<OpenedFile[] | null>
   readFile: (path: string) => Promise<AllowedFileStructure>;
-  openByPath: (path: string) => Promise<void>;
 }
 
 // Typed push-event channels (main → renderer)

@@ -35,7 +35,6 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true,
     },
   });
 
@@ -61,7 +60,9 @@ const createWindow = () => {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${rendererBundleName}/index.html`));
   }
 
-   mainWindow.webContents.openDevTools();
+  if (process.env.CI !== '1') {
+    mainWindow.webContents.openDevTools();
+  }
 };
 
 app.whenReady().then(() => {

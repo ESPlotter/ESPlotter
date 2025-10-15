@@ -23,7 +23,6 @@ contextBridgeExposeInMainWorld('files', {
   getLastOpenedFile: () => ipcRendererInvoke('getLastOpenedFile'),
   getLastOpenedFiles: () => ipcRendererInvoke('getLastOpenedFiles'),
   readFile: (path: string) => ipcRendererInvoke('readFile', path),
-  openByPath: (path: string) => ipcRendererInvoke('openByPath', path),
   onFileOpenFailed: (
     listener: (payload: {
       path: string;

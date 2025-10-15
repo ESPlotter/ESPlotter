@@ -1,7 +1,6 @@
 import { ipcMainHandle } from '@main/ipc/ipcMainHandle';
 import { getChartData } from '@main/getChartData/GetChartData';
 import { getLastOpenedFile, getLastOpenedFilesPath, getLastOpenedFiles } from '@main/state/appState';
-import { openByPathController } from '@main/controllers/fileOpenController';
 import { readAllowedFile } from '@main/files/fileService';
 import { saveToAppData } from '@main/files/saveToAppData';
 
@@ -15,5 +14,4 @@ export function registerIpcHandlers() {
   ipcMainHandle('getLastOpenedFile', getLastOpenedFile);
   ipcMainHandle('getLastOpenedFiles',getLastOpenedFiles)
   ipcMainHandle('readFile', readAllowedFile);
-  ipcMainHandle('openByPath', openByPathController);
 }

@@ -46,7 +46,7 @@ export async function setLastOpenedFilePath(filePath: string): Promise<void> {
 
    stateStore.set('lastOpenedFilePath',limited);
 
-     try {
+  try {
     app.addRecentDocument(filePath);
   } catch {
     // noop if platform unsupported

@@ -13,6 +13,11 @@ export async function readAllowedFile(filePath: string): Promise<AllowedFileStru
 }
 
 export async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
+  // Test helper: allow E2E to bypass native dialog
+  if (process.env.CI && process.env.UNIPLOT_E2E_OPEN_PATH) {
+    return process.env.UNIPLOT_E2E_OPEN_PATH;
+  }
+
   const { dialog } = await import('electron');
   const { canceled, filePaths } = await dialog.showOpenDialog(win, { properties: ['openFile'] });
   if (canceled) return null;

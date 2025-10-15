@@ -6,17 +6,18 @@ Before generating or modifying code, identify the relevant topic in the table an
 
 ## Topics and Docs
 
-| Topic                  | Documentation Path                      | keywords                           |
-| ---------------------- | --------------------------------------- | ---------------------------------- |
-| New Features           | docs/new-features.md                    | Priority, libraries, Electron APIs |
-| IPC Main ↔ Renderer   | docs/ipc-inter-process-communication.md | Message channels, contracts, sync  |
-| Components             | docs/components.md                      | Component, ui, design system       |
-| Business Logic         | docs/business-logic.md                  | Services, use cases, validations   |
-| Architecture           | docs/architecture.md                    | Modules, layers, patterns          |
-| Project Configuration  | docs/project-setup.md                   | Scripts, packaging, Electron setup |
-| Continuous Integration | docs/ci.md                              | Workflows, pipelines, checks       |
-| Tests                  | docs/tests.md                           | Strategy, coverage, tools          |
-| Env Variables          | docs/env-vars.md                        | Names, scopes, secrets             |
+| Topic                  | Documentation Path                      | keywords                                   |
+| ---------------------- | --------------------------------------- | ------------------------------------------ |
+| New Features           | docs/new-features.md                    | Priority, libraries, Electron APIs         |
+| Code standards         | docs/code-standards.md                  | Best practices, code standards, formatting |
+| IPC Main ↔ Renderer   | docs/ipc-inter-process-communication.md | Message channels, contracts, sync          |
+| Components             | docs/components.md                      | Component, ui, design system               |
+| Business Logic         | docs/business-logic.md                  | Services, use cases, validations           |
+| Architecture           | docs/architecture.md                    | Modules, layers, patterns                  |
+| Project Configuration  | docs/project-setup.md                   | Scripts, packaging, Electron setup         |
+| Continuous Integration | docs/ci.md                              | Workflows, pipelines, checks               |
+| Tests                  | docs/tests.md                           | Strategy, coverage, tools                  |
+| Env Variables          | docs/env-vars.md                        | Names, scopes, secrets                     |
 
 ## Good practices
 
