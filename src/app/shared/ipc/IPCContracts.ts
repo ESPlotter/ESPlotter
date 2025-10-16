@@ -1,4 +1,3 @@
-import type { ChartSerie } from '@shared/chart/ChartSerie';
 import type { AllowedFileStructure } from '@shared/AllowedFileStructure';
 
 export type OpenedFile = { path: string; data: AllowedFileStructure };
@@ -12,7 +11,6 @@ export interface RendererExposureMap {
     ping: () => Promise<string>;
   };
   uniplot: {
-    getChartData: () => Promise<ChartSerie[]>;
     saveNewFile: (fileData: { name: string; content: string }) => Promise<void>;
   };
   files: {
@@ -26,7 +24,6 @@ export interface RendererExposureMap {
 // Typed IPC channels (renderer → main)
 export interface IpcChannelMap {
   ping: () => string;
-  getChartData: () => Promise<ChartSerie[]>;
   saveNewFile: (fileData: { name: string; content: string }) => Promise<void>;
   getLastOpenedFile: () => Promise<OpenedFile | null>;
   getLastOpenedFiles: () => Promise<OpenedFile[] | null>;

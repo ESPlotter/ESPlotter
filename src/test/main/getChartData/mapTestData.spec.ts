@@ -1,10 +1,10 @@
-import { mapTestData } from '@main/getChartData/mapTestData';
 import { describe, expect, test } from 'vitest';
-import { TestDataMother } from './TestDataMother';
+import { mapAllowedFileStructure } from '@shared/chart/mapAllowedFileStructure';
+import { AllowedFileStructureMother } from './AllowedFileStructureMother';
 
 describe('mapTestData', () => {
   test('should map test data with one serie', () => {
-    const testData = TestDataMother.with({
+    const testData = AllowedFileStructureMother.with({
       x: {
         id: 'time',
         label: 'Time',
@@ -21,7 +21,7 @@ describe('mapTestData', () => {
       ],
     });
 
-    const result = mapTestData(testData);
+    const result = mapAllowedFileStructure(testData);
 
     expect(result).toEqual([
       {
@@ -38,7 +38,7 @@ describe('mapTestData', () => {
   });
 
   test('should map test data with one serie', () => {
-    const testData = TestDataMother.with({
+    const testData = AllowedFileStructureMother.with({
       x: {
         id: 'time',
         label: 'Time',
@@ -61,7 +61,7 @@ describe('mapTestData', () => {
       ],
     });
 
-    const result = mapTestData(testData);
+    const result = mapAllowedFileStructure(testData);
 
     expect(result).toEqual([
       {

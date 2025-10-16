@@ -1,16 +1,18 @@
-import { TestData } from '@main/getChartData/TestData';
 import { faker } from '@faker-js/faker';
+import { AllowedFileStructure } from '@shared/AllowedFileStructure';
 import { PartialDeep } from 'type-fest';
 
 const DEFAULT_NUMBER_OF_POINTS = 5;
 
-export class TestDataMother {
-  static with(data: PartialDeep<TestData> = {}): TestData {
+export class AllowedFileStructureMother {
+  static with(data: PartialDeep<AllowedFileStructure> = {}): AllowedFileStructure {
     const defaultSeries = new Array(faker.number.int({ min: 1, max: 3 })).fill(
       TestDataSerieMother.random(),
     );
 
-    const series = Array.isArray(data.series) ? (data.series as TestData['series']) : defaultSeries;
+    const series = Array.isArray(data.series)
+      ? (data.series as AllowedFileStructure['series'])
+      : defaultSeries;
 
     return {
       schemaVersion: data.schemaVersion ?? 1,
@@ -34,7 +36,9 @@ export class TestDataMother {
 }
 
 class TestDataSerieMother {
-  static with(data: PartialDeep<TestData['series'][number]>): TestData['series'][number] {
+  static with(
+    data: PartialDeep<AllowedFileStructure['series'][number]>,
+  ): AllowedFileStructure['series'][number] {
     return {
       id: data.id ?? faker.string.alphanumeric({ casing: 'upper' }),
       label: data.label ?? faker.science.unit().name,
@@ -47,7 +51,7 @@ class TestDataSerieMother {
     };
   }
 
-  static random(): TestData['series'][number] {
+  static random(): AllowedFileStructure['series'][number] {
     return TestDataSerieMother.with({});
   }
 }

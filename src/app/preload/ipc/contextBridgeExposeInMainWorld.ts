@@ -1,5 +1,5 @@
 import { contextBridge } from 'electron';
-import type { RendererExposure, RendererExposureKey } from '@shared/ipc/contracts';
+import type { RendererExposure, RendererExposureKey } from '@shared/ipc/IPCContracts';
 
 export function contextBridgeExposeInMainWorld<TName extends RendererExposureKey>(
   key: TName,

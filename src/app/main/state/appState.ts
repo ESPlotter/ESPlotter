@@ -2,7 +2,7 @@ import { app } from 'electron';
 import Store, { type Schema } from 'electron-store';
 import { readFileUtf8 } from '@main/files/fileService';
 import { isAllowedFileStructure, type AllowedFileStructure } from '@shared/AllowedFileStructure';
-import type { OpenedFile } from '@shared/ipc/contracts';
+import type { OpenedFile } from '@shared/ipc/IPCContracts';
 
 type AppState = {
   lastOpenedFilePath?: string[];
