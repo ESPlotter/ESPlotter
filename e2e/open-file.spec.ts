@@ -1,47 +1,16 @@
 import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
-import path from 'node:path';
-import os from 'node:os';
-import fs from 'node:fs/promises';
-import crypto from 'node:crypto';
-
-import { waitForReactContent } from './support/waitForReactContent';
-import { waitForPreloadScript } from './support/waitForPreloadScript';
-import { getElectronAppForE2eTest } from './support/getElectronAppForE2eTest';
 import { clickMenuItem } from './support/clickMenuItem';
 import { triggerFileOpenShortcut } from './support/triggerFileOpenShortcut';
 import { waitForFileParsed } from './support/waitForFileParsed';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
+import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
 let electronApp: ElectronApplication;
 let mainPage: Page;
 
-async function triggerFileOpenMenu(app: ElectronApplication): Promise<void> {
-  await clickMenuItem(app, ['File', 'Open File']);
-}
-
-async function expectChartVisible(page: Page): Promise<void> {
-  await expect(page.locator('canvas').first()).toBeVisible();
-}
-
-async function expectNoCharts(page: Page): Promise<void> {
-  await expect(page.locator('canvas')).toHaveCount(0);
-}
-
 test.describe('Open file flow', () => {
   test.beforeEach(async () => {
-    const tmpStateDir = path.join(
-      os.tmpdir(),
-      `uniplot-e2e-state-${Date.now()}-${crypto.randomUUID()}`,
-    );
-    await fs.mkdir(tmpStateDir, { recursive: true });
-    process.env.UNIPLOT_STATE_CWD = tmpStateDir;
-
-    electronApp = await getElectronAppForE2eTest();
-    mainPage = await electronApp.firstWindow();
-
-    await mainPage.waitForLoadState('domcontentloaded');
-    await waitForPreloadScript(mainPage);
-    await waitForReactContent(mainPage);
+    ({ electronApp, mainPage } = await setupE2eTestEnvironment());
   });
 
   test.afterEach(async () => {
@@ -82,3 +51,15 @@ test.describe('Open file flow', () => {
     await expectNoCharts(mainPage);
   });
 });
+
+async function triggerFileOpenMenu(app: ElectronApplication): Promise<void> {
+  await clickMenuItem(app, ['File', 'Open File']);
+}
+
+async function expectChartVisible(page: Page): Promise<void> {
+  await expect(page.locator('canvas').first()).toBeVisible();
+}
+
+async function expectNoCharts(page: Page): Promise<void> {
+  await expect(page.locator('canvas')).toHaveCount(0);
+}

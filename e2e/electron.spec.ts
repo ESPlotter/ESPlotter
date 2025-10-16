@@ -1,21 +1,13 @@
 import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
 
-import { waitForReactContent } from './support/waitForReactContent';
-import { waitForPreloadScript } from './support/waitForPreloadScript';
-import { getElectronAppForE2eTest } from './support/getElectronAppForE2eTest';
+import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
 let electronApp: ElectronApplication;
 let mainPage: Page;
 
 test.describe('Electron App', () => {
   test.beforeEach(async () => {
-    electronApp = await getElectronAppForE2eTest();
-
-    mainPage = await electronApp.firstWindow();
-
-    await mainPage.waitForLoadState('domcontentloaded');
-    await waitForPreloadScript(mainPage);
-    await waitForReactContent(mainPage);
+    ({ electronApp, mainPage } = await setupE2eTestEnvironment());
   });
 
   test.afterEach(async () => {
