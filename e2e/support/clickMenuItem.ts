@@ -8,6 +8,24 @@ export async function clickMenuItem(app: ElectronApplication, labels: string[]):
       throw new Error('Application menu is not registered');
     }
 
+    function findMenuItem(currentMenu: ElectronMenu, path: string[]): ElectronMenuItem | null {
+      let current = currentMenu;
+      for (let i = 0; i < path.length; i++) {
+        const item = current.items.find((it) => it.label === path[i]);
+        if (!item) {
+          return null;
+        }
+        if (i === path.length - 1) {
+          return item;
+        }
+        if (!item.submenu) {
+          return null;
+        }
+        current = item.submenu;
+      }
+      return null;
+    }
+
     const item = findMenuItem(menu, labelPath);
     if (!item) {
       throw new Error(`Menu item path "${labelPath.join(' > ')}" was not found`);
@@ -20,22 +38,4 @@ export async function clickMenuItem(app: ElectronApplication, labels: string[]):
     const targetWindow = BrowserWindow.getFocusedWindow() ?? null;
     item.click(undefined, targetWindow, undefined);
   }, labels);
-}
-
-function findMenuItem(menu: ElectronMenu, path: string[]): ElectronMenuItem | null {
-  let current = menu;
-  for (let i = 0; i < path.length; i++) {
-    const item = current.items.find((it) => it.label === path[i]);
-    if (!item) {
-      return null;
-    }
-    if (i === path.length - 1) {
-      return item;
-    }
-    if (!item.submenu) {
-      return null;
-    }
-    current = item.submenu;
-  }
-  return null;
 }
