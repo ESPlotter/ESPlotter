@@ -79,15 +79,15 @@ export class ElectronStoreStateRepository
 
         if (!isAllowedFileStructure(data)) {
           const filteredPaths = paths.filter((p) => p !== path);
-          await this.stateStore.set('lastOpenedFilePath', filteredPaths);
+          this.stateStore.set('lastOpenedFilePath', filteredPaths);
           continue;
         }
 
         openedFiles.push({ path, data: data as AllowedFileStructure });
       } catch {
-        // Si JSON corrupto o archivo no accesible, eliminar del store
+        // If corrupted JSON or unreadable, clear stored path per decision
         const filteredPaths = paths.filter((p) => p !== path);
-        await this.stateStore.set('lastOpenedFilePath', filteredPaths);
+        this.stateStore.set('lastOpenedFilePath', filteredPaths);
         continue;
       }
     }

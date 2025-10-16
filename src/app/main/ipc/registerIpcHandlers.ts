@@ -1,5 +1,4 @@
 import { ipcMainHandle } from '@main/ipc/ipcMainHandle';
-import { getLastOpenedFile, getLastOpenedFiles } from '@main/state/appState';
 import { readAllowedFile } from '@main/files/fileService';
 import { saveToAppData } from '@main/files/saveToAppData';
 
@@ -8,7 +7,17 @@ export function registerIpcHandlers() {
   ipcMainHandle('saveNewFile', async (fileData: { name: string; content: string }) => {
     await saveToAppData(fileData);
   });
-  ipcMainHandle('getLastOpenedFile', getLastOpenedFile);
-  ipcMainHandle('getLastOpenedFiles', getLastOpenedFiles);
+  ipcMainHandle('getLastOpenedFile', async () => {
+    const stateRepository = new (
+      await import('@main/state/ElectronStoreStateRepository')
+    ).ElectronStoreStateRepository();
+    return stateRepository.getLastOpenedFile();
+  });
+  ipcMainHandle('getLastOpenedFiles', async () => {
+    const stateRepository = new (
+      await import('@main/state/ElectronStoreStateRepository')
+    ).ElectronStoreStateRepository();
+    return stateRepository.getLastOpenedFiles();
+  });
   ipcMainHandle('readFile', readAllowedFile);
 }

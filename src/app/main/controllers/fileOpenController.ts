@@ -1,8 +1,11 @@
 import { readFileUtf8 } from '@main/files/fileService';
-import { setLastOpenedFilePath, clearLastOpenedFilePath } from '@main/state/appState';
 import { parseAllowedFileStructure } from '@shared/AllowedFileStructure';
 
 export async function openByPathController(path: string): Promise<void> {
+  const stateRepository = new (
+    await import('@main/state/ElectronStoreStateRepository')
+  ).ElectronStoreStateRepository();
+
   let content: string;
   try {
     content = await readFileUtf8(path);
@@ -16,9 +19,9 @@ export async function openByPathController(path: string): Promise<void> {
     parseAllowedFileStructure(content);
   } catch {
     // Invalid format
-    await clearLastOpenedFilePath();
+    await stateRepository.clearLastOpenedFilePath();
     return;
   }
 
-  await setLastOpenedFilePath(path);
+  await stateRepository.setLastOpenedFilePath(path);
 }
