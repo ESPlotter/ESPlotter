@@ -2,6 +2,7 @@ import { test, expect, type ElectronApplication, type Page } from '@playwright/t
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
+import type { KeyboardInputEvent } from 'electron';
 
 import { waitForReactContent } from './support/waitForReactContent';
 import { waitForPreloadScript } from './support/waitForPreloadScript';
@@ -58,6 +59,49 @@ test.describe('Open file flow', () => {
     // Last opened file path should be stored
     const lastPaths = await mainPage.evaluate(() => window.files.getLastOpenedFilesPath());
     expect(Array.isArray(lastPaths) ? lastPaths[0] : lastPaths).toBe(validPath);
+  });
+
+  test('opens a valid file using keyboard shortcut (Ctrl/Cmd+O)', async () => {
+    const validPath = path.resolve(process.cwd(), 'fixtures', 'test3.json');
+
+    await electronApp.evaluate((_, fpath) => {
+      process.env.UNIPLOT_E2E_OPEN_PATH = fpath as string;
+    }, validPath);
+
+    await mainPage.bringToFront();
+    const modifiers = (process.platform === 'darwin' ? ['meta'] : ['control']) as Array<
+      'control' | 'meta'
+    >;
+    await electronApp.evaluate(
+      ({ BrowserWindow }, { modifiers: accelModifiers }) => {
+        const win = BrowserWindow.getFocusedWindow();
+        if (!win) {
+          throw new Error('No focused window to receive shortcut');
+        }
+
+        const events: KeyboardInputEvent[] = [
+          { type: 'keyDown', keyCode: 'O', modifiers: accelModifiers },
+          { type: 'char', keyCode: 'O', modifiers: accelModifiers },
+          { type: 'keyUp', keyCode: 'O', modifiers: accelModifiers },
+        ];
+        for (const event of events) {
+          win.webContents.sendInputEvent(event);
+        }
+      },
+      { modifiers },
+    );
+
+    const openedPathHandle = await mainPage.waitForFunction(
+      () =>
+        window.files
+          .getLastOpenedFilesPath()
+          .then((paths) => (Array.isArray(paths) && paths.length > 0 ? paths[0] : null)),
+      { timeout: 20_000 },
+    );
+
+    const openedPath = (await openedPathHandle.jsonValue()) as string | null;
+    expect(openedPath).toBe(validPath);
+    await expect(mainPage.locator('canvas').first()).toBeVisible();
   });
 
   test('emits fileOpenFailed for invalid format (test1.json)', async () => {
