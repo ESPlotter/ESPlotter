@@ -38,14 +38,14 @@ const createWindow = () => {
     },
   });
 
-
-  // register shortcut Ctrl+Shift+I to open/close DevTools
-  globalShortcut.register('CommandOrControl+Shift+I', () => {
-    const focusedWindow = BrowserWindow.getFocusedWindow();
-    if (focusedWindow) {
-      focusedWindow.webContents.toggleDevTools();
-    }
-  });
+  if (!app.isPackaged) {
+    globalShortcut.register('CommandOrControl+Shift+I', () => {
+      const focusedWindow = BrowserWindow.getFocusedWindow();
+      if (focusedWindow) {
+        focusedWindow.webContents.toggleDevTools();
+      }
+    });
+  }
 
   // Retrieve renderer configuration from environment variables or electron-forge injected variables.
   // Environment variables are used for testing with Playwright.
@@ -58,10 +58,6 @@ const createWindow = () => {
     mainWindow.loadURL(rendererDevServerUrl);
   } else {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${rendererBundleName}/index.html`));
-  }
-
-  if (process.env.CI !== '1') {
-    mainWindow.webContents.openDevTools();
   }
 };
 
@@ -77,7 +73,7 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    globalShortcut.unregisterAll()
+    globalShortcut.unregisterAll();
     app.quit();
   }
 });
