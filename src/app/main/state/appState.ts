@@ -9,14 +9,12 @@ type AppState = {
 };
 
 const schema: Schema<AppState> = {
-  lastOpenedFilePath: { 
-    type: 'array', 
-    items: { type: 'string' } 
+  lastOpenedFilePath: {
+    type: 'array',
+    items: { type: 'string' },
   },
 };
 
-// Electron Store v11 type resolution can hide inherited Conf methods in some setups.
-// Cast a minimal surface (get/set/onDidChange) that we rely on.
 const stateStore = new Store<AppState>({
   name: 'state',
   schema,
@@ -38,13 +36,13 @@ const stateStore = new Store<AppState>({
 export async function setLastOpenedFilePath(filePath: string): Promise<void> {
   const current = stateStore.get('lastOpenedFilePath') || [];
 
-   const updated = [filePath, ...current.filter(f => f !== filePath)];
+  const updated = [filePath, ...current.filter((f) => f !== filePath)];
 
-   const limited = updated.slice(0, 10);
+  const limited = updated.slice(0, 10);
 
-   //save new list
+  //save new list
 
-   stateStore.set('lastOpenedFilePath',limited);
+  stateStore.set('lastOpenedFilePath', limited);
 
   try {
     app.addRecentDocument(filePath);
@@ -59,13 +57,9 @@ export async function clearLastOpenedFilePath(): Promise<void> {
   } catch {}
 }
 
-export async function getLastOpenedFilesPath(): Promise<string[] | null> {
-  return stateStore.get('lastOpenedFilePath') ?? null;
-}
-
 export async function getLastOpenedFile(): Promise<OpenedFile | null> {
-  const paths = await getLastOpenedFilesPath();
-  const path = paths?.[0]
+  const paths = stateStore.get('lastOpenedFilePath') ?? null;
+  const path = paths?.[0];
   if (!path) return null;
 
   try {
@@ -84,11 +78,11 @@ export async function getLastOpenedFile(): Promise<OpenedFile | null> {
 }
 
 export async function getLastOpenedFiles(): Promise<OpenedFile[] | null> {
-  const paths = await getLastOpenedFilesPath();
+  const paths = stateStore.get('lastOpenedFilePath') ?? null;
 
   if (!paths) return null;
 
-    const openedFiles: OpenedFile[] = [];
+  const openedFiles: OpenedFile[] = [];
 
   for (const path of paths) {
     try {
@@ -96,7 +90,7 @@ export async function getLastOpenedFiles(): Promise<OpenedFile[] | null> {
       const data: unknown = JSON.parse(content);
 
       if (!isAllowedFileStructure(data)) {
-        const filteredPaths = paths.filter(p => p !== path);
+        const filteredPaths = paths.filter((p) => p !== path);
         await stateStore.set('lastOpenedFilePath', filteredPaths);
         continue;
       }
@@ -104,7 +98,7 @@ export async function getLastOpenedFiles(): Promise<OpenedFile[] | null> {
       openedFiles.push({ path, data: data as AllowedFileStructure });
     } catch {
       // Si JSON corrupto o archivo no accesible, eliminar del store
-      const filteredPaths = paths.filter(p => p !== path);
+      const filteredPaths = paths.filter((p) => p !== path);
       await stateStore.set('lastOpenedFilePath', filteredPaths);
       continue;
     }
@@ -122,7 +116,7 @@ function onStateChange<K extends keyof AppState>(
 }
 
 export function onLastOpenedFilePathChange(
-  cb: (newPaths: string[] | undefined) => void
+  cb: (newPaths: string[] | undefined) => void,
 ): () => void {
   return onStateChange('lastOpenedFilePath', cb);
 }

@@ -19,17 +19,9 @@ contextBridgeExposeInMainWorld('uniplot', {
 });
 
 contextBridgeExposeInMainWorld('files', {
-  getLastOpenedFilesPath: () => ipcRendererInvoke('getLastOpenedFilesPath'),
   getLastOpenedFile: () => ipcRendererInvoke('getLastOpenedFile'),
   getLastOpenedFiles: () => ipcRendererInvoke('getLastOpenedFiles'),
   readFile: (path: string) => ipcRendererInvoke('readFile', path),
-  onFileOpenFailed: (
-    listener: (payload: {
-      path: string;
-      reason: 'not_found' | 'unreadable' | 'invalid_json' | 'invalid_format' | 'unknown';
-      message?: string;
-    }) => void,
-  ) => ipcRendererOn('fileOpenFailed', listener),
   onLastOpenedFileParsedChanged: (
     listener: (file: { path: string; data: AllowedFileStructure }) => void,
   ) => ipcRendererOn('lastOpenedFileParsedChanged', listener),

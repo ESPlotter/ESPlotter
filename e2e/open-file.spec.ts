@@ -2,20 +2,37 @@ import { test, expect, type ElectronApplication, type Page } from '@playwright/t
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
-import type { KeyboardInputEvent } from 'electron';
+import crypto from 'node:crypto';
 
 import { waitForReactContent } from './support/waitForReactContent';
 import { waitForPreloadScript } from './support/waitForPreloadScript';
 import { getElectronAppForE2eTest } from './support/getElectronAppForE2eTest';
-import { triggerFileOpenMenu } from './support/clickMenuItem';
+import { clickMenuItem } from './support/clickMenuItem';
+import { triggerFileOpenShortcut } from './support/triggerFileOpenShortcut';
+import { waitForFileParsed } from './support/waitForFileParsed';
+import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 
 let electronApp: ElectronApplication;
 let mainPage: Page;
 
+async function triggerFileOpenMenu(app: ElectronApplication): Promise<void> {
+  await clickMenuItem(app, ['File', 'Open File']);
+}
+
+async function expectChartVisible(page: Page): Promise<void> {
+  await expect(page.locator('canvas').first()).toBeVisible();
+}
+
+async function expectNoCharts(page: Page): Promise<void> {
+  await expect(page.locator('canvas')).toHaveCount(0);
+}
+
 test.describe('Open file flow', () => {
   test.beforeEach(async () => {
-    // Isolate app state (electron-store) per test run
-    const tmpStateDir = path.join(os.tmpdir(), `uniplot-e2e-state-${Date.now()}-${Math.random()}`);
+    const tmpStateDir = path.join(
+      os.tmpdir(),
+      `uniplot-e2e-state-${Date.now()}-${crypto.randomUUID()}`,
+    );
     await fs.mkdir(tmpStateDir, { recursive: true });
     process.env.UNIPLOT_STATE_CWD = tmpStateDir;
 
@@ -32,135 +49,36 @@ test.describe('Open file flow', () => {
   });
 
   test('opens a valid file (test3.json) and renders the chart', async () => {
-    const validPath = path.resolve(process.cwd(), 'fixtures', 'test3.json');
+    await setNextOpenFixturePath(electronApp, 'test3.json');
 
-    // Configure test-only env var in the main process for this run
-    await electronApp.evaluate((_, fpath) => {
-      process.env.UNIPLOT_E2E_OPEN_PATH = fpath as string;
-    }, validPath);
-
-    // Trigger File > Open (Cmd/Ctrl+O) and wait for renderer event
-    const parsedPromise = mainPage.evaluate(
-      () =>
-        new Promise<void>((resolve) => {
-          const off = window.files.onLastOpenedFileParsedChanged(() => {
-            off();
-            resolve();
-          });
-        }),
-    );
-
+    const parsedPromise = waitForFileParsed(mainPage);
     await triggerFileOpenMenu(electronApp);
     await parsedPromise;
 
-    // Chart should render a canvas via ECharts CanvasRenderer
-    await expect(mainPage.locator('canvas').first()).toBeVisible();
-
-    // Last opened file path should be stored
-    const lastPaths = await mainPage.evaluate(() => window.files.getLastOpenedFilesPath());
-    expect(Array.isArray(lastPaths) ? lastPaths[0] : lastPaths).toBe(validPath);
+    await expectChartVisible(mainPage);
   });
 
   test('opens a valid file using keyboard shortcut (Ctrl/Cmd+O)', async () => {
-    const validPath = path.resolve(process.cwd(), 'fixtures', 'test3.json');
+    await setNextOpenFixturePath(electronApp, 'test3.json');
 
-    await electronApp.evaluate((_, fpath) => {
-      process.env.UNIPLOT_E2E_OPEN_PATH = fpath as string;
-    }, validPath);
+    await triggerFileOpenShortcut(electronApp, mainPage);
 
-    await mainPage.bringToFront();
-    const modifiers = (process.platform === 'darwin' ? ['meta'] : ['control']) as Array<
-      'control' | 'meta'
-    >;
-    await electronApp.evaluate(
-      ({ BrowserWindow }, { modifiers: accelModifiers }) => {
-        const win = BrowserWindow.getFocusedWindow();
-        if (!win) {
-          throw new Error('No focused window to receive shortcut');
-        }
-
-        const events: KeyboardInputEvent[] = [
-          { type: 'keyDown', keyCode: 'O', modifiers: accelModifiers },
-          { type: 'char', keyCode: 'O', modifiers: accelModifiers },
-          { type: 'keyUp', keyCode: 'O', modifiers: accelModifiers },
-        ];
-        for (const event of events) {
-          win.webContents.sendInputEvent(event);
-        }
-      },
-      { modifiers },
-    );
-
-    const openedPathHandle = await mainPage.waitForFunction(
-      () =>
-        window.files
-          .getLastOpenedFilesPath()
-          .then((paths) => (Array.isArray(paths) && paths.length > 0 ? paths[0] : null)),
-      { timeout: 20_000 },
-    );
-
-    const openedPath = (await openedPathHandle.jsonValue()) as string | null;
-    expect(openedPath).toBe(validPath);
-    await expect(mainPage.locator('canvas').first()).toBeVisible();
+    await expectChartVisible(mainPage);
   });
 
-  test('emits fileOpenFailed for invalid format (test1.json)', async () => {
-    const invalidPath = path.resolve(process.cwd(), 'fixtures', 'test1.json');
-
-    await electronApp.evaluate((_, fpath) => {
-      process.env.UNIPLOT_E2E_OPEN_PATH = fpath as string;
-    }, invalidPath);
-
-    const payloadPromise = mainPage.evaluate(
-      () =>
-        new Promise<{ path: string; reason: string; message?: string }>((resolve) => {
-          const off = window.files.onFileOpenFailed((p) => {
-            off();
-            resolve(p);
-          });
-        }),
-    );
+  test('fails to open invalid format (test1.json)', async () => {
+    await setNextOpenFixturePath(electronApp, 'test1.json');
 
     await triggerFileOpenMenu(electronApp);
-    const payload = await payloadPromise;
 
-    expect(payload.path).toBe(invalidPath);
-    expect(payload.reason).toBe('invalid_format');
-
-    // App state should be cleared after invalid file
-    const lastPaths2 = await mainPage.evaluate(() => window.files.getLastOpenedFilesPath());
-    expect(lastPaths2).toBeNull();
-
-    // No chart should be rendered
-    await expect(mainPage.locator('canvas')).toHaveCount(0);
+    await expectNoCharts(mainPage);
   });
 
-  test('emits fileOpenFailed for not found path', async () => {
-    const missingPath = path.resolve(process.cwd(), 'fixtures', 'does-not-exist.json');
-
-    await electronApp.evaluate((_, fpath) => {
-      process.env.UNIPLOT_E2E_OPEN_PATH = fpath as string;
-    }, missingPath);
-
-    const payloadPromise = mainPage.evaluate(
-      () =>
-        new Promise<{ path: string; reason: string; message?: string }>((resolve) => {
-          const off = window.files.onFileOpenFailed((p) => {
-            off();
-            resolve(p);
-          });
-        }),
-    );
+  test('fails to open not found path', async () => {
+    await setNextOpenFixturePath(electronApp, 'does-not-exist.json');
 
     await triggerFileOpenMenu(electronApp);
-    const payload = await payloadPromise;
 
-    expect(payload.path).toBe(missingPath);
-    expect(payload.reason).toBe('not_found');
-
-    const lastPaths3 = await mainPage.evaluate(() => window.files.getLastOpenedFilesPath());
-    expect(lastPaths3).toBeNull();
-
-    await expect(mainPage.locator('canvas')).toHaveCount(0);
+    await expectNoCharts(mainPage);
   });
 });

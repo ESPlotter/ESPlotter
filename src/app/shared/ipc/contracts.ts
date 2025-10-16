@@ -16,17 +16,9 @@ export interface RendererExposureMap {
     saveNewFile: (fileData: { name: string; content: string }) => Promise<void>;
   };
   files: {
-    getLastOpenedFilesPath: () => Promise<string[] | null>;
     getLastOpenedFile: () => Promise<OpenedFile | null>;
-    getLastOpenedFiles: () => Promise<OpenedFile[] | null>
+    getLastOpenedFiles: () => Promise<OpenedFile[] | null>;
     readFile: (path: string) => Promise<AllowedFileStructure>;
-    onFileOpenFailed: (
-      listener: (payload: {
-        path: string;
-        reason: 'not_found' | 'unreadable' | 'invalid_json' | 'invalid_format' | 'unknown';
-        message?: string;
-      }) => void,
-    ) => () => void;
     onLastOpenedFileParsedChanged: (listener: (file: OpenedFile) => void) => () => void;
   };
 }
@@ -36,20 +28,14 @@ export interface IpcChannelMap {
   ping: () => string;
   getChartData: () => Promise<ChartSerie[]>;
   saveNewFile: (fileData: { name: string; content: string }) => Promise<void>;
-  getLastOpenedFilesPath: () => Promise<string[] | null>;
   getLastOpenedFile: () => Promise<OpenedFile | null>;
-  getLastOpenedFiles: () => Promise<OpenedFile[] | null>
+  getLastOpenedFiles: () => Promise<OpenedFile[] | null>;
   readFile: (path: string) => Promise<AllowedFileStructure>;
 }
 
 // Typed push-event channels (main → renderer)
 export interface IpcEventMap {
   lastOpenedFileParsedChanged: (payload: OpenedFile) => void;
-  fileOpenFailed: (payload: {
-    path: string;
-    reason: 'not_found' | 'unreadable' | 'invalid_json' | 'invalid_format' | 'unknown';
-    message?: string;
-  }) => void;
 }
 
 export type IpcEventKey = keyof IpcEventMap;

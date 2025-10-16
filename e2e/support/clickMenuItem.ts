@@ -37,7 +37,3 @@ export async function clickMenuItem(app: ElectronApplication, labels: string[]):
     item.click(undefined, targetWindow, undefined);
   }, labels);
 }
-
-export async function triggerFileOpenMenu(app: ElectronApplication): Promise<void> {
-  await clickMenuItem(app, ['File', 'Open File']);
-}
