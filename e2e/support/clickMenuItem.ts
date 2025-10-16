@@ -7,33 +7,35 @@ export async function clickMenuItem(app: ElectronApplication, labels: string[]):
     if (!menu) {
       throw new Error('Application menu is not registered');
     }
-    let currentMenu: ElectronMenu | undefined = menu;
-    let item: ElectronMenuItem | undefined;
 
-    for (let index = 0; index < labelPath.length; index += 1) {
-      const label = labelPath[index];
-      if (!currentMenu) {
-        break;
-      }
-      item = currentMenu.items.find((entry) => entry.label === label);
-      if (!item) {
-        break;
-      }
-      const isLast = index === labelPath.length - 1;
-      if (isLast) {
-        break;
-      }
-      currentMenu = item.submenu ?? undefined;
-    }
-
+    const item = findMenuItem(menu, labelPath);
     if (!item) {
-      throw new Error(`Menu item path \"${labelPath.join(' > ')}\" was not found`);
+      throw new Error(`Menu item path "${labelPath.join(' > ')}" was not found`);
     }
 
     if (typeof item.click !== 'function') {
       throw new Error(`Menu item "${labelPath.at(-1) ?? ''}" is not clickable`);
     }
+
     const targetWindow = BrowserWindow.getFocusedWindow() ?? null;
     item.click(undefined, targetWindow, undefined);
   }, labels);
+}
+
+function findMenuItem(menu: ElectronMenu, path: string[]): ElectronMenuItem | null {
+  let current = menu;
+  for (let i = 0; i < path.length; i++) {
+    const item = current.items.find((it) => it.label === path[i]);
+    if (!item) {
+      return null;
+    }
+    if (i === path.length - 1) {
+      return item;
+    }
+    if (!item.submenu) {
+      return null;
+    }
+    current = item.submenu;
+  }
+  return null;
 }
