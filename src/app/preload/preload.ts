@@ -3,7 +3,7 @@
 import { contextBridgeExposeInMainWorld } from '@preload/ipc/contextBridgeExposeInMainWorld';
 import { ipcRendererInvoke } from '@preload/ipc/ipcRendererInvoke';
 import { ipcRendererOn } from '@preload/ipc/ipcRendererOn';
-import { ChannelFilePrimitive } from '@shared/Domain/Primitives/ChannelFilePrimitive';
+import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
 
 contextBridgeExposeInMainWorld('versions', {
   node: () => process.versions.node,

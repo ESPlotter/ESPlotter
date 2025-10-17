@@ -3,7 +3,7 @@ import {
   IpcChannelKey,
   IpcInvokeArgs,
   IpcInvokeResult,
-} from '@shared/Domain/Repositories/IPCContracts';
+} from '@shared/domain/repositories/IPCContracts';
 
 export function ipcRendererInvoke<TChannel extends IpcChannelKey>(
   channel: TChannel,

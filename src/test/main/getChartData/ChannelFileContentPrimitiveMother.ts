@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
-import { ChannelFileContentPrimitive } from '@shared/Domain/Primitives/ChannelFileContentPrimitive';
-import { ChannelFileContentSeriePrimitive } from '@shared/Domain/Primitives/ChannelFileContentSeriePrimitive';
+import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFileContentPrimitive';
+import { ChannelFileContentSeriePrimitive } from '@shared/domain/primitives/ChannelFileContentSeriePrimitive';
 import { PartialDeep } from 'type-fest';
 
 const DEFAULT_NUMBER_OF_POINTS = 5;

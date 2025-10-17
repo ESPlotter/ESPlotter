@@ -1,4 +1,3 @@
-import { Button } from '@shadcn/components/ui/button';
 import { useEffect, useState } from 'react';
 import { Chart } from '@renderer/components/Chart/Chart';
 import Layout from '@renderer/components/Layout/layout';
