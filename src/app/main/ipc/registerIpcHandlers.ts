@@ -1,23 +1,31 @@
 import { ipcMainHandle } from '@main/ipc/ipcMainHandle';
-import { readAllowedFile } from '@main/files/fileService';
-import { saveToAppData } from '@main/files/saveToAppData';
 
 export function registerIpcHandlers() {
   ipcMainHandle('ping', () => 'pong');
-  ipcMainHandle('saveNewFile', async (fileData: { name: string; content: string }) => {
-    await saveToAppData(fileData);
-  });
   ipcMainHandle('getLastOpenedFile', async () => {
-    const stateRepository = new (
-      await import('@main/state/ElectronStoreStateRepository')
-    ).ElectronStoreStateRepository();
-    return stateRepository.getLastOpenedFile();
+    const getLastOpenedChannelFile = new (
+      await import('@main/ChannelFile/Application/UseCases/GetLastOpenedChannelFile')
+    ).GetLastOpenedChannelFile(
+      new (
+        await import('@main/ChannelFile/Infrastructure/Repositories/ElectronStoreStateRepository')
+      ).ElectronStoreStateRepository(),
+      new (
+        await import('@main/ChannelFile/Infrastructure/Services/NodeFileService')
+      ).NodeFileService(),
+    );
+    return getLastOpenedChannelFile.run();
   });
-  ipcMainHandle('getLastOpenedFiles', async () => {
-    const stateRepository = new (
-      await import('@main/state/ElectronStoreStateRepository')
-    ).ElectronStoreStateRepository();
-    return stateRepository.getLastOpenedFiles();
+  ipcMainHandle('getOpenedChannelFiles', async () => {
+    const getOpenedChannelFiles = new (
+      await import('@main/ChannelFile/Application/UseCases/GetOpenedChannelFiles')
+    ).GetOpenedChannelFiles(
+      new (
+        await import('@main/ChannelFile/Infrastructure/Repositories/ElectronStoreStateRepository')
+      ).ElectronStoreStateRepository(),
+      new (
+        await import('@main/ChannelFile/Infrastructure/Services/NodeFileService')
+      ).NodeFileService(),
+    );
+    return getOpenedChannelFiles.run();
   });
-  ipcMainHandle('readFile', readAllowedFile);
 }

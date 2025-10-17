@@ -1,5 +1,9 @@
 import { ipcRenderer } from 'electron';
-import type { IpcChannelKey, IpcInvokeArgs, IpcInvokeResult } from '@shared/ipc/IPCContracts';
+import {
+  IpcChannelKey,
+  IpcInvokeArgs,
+  IpcInvokeResult,
+} from '@shared/Domain/Repositories/IPCContracts';
 
 export function ipcRendererInvoke<TChannel extends IpcChannelKey>(
   channel: TChannel,

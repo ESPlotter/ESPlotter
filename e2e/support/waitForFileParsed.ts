@@ -4,7 +4,7 @@ export function waitForFileParsed(page: Page): Promise<void> {
   return page.evaluate(
     () =>
       new Promise<void>((resolve) => {
-        const off = window.files.onLastOpenedFileParsedChanged(() => {
+        const off = window.files.onLastOpenedFileChanged(() => {
           off();
           resolve();
         });

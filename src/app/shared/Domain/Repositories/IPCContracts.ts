@@ -1,8 +1,5 @@
-import type { AllowedFileStructure } from '@shared/AllowedFileStructure';
+import { ChannelFilePrimitive } from '../Primitives/ChannelFilePrimitive';
 
-export type OpenedFile = { path: string; data: AllowedFileStructure };
-
-// Typed objects exposed in the renderer process (via contextBridge)
 export interface RendererExposureMap {
   versions: {
     node: () => string;
@@ -10,29 +7,21 @@ export interface RendererExposureMap {
     electron: () => string;
     ping: () => Promise<string>;
   };
-  uniplot: {
-    saveNewFile: (fileData: { name: string; content: string }) => Promise<void>;
-  };
   files: {
-    getLastOpenedFile: () => Promise<OpenedFile | null>;
-    getLastOpenedFiles: () => Promise<OpenedFile[] | null>;
-    readFile: (path: string) => Promise<AllowedFileStructure>;
-    onLastOpenedFileParsedChanged: (listener: (file: OpenedFile) => void) => () => void;
+    getLastOpenedFile: () => Promise<ChannelFilePrimitive | null>;
+    getOpenedChannelFiles: () => Promise<ChannelFilePrimitive[] | null>;
+    onLastOpenedFileChanged: (listener: (file: ChannelFilePrimitive) => void) => () => void;
   };
 }
 
-// Typed IPC channels (renderer → main)
 export interface IpcChannelMap {
   ping: () => string;
-  saveNewFile: (fileData: { name: string; content: string }) => Promise<void>;
-  getLastOpenedFile: () => Promise<OpenedFile | null>;
-  getLastOpenedFiles: () => Promise<OpenedFile[] | null>;
-  readFile: (path: string) => Promise<AllowedFileStructure>;
+  getLastOpenedFile: () => Promise<ChannelFilePrimitive | null>;
+  getOpenedChannelFiles: () => Promise<ChannelFilePrimitive[] | null>;
 }
 
-// Typed push-event channels (main → renderer)
 export interface IpcEventMap {
-  lastOpenedFileParsedChanged: (payload: OpenedFile) => void;
+  lastOpenedFileChanged: (payload: ChannelFilePrimitive) => void;
 }
 
 export type IpcEventKey = keyof IpcEventMap;

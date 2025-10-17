@@ -3,7 +3,7 @@
 import { contextBridgeExposeInMainWorld } from '@preload/ipc/contextBridgeExposeInMainWorld';
 import { ipcRendererInvoke } from '@preload/ipc/ipcRendererInvoke';
 import { ipcRendererOn } from '@preload/ipc/ipcRendererOn';
-import type { AllowedFileStructure } from '@shared/AllowedFileStructure';
+import { ChannelFilePrimitive } from '@shared/Domain/Primitives/ChannelFilePrimitive';
 
 contextBridgeExposeInMainWorld('versions', {
   node: () => process.versions.node,
@@ -12,16 +12,9 @@ contextBridgeExposeInMainWorld('versions', {
   ping: () => ipcRendererInvoke('ping'),
 });
 
-contextBridgeExposeInMainWorld('uniplot', {
-  saveNewFile: (fileData: { name: string; content: string }) =>
-    ipcRendererInvoke('saveNewFile', fileData),
-});
-
 contextBridgeExposeInMainWorld('files', {
   getLastOpenedFile: () => ipcRendererInvoke('getLastOpenedFile'),
-  getLastOpenedFiles: () => ipcRendererInvoke('getLastOpenedFiles'),
-  readFile: (path: string) => ipcRendererInvoke('readFile', path),
-  onLastOpenedFileParsedChanged: (
-    listener: (file: { path: string; data: AllowedFileStructure }) => void,
-  ) => ipcRendererOn('lastOpenedFileParsedChanged', listener),
+  getOpenedChannelFiles: () => ipcRendererInvoke('getOpenedChannelFiles'),
+  onLastOpenedFileChanged: (listener: (file: ChannelFilePrimitive) => void) =>
+    ipcRendererOn('lastOpenedFileChanged', listener),
 });

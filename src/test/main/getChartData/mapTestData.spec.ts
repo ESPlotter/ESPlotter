@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import { mapAllowedFileStructure } from '@shared/chart/mapAllowedFileStructure';
-import { AllowedFileStructureMother } from './AllowedFileStructureMother';
+import { ChannelFileContentPrimitiveMother } from './ChannelFileContentPrimitiveMother';
+import { mapAllowedFileStructure } from '@renderer/components/Chart/mapAllowedFileStructure';
 
 describe('mapTestData', () => {
   test('should map test data with one serie', () => {
-    const testData = AllowedFileStructureMother.with({
+    const testData = ChannelFileContentPrimitiveMother.with({
       x: {
         id: 'time',
         label: 'Time',
@@ -38,7 +38,7 @@ describe('mapTestData', () => {
   });
 
   test('should map test data with one serie', () => {
-    const testData = AllowedFileStructureMother.with({
+    const testData = ChannelFileContentPrimitiveMother.with({
       x: {
         id: 'time',
         label: 'Time',

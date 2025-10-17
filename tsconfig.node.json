@@ -9,7 +9,8 @@
   "include": [
     "src/app/main/**/*.ts",
     "src/app/preload/**/*.ts",
-    "src/test/main/**/*.ts",
+    "src/app/shared/**/*.ts",
+    "src/test/**/*.ts",
     "types/**/*.d.ts"
   ]
 }

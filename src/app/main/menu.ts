@@ -1,6 +1,5 @@
 import { BrowserWindow, Menu } from 'electron';
-import { openByPathController } from '@main/controllers/fileOpenController';
-import { showOpenFileDialog } from '@main/files/fileService';
+import { SaveChannelFilePath } from './ChannelFile/Application/UseCases/SaveChannelFile';
 
 export function setMainMenu() {
   const template: Array<Electron.MenuItemConstructorOptions | Electron.MenuItem> = [
@@ -12,10 +11,14 @@ export function setMainMenu() {
           accelerator: 'CmdOrCtrl+O',
           click: async () => {
             const win = BrowserWindow.getFocusedWindow();
-            if (!win) return;
+            if (!win) {
+              return;
+            }
             const selected = await showOpenFileDialog(win);
-            if (!selected) return;
-            await openByPathController(selected);
+            if (!selected) {
+              return;
+            }
+            await addNewOpenedFilePath(selected);
           },
         },
       ],
@@ -24,4 +27,34 @@ export function setMainMenu() {
 
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
+}
+
+async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
+  if (process.env.CI && process.env.UNIPLOT_E2E_OPEN_PATH) {
+    return process.env.UNIPLOT_E2E_OPEN_PATH;
+  }
+
+  const { dialog } = await import('electron');
+  const { canceled, filePaths } = await dialog.showOpenDialog(win, { properties: ['openFile'] });
+  if (canceled) return null;
+  return filePaths[0] ?? null;
+}
+
+async function addNewOpenedFilePath(path: string): Promise<void> {
+  const saveChannelFilePath = new SaveChannelFilePath(
+    new (
+      await import('@main/ChannelFile/Infrastructure/Repositories/ElectronStoreStateRepository')
+    ).ElectronStoreStateRepository(),
+    new (
+      await import('@main/ChannelFile/Infrastructure/Services/NodeFileService')
+    ).NodeFileService(),
+    new (
+      await import('@main/ChannelFile/Domain/Services/ChannelFileStructureChecker')
+    ).ChannelFileStructureChecker(),
+  );
+  try {
+    await saveChannelFilePath.run(path);
+  } catch {
+    // file has invalid structure
+  }
 }

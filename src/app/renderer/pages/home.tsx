@@ -1,27 +1,28 @@
 import { Button } from '@shadcn/components/ui/button';
 import { useEffect, useState } from 'react';
 import { Chart } from '@renderer/components/Chart/Chart';
-import type { ChartSerie } from '@shared/chart/ChartSerie';
-import { mapAllowedFileStructure } from '@shared/chart/mapAllowedFileStructure';
 import Layout from '@renderer/components/Layout/layout';
+import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
+import { mapAllowedFileStructure } from '@renderer/components/Chart/mapAllowedFileStructure';
 
 export function HomePage() {
   const [series, setSeries] = useState<ChartSerie[]>([]);
-
+  console.log({ series });
   async function ping() {
     const response = await window.versions.ping();
     console.log(response);
   }
 
   useEffect(() => {
-    const offLast = window.files.onLastOpenedFileParsedChanged((file) => {
-      setSeries(mapAllowedFileStructure(file.data));
+    const offLast = window.files.onLastOpenedFileChanged((file) => {
+      setSeries(mapAllowedFileStructure(file.content));
     });
 
     (async () => {
       const file = await window.files.getLastOpenedFile();
+      console.log({ file });
       if (file) {
-        setSeries(mapAllowedFileStructure(file.data));
+        setSeries(mapAllowedFileStructure(file.content));
       }
     })();
 

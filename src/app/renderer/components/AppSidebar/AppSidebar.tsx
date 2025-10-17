@@ -17,7 +17,7 @@ import {
 } from '@shadcn/components/ui/accordion';
 
 import { useEffect, useState } from 'react';
-import { AllowedFileStructure } from '@shared/AllowedFileStructure';
+import { ChannelFileContentPrimitive } from '@shared/Domain/Primitives/ChannelFileContentPrimitive';
 
 interface MenuItem {
   label: string;
@@ -29,19 +29,19 @@ export function AppSidebar() {
   const [items, setItems] = useState<MenuItem[]>([]);
 
   useEffect(() => {
-    const offLast = window.files.onLastOpenedFileParsedChanged((file) => {
+    const offLast = window.files.onLastOpenedFileChanged((file) => {
       const lastPart = getLastPart(file.path);
       setItems((prevItems) => [
         ...prevItems,
-        ...mapAllowedFileStructureToMenuItems(file.data, lastPart),
+        ...mapAllowedFileStructureToMenuItems(file.content, lastPart),
       ]);
     });
     (async () => {
-      const files = await window.files.getLastOpenedFiles();
+      const files = await window.files.getOpenedChannelFiles();
       if (files && files.length > 0) {
         const allItems = files.flatMap((file) => {
           const lastPart = getLastPart(file.path);
-          return mapAllowedFileStructureToMenuItems(file.data, lastPart);
+          return mapAllowedFileStructureToMenuItems(file.content, lastPart);
         });
         setItems(allItems);
       }
@@ -87,7 +87,7 @@ export function AppSidebar() {
 }
 
 function mapAllowedFileStructureToMenuItems(
-  data: AllowedFileStructure,
+  data: ChannelFileContentPrimitive,
   lastPart?: string,
 ): MenuItem[] {
   return [

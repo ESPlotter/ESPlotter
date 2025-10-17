@@ -1,7 +1,7 @@
-import type { ChartSerie } from '@shared/chart/ChartSerie';
-import type { AllowedFileStructure } from '@shared/AllowedFileStructure';
+import { ChannelFileContentPrimitive } from '@shared/Domain/Primitives/ChannelFileContentPrimitive';
+import { ChartSerie } from './ChartSerie';
 
-export function mapAllowedFileStructure(data: AllowedFileStructure): ChartSerie[] {
+export function mapAllowedFileStructure(data: ChannelFileContentPrimitive): ChartSerie[] {
   const xValues = data?.x?.values ?? [];
   const series = Array.isArray(data?.series) ? data.series : [];
 

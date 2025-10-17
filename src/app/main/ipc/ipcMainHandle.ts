@@ -1,5 +1,9 @@
 import { ipcMain } from 'electron';
-import type { IpcChannelKey, IpcInvokeArgs, IpcInvokeHandler } from '@shared/ipc/IPCContracts';
+import {
+  IpcChannelKey,
+  IpcInvokeArgs,
+  IpcInvokeHandler,
+} from '@shared/Domain/Repositories/IPCContracts';
 
 export function ipcMainHandle<TChannel extends IpcChannelKey>(
   channel: TChannel,

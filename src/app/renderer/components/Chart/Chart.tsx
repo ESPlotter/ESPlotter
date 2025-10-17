@@ -10,7 +10,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsOption } from 'echarts';
-import type { ChartSerie } from '@shared/chart/ChartSerie';
+import { ChartSerie } from './ChartSerie';
 
 echarts.use([
   TitleComponent,

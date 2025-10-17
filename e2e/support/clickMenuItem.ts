@@ -1,5 +1,5 @@
-import type { ElectronApplication } from '@playwright/test';
-import type { Menu as ElectronMenu, MenuItem as ElectronMenuItem } from 'electron';
+import { ElectronApplication } from '@playwright/test';
+import { Menu as ElectronMenu, MenuItem as ElectronMenuItem } from 'electron';
 
 export async function clickMenuItem(app: ElectronApplication, labels: string[]): Promise<void> {
   await app.evaluate(({ Menu, BrowserWindow }, labelPath) => {

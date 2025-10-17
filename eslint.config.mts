@@ -14,7 +14,7 @@ export default defineConfig([
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
   {
-    files: ['**/*.{ts,tsx,cts,mts}'],
+    files: ['**/*.{ts,tsx,cts,mts}', '**/.d.ts'],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {

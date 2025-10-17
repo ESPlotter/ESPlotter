@@ -1,17 +1,18 @@
 import { faker } from '@faker-js/faker';
-import { AllowedFileStructure } from '@shared/AllowedFileStructure';
+import { ChannelFileContentPrimitive } from '@shared/Domain/Primitives/ChannelFileContentPrimitive';
+import { ChannelFileContentSeriePrimitive } from '@shared/Domain/Primitives/ChannelFileContentSeriePrimitive';
 import { PartialDeep } from 'type-fest';
 
 const DEFAULT_NUMBER_OF_POINTS = 5;
 
-export class AllowedFileStructureMother {
-  static with(data: PartialDeep<AllowedFileStructure> = {}): AllowedFileStructure {
+export class ChannelFileContentPrimitiveMother {
+  static with(data: PartialDeep<ChannelFileContentPrimitive> = {}): ChannelFileContentPrimitive {
     const defaultSeries = new Array(faker.number.int({ min: 1, max: 3 })).fill(
-      TestDataSerieMother.random(),
+      ChannelFileContentSeriePrimitiveMother.random(),
     );
 
     const series = Array.isArray(data.series)
-      ? (data.series as AllowedFileStructure['series'])
+      ? (data.series as ChannelFileContentPrimitive['series'])
       : defaultSeries;
 
     return {
@@ -35,10 +36,10 @@ export class AllowedFileStructureMother {
   }
 }
 
-class TestDataSerieMother {
+class ChannelFileContentSeriePrimitiveMother {
   static with(
-    data: PartialDeep<AllowedFileStructure['series'][number]>,
-  ): AllowedFileStructure['series'][number] {
+    data: PartialDeep<ChannelFileContentSeriePrimitive>,
+  ): ChannelFileContentSeriePrimitive {
     return {
       id: data.id ?? faker.string.alphanumeric({ casing: 'upper' }),
       label: data.label ?? faker.science.unit().name,
@@ -51,7 +52,7 @@ class TestDataSerieMother {
     };
   }
 
-  static random(): AllowedFileStructure['series'][number] {
-    return TestDataSerieMother.with({});
+  static random(): ChannelFileContentSeriePrimitive {
+    return ChannelFileContentSeriePrimitiveMother.with({});
   }
 }
