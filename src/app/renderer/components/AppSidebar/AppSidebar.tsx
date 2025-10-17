@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
+import { useOpenedChannelFiles } from '@renderer/hooks/useOpenedChannelFiles';
 import {
   Accordion,
   AccordionItem,
@@ -16,38 +17,25 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@shadcn/components/ui/sidebar';
-import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFileContentPrimitive';
+import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
 
-interface MenuItem {
+interface ChannelFile {
+  fileName: string;
+  children: Channels[];
+}
+
+interface Channels {
   label: string;
-  unit?: string;
-  children?: MenuItem[];
+  id: string;
+  unit: string;
 }
 
 export function AppSidebar() {
-  const [items, setItems] = useState<MenuItem[]>([]);
+  const openedChannelFiles = useOpenedChannelFiles();
 
-  useEffect(() => {
-    const offLast = window.files.onLastOpenedChannelFileChanged((file) => {
-      const lastPart = getLastPart(file.path);
-      setItems((prevItems) => [
-        ...prevItems,
-        ...mapAllowedFileStructureToMenuItems(file.content, lastPart),
-      ]);
-    });
-    (async () => {
-      const files = await window.files.getOpenedChannelFiles();
-      if (files && files.length > 0) {
-        const allItems = files.flatMap((file) => {
-          const lastPart = getLastPart(file.path);
-          return mapAllowedFileStructureToMenuItems(file.content, lastPart);
-        });
-        setItems(allItems);
-      }
-    })();
-
-    return () => offLast();
-  }, []);
+  const allItems = useMemo(() => {
+    return openedChannelFiles.map(mapToMenuItems);
+  }, [openedChannelFiles]);
 
   return (
     <Sidebar>
@@ -56,11 +44,11 @@ export function AppSidebar() {
           <SidebarGroupLabel>CHANNELS</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <Accordion type="single" collapsible key={item.label}>
-                  <AccordionItem value={item.label}>
+              {allItems.map((item) => (
+                <Accordion type="single" collapsible key={item.fileName}>
+                  <AccordionItem value={item.fileName}>
                     <AccordionTrigger className="text-sm font-medium">
-                      {item.label}
+                      {item.fileName}
                     </AccordionTrigger>
                     <AccordionContent>
                       {item.children?.map((child) => (
@@ -85,27 +73,22 @@ export function AppSidebar() {
   );
 }
 
-function mapAllowedFileStructureToMenuItems(
-  data: ChannelFileContentPrimitive,
-  lastPart?: string,
-): MenuItem[] {
-  return [
-    {
-      label: lastPart || 'test',
-      children: data.series.map((s) => ({
-        label: s.label,
-        unit: s.unit,
-      })),
-    },
-  ];
-}
+function mapToMenuItems(data: ChannelFilePrimitive): ChannelFile {
+  return {
+    fileName: getFileName(data.path),
+    children: data.content.series.map((s) => ({
+      id: s.id,
+      label: s.label,
+      unit: s.unit,
+    })),
+  };
 
-function getLastPart(filePath: string): string {
-  const lastPart: string =
-    filePath
-      .split(/[\\/]/)
-      .pop()
-      ?.replace(/\.[^/.]+$/, '') || 'test';
-
-  return lastPart;
+  function getFileName(filePath: string): string {
+    return (
+      filePath
+        .split(/[\\/]/)
+        .pop()
+        ?.replace(/\.[^/.]+$/, '') || 'test'
+    );
+  }
 }

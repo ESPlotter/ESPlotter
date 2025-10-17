@@ -8,7 +8,7 @@ export interface RendererExposureMap {
   };
   files: {
     getLastOpenedChannelFile: () => Promise<ChannelFilePrimitive | null>;
-    getOpenedChannelFiles: () => Promise<ChannelFilePrimitive[] | null>;
+    getOpenedChannelFiles: () => Promise<ChannelFilePrimitive[]>;
     onLastOpenedChannelFileChanged: (listener: (file: ChannelFilePrimitive) => void) => () => void;
   };
 }
@@ -16,7 +16,7 @@ export interface RendererExposureMap {
 export interface IpcChannelMap {
   ping: () => string;
   getLastOpenedChannelFile: () => Promise<ChannelFilePrimitive | null>;
-  getOpenedChannelFiles: () => Promise<ChannelFilePrimitive[] | null>;
+  getOpenedChannelFiles: () => Promise<ChannelFilePrimitive[]>;
 }
 
 export interface IpcEventMap {
