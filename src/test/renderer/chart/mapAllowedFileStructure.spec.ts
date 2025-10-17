@@ -1,8 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { mapAllowedFileStructure } from '@renderer/components/Chart/mapAllowedFileStructure';
-
-import { ChannelFileContentPrimitiveMother } from '../channel-file/domain/primitives/ChannelFileContentPrimitiveMother';
+import { ChannelFileContentPrimitiveMother } from 'src/test/shared/domain/primitives/ChannelFileContentPrimitiveMother';
 
 describe('mapTestData', () => {
   test('should map test data with one serie', () => {

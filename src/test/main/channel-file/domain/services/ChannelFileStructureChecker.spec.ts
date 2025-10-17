@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { ChannelFileStructureDoesNotHaveAllowedStructure } from '@main/channel-file/domain/exceptions/ChannelFileStructureDoesNotHaveAllowedStructure';
 import { ChannelFileStructureChecker } from '@main/channel-file/domain/services/ChannelFileStructureChecker';
 
-import { ChannelFileContentPrimitiveMother } from '../primitives/ChannelFileContentPrimitiveMother';
+import { ChannelFileContentPrimitiveMother } from '../../../../shared/domain/primitives/ChannelFileContentPrimitiveMother';
 
 let checker: ChannelFileStructureChecker;
 

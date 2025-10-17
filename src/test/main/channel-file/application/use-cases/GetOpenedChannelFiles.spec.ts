@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { GetOpenedChannelFiles } from '@main/channel-file/application/use-cases/GetOpenedChannelFiles';
 
-import { ChannelFilePrimitiveMother } from '../../domain/primitives/ChannelFilePrimitiveMother';
+import { ChannelFilePrimitiveMother } from '../../../../shared/domain/primitives/ChannelFilePrimitiveMother';
 import { StateRepositoryMock } from '../../infrastructure/repositories/StateRepositoryMock';
 import { FileServiceMock } from '../../infrastructure/services/FileServiceMock';
 

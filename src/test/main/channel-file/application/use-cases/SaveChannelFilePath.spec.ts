@@ -4,8 +4,8 @@ import { SaveChannelFilePath } from '@main/channel-file/application/use-cases/Sa
 import { ChannelFileStructureDoesNotHaveAllowedStructure } from '@main/channel-file/domain/exceptions/ChannelFileStructureDoesNotHaveAllowedStructure';
 import { ChannelFileStructureChecker } from '@main/channel-file/domain/services/ChannelFileStructureChecker';
 
-import { ChannelFileContentPrimitiveMother } from '../../domain/primitives/ChannelFileContentPrimitiveMother';
-import { ChannelFilePrimitiveMother } from '../../domain/primitives/ChannelFilePrimitiveMother';
+import { ChannelFileContentPrimitiveMother } from '../../../../shared/domain/primitives/ChannelFileContentPrimitiveMother';
+import { ChannelFilePrimitiveMother } from '../../../../shared/domain/primitives/ChannelFilePrimitiveMother';
 import { StateRepositoryMock } from '../../infrastructure/repositories/StateRepositoryMock';
 import { FileServiceMock } from '../../infrastructure/services/FileServiceMock';
 
