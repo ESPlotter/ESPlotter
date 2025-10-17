@@ -1,7 +1,8 @@
-import { webContentsBroadcast } from '@main/ipc/webContentsBroadcast';
 import { app } from 'electron';
 
-export async function registerAppStateObservers() {
+import { webContentsBroadcast } from '@main/Shared/ipc/webContentsBroadcast';
+
+export async function registerChannelFileObservers(): Promise<void> {
   const stateRepository = new (
     await import('@main/ChannelFile/Infrastructure/Repositories/ElectronStoreStateRepository')
   ).ElectronStoreStateRepository();

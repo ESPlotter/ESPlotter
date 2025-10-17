@@ -1,7 +1,6 @@
-import { ipcMainHandle } from '@main/ipc/ipcMainHandle';
+import { ipcMainHandle } from '@main/Shared/ipc/ipcMainHandle';
 
-export function registerIpcHandlers() {
-  ipcMainHandle('ping', () => 'pong');
+export function registerChannelFileIpcHandlers(): void {
   ipcMainHandle('getLastOpenedFile', async () => {
     const getLastOpenedChannelFile = new (
       await import('@main/ChannelFile/Application/UseCases/GetLastOpenedChannelFile')

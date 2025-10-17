@@ -7,11 +7,6 @@ import { mapAllowedFileStructure } from '@renderer/components/Chart/mapAllowedFi
 
 export function HomePage() {
   const [series, setSeries] = useState<ChartSerie[]>([]);
-  console.log({ series });
-  async function ping() {
-    const response = await window.versions.ping();
-    console.log(response);
-  }
 
   useEffect(() => {
     const offLast = window.files.onLastOpenedFileChanged((file) => {
@@ -20,7 +15,6 @@ export function HomePage() {
 
     (async () => {
       const file = await window.files.getLastOpenedFile();
-      console.log({ file });
       if (file) {
         setSeries(mapAllowedFileStructure(file.content));
       }
@@ -39,7 +33,6 @@ export function HomePage() {
           This app is using Chrome (v{window.versions.chrome()}), Node.js (v{window.versions.node()}
           ), and Electron (v{window.versions.electron()})
         </p>
-        <Button onClick={ping}>ping</Button>
 
         {series.length > 0 && <Chart series={series} />}
       </div>

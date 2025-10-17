@@ -1,8 +1,7 @@
-import { BrowserWindow, Menu } from 'electron';
-import { SaveChannelFilePath } from './ChannelFile/Application/UseCases/SaveChannelFile';
+import { BrowserWindow, Menu, type MenuItemConstructorOptions } from 'electron';
 
-export function setMainMenu() {
-  const template: Array<Electron.MenuItemConstructorOptions | Electron.MenuItem> = [
+export function registerMainMenu(): void {
+  const template: MenuItemConstructorOptions[] = [
     {
       label: 'File',
       submenu: [
@@ -41,7 +40,9 @@ async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
 }
 
 async function addNewOpenedFilePath(path: string): Promise<void> {
-  const saveChannelFilePath = new SaveChannelFilePath(
+  const saveChannelFilePath = new (
+    await import('@main/ChannelFile/Application/UseCases/SaveChannelFile')
+  ).SaveChannelFilePath(
     new (
       await import('@main/ChannelFile/Infrastructure/Repositories/ElectronStoreStateRepository')
     ).ElectronStoreStateRepository(),

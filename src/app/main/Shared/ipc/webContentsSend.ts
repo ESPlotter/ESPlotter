@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron';
-import { IpcEventKey, IpcEventPayload } from '@shared/Domain/Repositories/IPCContracts';
+
+import { type IpcEventKey, type IpcEventPayload } from '@shared/Domain/Repositories/IPCContracts';
 
 export function webContentsSend<TKey extends IpcEventKey>(
   win: BrowserWindow,

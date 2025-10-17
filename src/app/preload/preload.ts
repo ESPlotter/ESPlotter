@@ -9,7 +9,6 @@ contextBridgeExposeInMainWorld('versions', {
   node: () => process.versions.node,
   chrome: () => process.versions.chrome,
   electron: () => process.versions.electron,
-  ping: () => ipcRendererInvoke('ping'),
 });
 
 contextBridgeExposeInMainWorld('files', {

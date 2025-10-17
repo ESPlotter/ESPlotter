@@ -5,7 +5,6 @@ export interface RendererExposureMap {
     node: () => string;
     chrome: () => string;
     electron: () => string;
-    ping: () => Promise<string>;
   };
   files: {
     getLastOpenedFile: () => Promise<ChannelFilePrimitive | null>;

@@ -1,5 +1,6 @@
-import { IpcEventKey, IpcEventPayload } from '@shared/Domain/Repositories/IPCContracts';
 import { BrowserWindow } from 'electron';
+
+import { type IpcEventKey, type IpcEventPayload } from '@shared/Domain/Repositories/IPCContracts';
 
 export function webContentsBroadcast<TKey extends IpcEventKey>(
   channel: TKey,

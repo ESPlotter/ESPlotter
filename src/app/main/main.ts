@@ -2,9 +2,9 @@ import { app, BrowserWindow, globalShortcut } from 'electron';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { setMainMenu } from './menu';
-import { registerIpcHandlers } from '@main/ipc/registerIpcHandlers';
-import { registerAppStateObservers } from '@main/observers/registerAppStateObservers';
+import { registerMainIpcHandlers } from '@main/Shared/ipc/registerMainIpcHandlers';
+import { registerMainMenu } from '@main/Shared/menu/registerMainMenu';
+import { registerChannelFileObservers } from '@main/ChannelFile/Infrastructure/Observers/registerChannelFileObservers';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -62,9 +62,9 @@ const createWindow = () => {
 };
 
 app.whenReady().then(() => {
-  registerIpcHandlers();
-  registerAppStateObservers();
-  setMainMenu();
+  registerMainIpcHandlers();
+  registerChannelFileObservers();
+  registerMainMenu();
   createWindow();
 });
 
