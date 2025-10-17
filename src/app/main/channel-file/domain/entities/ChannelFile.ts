@@ -1,4 +1,5 @@
 import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
+
 import { ChannelFileContent } from '../vos/ChannelFileContent';
 
 export class ChannelFile {

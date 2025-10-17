@@ -1,4 +1,5 @@
 import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFileContentPrimitive';
+
 import { ChannelFileContentMetadata } from './ChannelFileContentMetadata';
 import { ChannelFileContentSerie } from './ChannelFileContentSerie';
 

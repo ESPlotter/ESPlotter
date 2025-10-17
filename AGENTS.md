@@ -6,18 +6,18 @@ Before generating or modifying code, identify the relevant topic in the table an
 
 ## Topics and Docs
 
-| Topic                  | Documentation Path                      | keywords                                   |
-| ---------------------- | --------------------------------------- | ------------------------------------------ |
-| New Features           | docs/new-features.md                    | Priority, libraries, Electron APIs         |
-| Code standards         | docs/code-standards.md                  | Best practices, code standards, formatting |
-| IPC Main ↔ Renderer   | docs/ipc-inter-process-communication.md | Message channels, contracts, sync          |
-| Components             | docs/components.md                      | Component, ui, design system               |
-| Business Logic         | docs/business-logic.md                  | Services, use cases, validations           |
-| Architecture           | docs/architecture.md                    | Modules, layers, patterns                  |
-| Project Configuration  | docs/project-setup.md                   | Scripts, packaging, Electron setup         |
-| Continuous Integration | docs/ci.md                              | Workflows, pipelines, checks               |
-| Tests                  | docs/tests.md                           | Strategy, coverage, tools                  |
-| Env Variables          | docs/env-vars.md                        | Names, scopes, secrets                     |
+| Topic                  | Documentation Path                                                                   | keywords                                   |
+| ---------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------ |
+| New Features           | [docs/new-features.md](./docs/new-features.md)                                       | Priority, libraries, Electron APIs         |
+| Code standards         | [docs/code-standards.md](./docs/code-standards.md)                                   | Best practices, code standards, formatting |
+| IPC Main ↔ Renderer   | [docs/ipc-inter-process-communication.md](./docs/ipc-inter-process-communication.md) | Message channels, contracts, sync          |
+| Components             | [docs/components.md](./docs/components.md)                                           | Component, ui, design system               |
+| Business Logic         | [docs/business-logic.md](./docs/business-logic.md)                                   | Services, use cases, validations           |
+| Architecture           | [docs/architecture.md](./docs/architecture.md)                                       | Modules, layers, patterns                  |
+| Project Configuration  | [docs/project-setup.md](./docs/project-setup.md)                                     | Scripts, packaging, Electron setup         |
+| Continuous Integration | [docs/ci.md](./docs/ci.md)                                                           | Workflows, pipelines, checks               |
+| Tests                  | [docs/tests.md](./docs/tests.md)                                                     | Strategy, coverage, tools                  |
+| Env Variables          | [docs/env-vars.md](./docs/env-vars.md)                                               | Names, scopes, secrets                     |
 
 ## Good practices
 
@@ -29,5 +29,5 @@ Before generating or modifying code, identify the relevant topic in the table an
 
 - If instructions clash, ask and suggest modifying the docs.
 - When documentation is lacking, indicate the gap and propose how to obtain it.
-- Record doubts concisely in [`docs/open-questions-llm.md`](docs/open-questions-llm.md).
+- Record doubts concisely in [`docs/open-questions-llm.md`](./docs/open-questions-llm.md).
 - Always seek confirmation before implementing sensitive changes.

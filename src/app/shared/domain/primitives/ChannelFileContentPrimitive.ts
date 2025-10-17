@@ -1,5 +1,5 @@
-import { ChannelFileContentSeriePrimitive } from './ChannelFileContentSeriePrimitive';
 import { ChannelFileContentMetadataPrimitive } from './ChannelFileContentMetadataPrimitive';
+import { ChannelFileContentSeriePrimitive } from './ChannelFileContentSeriePrimitive';
 
 export interface ChannelFileContentPrimitive {
   schemaVersion: number;

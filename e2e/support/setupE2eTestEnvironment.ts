@@ -1,12 +1,13 @@
-import { type ElectronApplication, type Page } from '@playwright/test';
-import path from 'node:path';
-import os from 'node:os';
-import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 
-import { waitForReactContent } from './waitForReactContent';
-import { waitForPreloadScript } from './waitForPreloadScript';
+import { type ElectronApplication, type Page } from '@playwright/test';
+
 import { getElectronAppForE2eTest } from './getElectronAppForE2eTest';
+import { waitForPreloadScript } from './waitForPreloadScript';
+import { waitForReactContent } from './waitForReactContent';
 
 export async function setupE2eTestEnvironment(): Promise<{
   electronApp: ElectronApplication;

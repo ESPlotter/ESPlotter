@@ -1,5 +1,6 @@
-import { ElectronApplication } from '@playwright/test';
 import path from 'node:path';
+
+import { ElectronApplication } from '@playwright/test';
 
 export async function setNextOpenFixturePath(
   app: ElectronApplication,

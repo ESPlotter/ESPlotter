@@ -1,4 +1,5 @@
 import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFileContentPrimitive';
+
 import { ChartSerie } from './ChartSerie';
 
 export function mapAllowedFileStructure(data: ChannelFileContentPrimitive): ChartSerie[] {

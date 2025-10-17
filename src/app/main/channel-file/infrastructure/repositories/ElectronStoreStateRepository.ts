@@ -1,6 +1,8 @@
 import { type Schema } from 'electron-store';
-import { StateRepository } from '../../domain/repositories/StateRepository';
+
 import { BaseElectronStore } from '@shared/infrastructure/repositories/BaseElectronStore';
+
+import { StateRepository } from '../../domain/repositories/StateRepository';
 
 type AppState = {
   openedFilePath?: string[];

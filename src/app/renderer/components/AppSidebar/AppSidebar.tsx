@@ -1,3 +1,11 @@
+import { useEffect, useState } from 'react';
+
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@shadcn/components/ui/accordion';
 import {
   Sidebar,
   SidebarContent,
@@ -8,16 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@shadcn/components/ui/sidebar';
-
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '@shadcn/components/ui/accordion';
-
-import { useEffect, useState } from 'react';
-import { ChannelFileContentPrimitive } from '@shared/Domain/Primitives/ChannelFileContentPrimitive';
+import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFileContentPrimitive';
 
 interface MenuItem {
   label: string;

@@ -1,6 +1,4 @@
-import { useMemo } from 'react';
-import ReactEChartsCore from 'echarts-for-react/lib/core';
-import * as echarts from 'echarts/core';
+import { EChartsOption } from 'echarts';
 import { LineChart } from 'echarts/charts';
 import {
   GridComponent,
@@ -8,8 +6,11 @@ import {
   TitleComponent,
   LegendComponent,
 } from 'echarts/components';
+import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { EChartsOption } from 'echarts';
+import ReactEChartsCore from 'echarts-for-react/lib/core';
+import { useMemo } from 'react';
+
 import { ChartSerie } from './ChartSerie';
 
 echarts.use([

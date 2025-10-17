@@ -1,7 +1,9 @@
 import { faker } from '@faker-js/faker';
+import { PartialDeep } from 'type-fest';
+
 import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFileContentPrimitive';
 import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
-import { PartialDeep } from 'type-fest';
+
 import { ChannelFileContentPrimitiveMother } from './ChannelFileContentPrimitiveMother';
 
 export class ChannelFilePrimitiveMother {

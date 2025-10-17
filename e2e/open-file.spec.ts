@@ -1,9 +1,10 @@
 import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
+
 import { clickMenuItem } from './support/clickMenuItem';
-import { triggerFileOpenShortcut } from './support/triggerFileOpenShortcut';
-import { waitForLastOpenedFileChanged } from './support/waitForLastOpenedFileChanged';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
+import { triggerFileOpenShortcut } from './support/triggerFileOpenShortcut';
+import { waitForLastOpenedFileChanged } from './support/waitForLastOpenedFileChanged';
 
 let electronApp: ElectronApplication;
 let mainPage: Page;

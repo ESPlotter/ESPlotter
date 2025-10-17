@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+
 import { SaveChannelFilePath } from '@main/channel-file/application/use-cases/SaveChannelFile';
+import { ChannelFileStructureDoesNotHaveAllowedStructure } from '@main/channel-file/domain/exceptions/ChannelFileStructureDoesNotHaveAllowedStructure';
+import { ChannelFileStructureChecker } from '@main/channel-file/domain/services/ChannelFileStructureChecker';
+
 import { ChannelFileContentPrimitiveMother } from '../../domain/primitives/ChannelFileContentPrimitiveMother';
 import { ChannelFilePrimitiveMother } from '../../domain/primitives/ChannelFilePrimitiveMother';
 import { StateRepositoryMock } from '../../infrastructure/repositories/StateRepositoryMock';
 import { FileServiceMock } from '../../infrastructure/services/FileServiceMock';
-import { ChannelFileStructureChecker } from '@main/channel-file/domain/services/ChannelFileStructureChecker';
-import { ChannelFileStructureDoesNotHaveAllowedStructure } from '@main/channel-file/domain/exceptions/ChannelFileStructureDoesNotHaveAllowedStructure';
 
 let stateRepository: StateRepositoryMock;
 let fileService: FileServiceMock;

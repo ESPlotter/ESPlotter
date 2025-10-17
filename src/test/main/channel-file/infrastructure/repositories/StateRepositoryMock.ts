@@ -1,4 +1,5 @@
 import { expect } from 'vitest';
+
 import type { StateRepository } from '@main/channel-file/domain/repositories/StateRepository';
 
 export class StateRepositoryMock implements StateRepository {

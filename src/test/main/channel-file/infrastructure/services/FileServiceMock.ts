@@ -1,4 +1,5 @@
 import { expect } from 'vitest';
+
 import type { FileService } from '@main/channel-file/domain/services/FileService';
 
 export class FileServiceMock implements FileService {

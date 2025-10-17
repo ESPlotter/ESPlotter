@@ -1,6 +1,7 @@
-import { defineConfig } from 'vite';
-import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { defineConfig } from 'vite';
 
 import aliasConfig from './tsconfig.paths.json' with { type: 'json' };
 

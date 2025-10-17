@@ -1,10 +1,12 @@
-import { app, BrowserWindow, globalShortcut } from 'electron';
-import path from 'node:path';
 import { createRequire } from 'node:module';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { app, BrowserWindow, globalShortcut } from 'electron';
+
+import { registerChannelFileObservers } from '@main/channel-file/infrastructure/observers/registerChannelFileObservers';
 import { registerMainIpcHandlers } from '@main/shared/ipc/registerMainIpcHandlers';
 import { registerMainMenu } from '@main/shared/menu/registerMainMenu';
-import { registerChannelFileObservers } from '@main/channel-file/infrastructure/observers/registerChannelFileObservers';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

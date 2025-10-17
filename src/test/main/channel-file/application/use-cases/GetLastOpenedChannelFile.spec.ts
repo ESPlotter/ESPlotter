@@ -1,5 +1,7 @@
 import { describe, expect, it, beforeEach } from 'vitest';
+
 import { GetLastOpenedChannelFile } from '@main/channel-file/application/use-cases/GetLastOpenedChannelFile';
+
 import { ChannelFilePrimitiveMother } from '../../domain/primitives/ChannelFilePrimitiveMother';
 import { StateRepositoryMock } from '../../infrastructure/repositories/StateRepositoryMock';
 import { FileServiceMock } from '../../infrastructure/services/FileServiceMock';
