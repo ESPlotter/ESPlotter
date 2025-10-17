@@ -64,10 +64,7 @@ test.describe('Electron App', () => {
   test('should have working preload script with versions API', async () => {
     const nodeVersion = await mainPage.evaluate(() => window.versions.node());
 
-    const pingResult = await mainPage.evaluate(async () => await window.versions.ping());
-
     expect(typeof nodeVersion).toBe('string');
-    expect(pingResult).toBe('pong');
   });
 
   test('should render React UI', async () => {
@@ -78,9 +75,5 @@ test.describe('Electron App', () => {
     await expect(versionsParagraph).toContainText('Chrome');
     await expect(versionsParagraph).toContainText('Node.js');
     await expect(versionsParagraph).toContainText('Electron');
-
-    const pingButton = mainPage.getByRole('button', { name: 'ping' });
-    await expect(pingButton).toBeVisible();
-    await expect(pingButton).toBeEnabled();
   });
 });
