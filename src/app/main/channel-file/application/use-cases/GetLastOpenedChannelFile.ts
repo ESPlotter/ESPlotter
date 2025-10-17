@@ -8,7 +8,7 @@ export class GetLastOpenedChannelFile {
   ) {}
 
   async run(): Promise<ChannelFilePrimitive | null> {
-    const lastOpenedFilePath = await this.stateRepository.getLastOpenedFilePath();
+    const lastOpenedFilePath = await this.stateRepository.getLastOpenedChannelFilePath();
 
     if (!lastOpenedFilePath) {
       return null;

@@ -9,12 +9,12 @@ export function HomePage() {
   const [series, setSeries] = useState<ChartSerie[]>([]);
 
   useEffect(() => {
-    const offLast = window.files.onLastOpenedFileChanged((file) => {
+    const offLast = window.files.onLastOpenedChannelFileChanged((file) => {
       setSeries(mapAllowedFileStructure(file.content));
     });
 
     (async () => {
-      const file = await window.files.getLastOpenedFile();
+      const file = await window.files.getLastOpenedChannelFile();
       if (file) {
         setSeries(mapAllowedFileStructure(file.content));
       }

@@ -28,7 +28,7 @@ export function AppSidebar() {
   const [items, setItems] = useState<MenuItem[]>([]);
 
   useEffect(() => {
-    const offLast = window.files.onLastOpenedFileChanged((file) => {
+    const offLast = window.files.onLastOpenedChannelFileChanged((file) => {
       const lastPart = getLastPart(file.path);
       setItems((prevItems) => [
         ...prevItems,

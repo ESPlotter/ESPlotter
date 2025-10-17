@@ -12,8 +12,8 @@ contextBridgeExposeInMainWorld('versions', {
 });
 
 contextBridgeExposeInMainWorld('files', {
-  getLastOpenedFile: () => ipcRendererInvoke('getLastOpenedFile'),
+  getLastOpenedChannelFile: () => ipcRendererInvoke('getLastOpenedChannelFile'),
   getOpenedChannelFiles: () => ipcRendererInvoke('getOpenedChannelFiles'),
-  onLastOpenedFileChanged: (listener: (file: ChannelFilePrimitive) => void) =>
-    ipcRendererOn('lastOpenedFileChanged', listener),
+  onLastOpenedChannelFileChanged: (listener: (file: ChannelFilePrimitive) => void) =>
+    ipcRendererOn('lastOpenedChannelFileChanged', listener),
 });

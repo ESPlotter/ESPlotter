@@ -7,7 +7,7 @@ export class StateRepositoryMock implements StateRepository {
   private openedFilePaths: string[] = [];
 
   private saveOpenedFilePathsCalls: string[][] = [];
-  private getLastOpenedFilePathCalls = 0;
+  private getLastOpenedChannelFilePathCalls = 0;
   private getOpenedFilePathsCalls = 0;
 
   setLastOpenedFilePath(path: string | null): void {
@@ -23,8 +23,8 @@ export class StateRepositoryMock implements StateRepository {
     this.openedFilePaths = [...filePaths];
   }
 
-  async getLastOpenedFilePath(): Promise<string | null> {
-    this.getLastOpenedFilePathCalls += 1;
+  async getLastOpenedChannelFilePath(): Promise<string | null> {
+    this.getLastOpenedChannelFilePathCalls += 1;
     return this.lastOpenedFilePath;
   }
 
@@ -33,12 +33,12 @@ export class StateRepositoryMock implements StateRepository {
     return [...this.openedFilePaths];
   }
 
-  onLastOpenedFilePathChange(_cb: () => void): () => void {
+  onLastOpenedChannelFilePathChange(_cb: () => void): () => void {
     return () => undefined;
   }
 
-  expectGetLastOpenedFilePathCalledTimes(times: number): void {
-    expect(this.getLastOpenedFilePathCalls).toBe(times);
+  expectGetLastOpenedChannelFilePathCalledTimes(times: number): void {
+    expect(this.getLastOpenedChannelFilePathCalls).toBe(times);
   }
 
   expectGetOpenedFilePathsCalledTimes(times: number): void {

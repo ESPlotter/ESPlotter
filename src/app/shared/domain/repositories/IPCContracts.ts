@@ -7,20 +7,20 @@ export interface RendererExposureMap {
     electron: () => string;
   };
   files: {
-    getLastOpenedFile: () => Promise<ChannelFilePrimitive | null>;
+    getLastOpenedChannelFile: () => Promise<ChannelFilePrimitive | null>;
     getOpenedChannelFiles: () => Promise<ChannelFilePrimitive[] | null>;
-    onLastOpenedFileChanged: (listener: (file: ChannelFilePrimitive) => void) => () => void;
+    onLastOpenedChannelFileChanged: (listener: (file: ChannelFilePrimitive) => void) => () => void;
   };
 }
 
 export interface IpcChannelMap {
   ping: () => string;
-  getLastOpenedFile: () => Promise<ChannelFilePrimitive | null>;
+  getLastOpenedChannelFile: () => Promise<ChannelFilePrimitive | null>;
   getOpenedChannelFiles: () => Promise<ChannelFilePrimitive[] | null>;
 }
 
 export interface IpcEventMap {
-  lastOpenedFileChanged: (payload: ChannelFilePrimitive) => void;
+  lastOpenedChannelFileChanged: (payload: ChannelFilePrimitive) => void;
 }
 
 export type IpcEventKey = keyof IpcEventMap;

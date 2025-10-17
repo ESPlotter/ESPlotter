@@ -4,7 +4,7 @@ import { clickMenuItem } from './support/clickMenuItem';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 import { triggerFileOpenShortcut } from './support/triggerFileOpenShortcut';
-import { waitForLastOpenedFileChanged } from './support/waitForLastOpenedFileChanged';
+import { waitForLastOpenedChannelFileChanged } from './support/waitForLastOpenedChannelFileChanged';
 
 let electronApp: ElectronApplication;
 let mainPage: Page;
@@ -21,7 +21,7 @@ test.describe('Open file flow', () => {
   test('opens a valid file (test3.json) and renders the chart', async () => {
     await setNextOpenFixturePath(electronApp, 'test3.json');
 
-    const parsedPromise = waitForLastOpenedFileChanged(mainPage);
+    const parsedPromise = waitForLastOpenedChannelFileChanged(mainPage);
     await triggerFileOpenMenu(electronApp);
     await parsedPromise;
 

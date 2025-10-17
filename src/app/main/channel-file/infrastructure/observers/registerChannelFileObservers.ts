@@ -15,13 +15,13 @@ export async function registerChannelFileObservers(): Promise<void> {
     ).NodeFileService(),
   );
 
-  const offLast = stateRepository.onLastOpenedFilePathChange(async () => {
+  const offLast = stateRepository.onLastOpenedChannelFilePathChange(async () => {
     const file = await getLastOpenedChannelFile.run();
     if (!file) {
       return;
     }
 
-    webContentsBroadcast('lastOpenedFileChanged', file);
+    webContentsBroadcast('lastOpenedChannelFileChanged', file);
   });
 
   app.on('will-quit', () => {

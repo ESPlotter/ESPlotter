@@ -21,7 +21,7 @@ describe('GetLastOpenedChannelFile', () => {
     const result = await useCase.run();
 
     expect(result).toBeNull();
-    stateRepository.expectGetLastOpenedFilePathCalledTimes(1);
+    stateRepository.expectGetLastOpenedChannelFilePathCalledTimes(1);
   });
 
   it('returns the last opened channel file with its parsed content', async () => {
@@ -35,7 +35,7 @@ describe('GetLastOpenedChannelFile', () => {
 
     const result = await useCase.run();
 
-    stateRepository.expectGetLastOpenedFilePathCalledTimes(1);
+    stateRepository.expectGetLastOpenedChannelFilePathCalledTimes(1);
     fileService.expectReadFileUtf8CalledTimes(1);
     fileService.expectReadFileUtf8CalledWith(expectedChannelFile.path);
     expect(result).toEqual(expectedChannelFile);

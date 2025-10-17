@@ -1,7 +1,7 @@
 import { ipcMainHandle } from '@main/shared/ipc/ipcMainHandle';
 
 export function registerChannelFileIpcHandlers(): void {
-  ipcMainHandle('getLastOpenedFile', async () => {
+  ipcMainHandle('getLastOpenedChannelFile', async () => {
     const getLastOpenedChannelFile = new (
       await import('@main/channel-file/application/use-cases/GetLastOpenedChannelFile')
     ).GetLastOpenedChannelFile(
