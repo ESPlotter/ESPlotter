@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ChannelFileContentPrimitiveMother } from './ChannelFileContentPrimitiveMother';
+import { ChannelFileContentPrimitiveMother } from '../channel-file/domain/primitives/ChannelFileContentPrimitiveMother';
 import { mapAllowedFileStructure } from '@renderer/components/Chart/mapAllowedFileStructure';
 
 describe('mapTestData', () => {

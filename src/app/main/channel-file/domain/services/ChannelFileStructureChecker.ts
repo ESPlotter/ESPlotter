@@ -4,7 +4,12 @@ export class ChannelFileStructureChecker {
   constructor() {}
 
   async run(content: string): Promise<void> {
-    const data: unknown = JSON.parse(content);
+    let data: unknown;
+    try {
+      data = JSON.parse(content);
+    } catch {
+      throw new ChannelFileStructureDoesNotHaveAllowedStructure();
+    }
 
     if (!this.isAllowedFileStructure(data)) {
       throw new ChannelFileStructureDoesNotHaveAllowedStructure();

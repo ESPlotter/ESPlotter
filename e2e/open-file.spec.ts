@@ -1,7 +1,7 @@
 import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
 import { clickMenuItem } from './support/clickMenuItem';
 import { triggerFileOpenShortcut } from './support/triggerFileOpenShortcut';
-import { waitForFileParsed } from './support/waitForFileParsed';
+import { waitForLastOpenedFileChanged } from './support/waitForLastOpenedFileChanged';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
@@ -20,7 +20,7 @@ test.describe('Open file flow', () => {
   test('opens a valid file (test3.json) and renders the chart', async () => {
     await setNextOpenFixturePath(electronApp, 'test3.json');
 
-    const parsedPromise = waitForFileParsed(mainPage);
+    const parsedPromise = waitForLastOpenedFileChanged(mainPage);
     await triggerFileOpenMenu(electronApp);
     await parsedPromise;
 
