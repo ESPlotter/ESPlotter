@@ -24,6 +24,9 @@ export function registerChannelFileIpcHandlers(): void {
       new (
         await import('@main/channel-file/infrastructure/services/NodeFileService')
       ).NodeFileService(),
+      new (
+        await import('@main/channel-file/domain/services/ChannelFileStructureChecker')
+      ).ChannelFileStructureChecker(),
     );
     return getOpenedChannelFiles.run();
   });
