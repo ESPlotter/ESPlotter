@@ -35,7 +35,7 @@ Configuration for shadcn is stored in `components.json` at the project root.
 ## Testing
 
 Every custom component must include a test file with React Testing Library.
-See `docs/tests.md` for setup, examples, and naming conventions.
+See [docs/tests.md](./tests.md) for setup, examples, and naming conventions.
 Test file should follow the same relative path, e.g.:
 
 ```sh

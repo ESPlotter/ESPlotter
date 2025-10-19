@@ -1,26 +1,22 @@
-import { Button } from '@shadcn/components/ui/button';
 import { useEffect, useState } from 'react';
+
 import { Chart } from '@renderer/components/Chart/Chart';
-import type { ChartSerie } from '@shared/chart/ChartSerie';
-import { mapAllowedFileStructure } from '@shared/chart/mapAllowedFileStructure';
+import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
+import { mapAllowedFileStructure } from '@renderer/components/Chart/mapAllowedFileStructure';
+import Layout from '@renderer/components/Layout/layout';
 
 export function HomePage() {
   const [series, setSeries] = useState<ChartSerie[]>([]);
 
-  async function ping() {
-    const response = await window.versions.ping();
-    console.log(response);
-  }
-
   useEffect(() => {
-    const offLast = window.files.onLastOpenedFileParsedChanged((file) => {
-      setSeries(mapAllowedFileStructure(file.data));
+    const offLast = window.files.onLastOpenedChannelFileChanged((file) => {
+      setSeries(mapAllowedFileStructure(file.content));
     });
 
     (async () => {
-      const file = await window.files.getLastOpenedFile();
+      const file = await window.files.getLastOpenedChannelFile();
       if (file) {
-        setSeries(mapAllowedFileStructure(file.data));
+        setSeries(mapAllowedFileStructure(file.content));
       }
     })();
 
@@ -30,15 +26,16 @@ export function HomePage() {
   }, []);
 
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-bold underline">Hello from React!</h1>
-      <p>
-        This app is using Chrome (v{window.versions.chrome()}), Node.js (v{window.versions.node()}),
-        and Electron (v{window.versions.electron()})
-      </p>
-      <Button onClick={ping}>ping</Button>
+    <Layout>
+      <div className="p-4">
+        <h1 className="text-3xl font-bold underline">Hello from React!</h1>
+        <p>
+          This app is using Chrome (v{window.versions.chrome()}), Node.js (v{window.versions.node()}
+          ), and Electron (v{window.versions.electron()})
+        </p>
 
-      {series.length > 0 && <Chart series={series} />}
-    </div>
+        {series.length > 0 && <Chart series={series} />}
+      </div>
+    </Layout>
   );
 }

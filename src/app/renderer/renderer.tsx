@@ -1,4 +1,5 @@
 import ReactDOM from 'react-dom/client';
+
 import { App } from '@renderer/app';
 import './index.css';
 

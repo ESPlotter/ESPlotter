@@ -1,9 +1,11 @@
 import { fileURLToPath } from 'node:url';
+
 import { defineConfig } from 'eslint/config';
-import tseslint from 'typescript-eslint';
-import eslintPluginImport from 'eslint-plugin-import';
-import globals from 'globals';
 import eslintConfigPrettier from 'eslint-config-prettier';
+import eslintPluginImport from 'eslint-plugin-import';
+import eslintPluginUnusedImports from 'eslint-plugin-unused-imports';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 const tsconfigRootDir = fileURLToPath(new URL('.', import.meta.url));
 
@@ -14,7 +16,7 @@ export default defineConfig([
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
   {
-    files: ['**/*.{ts,tsx,cts,mts}'],
+    files: ['**/*.{ts,tsx,cts,mts}', '**/.d.ts'],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
@@ -28,6 +30,7 @@ export default defineConfig([
     plugins: {
       '@typescript-eslint': tseslint.plugin,
       import: eslintPluginImport,
+      'unused-imports': eslintPluginUnusedImports,
     },
     settings: {
       'import/resolver': {
@@ -41,6 +44,26 @@ export default defineConfig([
     },
     rules: {
       ...eslintPluginImport.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': 'off',
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+          ignoreRestSiblings: false,
+        },
+      ],
+      'import/order': [
+        'warn',
+        {
+          alphabetize: { order: 'asc', caseInsensitive: true },
+          'newlines-between': 'always',
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'type'],
+        },
+      ],
     },
   },
   {

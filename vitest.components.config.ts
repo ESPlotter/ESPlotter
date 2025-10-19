@@ -1,7 +1,8 @@
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
-import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
 
 import aliasConfig from './tsconfig.paths.json' with { type: 'json' };
 

@@ -1,4 +1,5 @@
 import { createHashRouter, RouterProvider } from 'react-router';
+
 import { HomePage } from './pages/home';
 
 export function App() {

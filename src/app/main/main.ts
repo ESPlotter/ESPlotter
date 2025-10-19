@@ -1,10 +1,12 @@
-import { app, BrowserWindow } from 'electron';
-import path from 'node:path';
 import { createRequire } from 'node:module';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { setMainMenu } from './menu';
-import { registerIpcHandlers } from '@main/ipc/registerIpcHandlers';
-import { registerAppStateObservers } from '@main/observers/registerAppStateObservers';
+
+import { app, BrowserWindow, globalShortcut } from 'electron';
+
+import { registerChannelFileObservers } from '@main/channel-file/infrastructure/observers/registerChannelFileObservers';
+import { registerMainIpcHandlers } from '@main/shared/ipc/registerMainIpcHandlers';
+import { registerMainMenu } from '@main/shared/menu/registerMainMenu';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -35,9 +37,17 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true,
     },
   });
+
+  if (!app.isPackaged) {
+    globalShortcut.register('CommandOrControl+Shift+I', () => {
+      const focusedWindow = BrowserWindow.getFocusedWindow();
+      if (focusedWindow) {
+        focusedWindow.webContents.toggleDevTools();
+      }
+    });
+  }
 
   // Retrieve renderer configuration from environment variables or electron-forge injected variables.
   // Environment variables are used for testing with Playwright.
@@ -51,14 +61,12 @@ const createWindow = () => {
   } else {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${rendererBundleName}/index.html`));
   }
-
-  // mainWindow.webContents.openDevTools();
 };
 
 app.whenReady().then(() => {
-  registerIpcHandlers();
-  registerAppStateObservers();
-  setMainMenu();
+  registerMainIpcHandlers();
+  registerChannelFileObservers();
+  registerMainMenu();
   createWindow();
 });
 
@@ -67,6 +75,7 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
+    globalShortcut.unregisterAll();
     app.quit();
   }
 });

@@ -1,21 +1,13 @@
 import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
 
-import { waitForReactContent } from './support/waitForReactContent';
-import { waitForPreloadScript } from './support/waitForPreloadScript';
-import { getElectronAppForE2eTest } from './support/getElectronAppForE2eTest';
+import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
 let electronApp: ElectronApplication;
 let mainPage: Page;
 
 test.describe('Electron App', () => {
   test.beforeEach(async () => {
-    electronApp = await getElectronAppForE2eTest();
-
-    mainPage = await electronApp.firstWindow();
-
-    await mainPage.waitForLoadState('domcontentloaded');
-    await waitForPreloadScript(mainPage);
-    await waitForReactContent(mainPage);
+    ({ electronApp, mainPage } = await setupE2eTestEnvironment());
   });
 
   test.afterEach(async () => {
@@ -72,10 +64,7 @@ test.describe('Electron App', () => {
   test('should have working preload script with versions API', async () => {
     const nodeVersion = await mainPage.evaluate(() => window.versions.node());
 
-    const pingResult = await mainPage.evaluate(async () => await window.versions.ping());
-
     expect(typeof nodeVersion).toBe('string');
-    expect(pingResult).toBe('pong');
   });
 
   test('should render React UI', async () => {
@@ -86,9 +75,5 @@ test.describe('Electron App', () => {
     await expect(versionsParagraph).toContainText('Chrome');
     await expect(versionsParagraph).toContainText('Node.js');
     await expect(versionsParagraph).toContainText('Electron');
-
-    const pingButton = mainPage.getByRole('button', { name: 'ping' });
-    await expect(pingButton).toBeVisible();
-    await expect(pingButton).toBeEnabled();
   });
 });
