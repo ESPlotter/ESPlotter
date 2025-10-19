@@ -17,15 +17,21 @@ export async function triggerFileOpenShortcut(
       if (!win) {
         throw new Error('No focused window to receive shortcut');
       }
-
-      const events: KeyboardInputEvent[] = [
-        { type: 'keyDown', keyCode: 'O', modifiers: accelModifiers },
-        { type: 'char', keyCode: 'O', modifiers: accelModifiers },
-        { type: 'keyUp', keyCode: 'O', modifiers: accelModifiers },
-      ];
-      for (const event of events) {
-        win.webContents.sendInputEvent(event);
+      // Ensure the window is focused
+      if (!win.isFocused()) {
+        win.focus();
       }
+      // Small delay to ensure focus takes effect
+      setTimeout(() => {
+        const events: KeyboardInputEvent[] = [
+          { type: 'keyDown', keyCode: 'O', modifiers: accelModifiers },
+          { type: 'char', keyCode: 'O', modifiers: accelModifiers },
+          { type: 'keyUp', keyCode: 'O', modifiers: accelModifiers },
+        ];
+        for (const event of events) {
+          win.webContents.sendInputEvent(event);
+        }
+      }, 100);
     },
     { accelModifiers: modifiers },
   );
