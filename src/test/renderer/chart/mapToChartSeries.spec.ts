@@ -1,6 +1,6 @@
-import { mapToChartSerie } from '@renderer/components/Chart/mapToChartSerie';
 import { describe, expect, test } from 'vitest';
 
+import { mapToChartSerie } from '@renderer/components/Chart/mapToChartSerie';
 import { ChannelFileContentPrimitiveMother } from 'src/test/shared/domain/primitives/ChannelFileContentPrimitiveMother';
 
 describe('mapToChartSerie', () => {
