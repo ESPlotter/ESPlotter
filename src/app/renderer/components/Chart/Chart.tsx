@@ -11,6 +11,8 @@ import { CanvasRenderer } from 'echarts/renderers';
 import ReactEChartsCore from 'echarts-for-react/lib/core';
 import { useMemo } from 'react';
 
+import { useChannelChartsStore } from '@renderer/store/ChannelChartsStore';
+
 import { ChartSerie } from './ChartSerie';
 
 echarts.use([
@@ -22,10 +24,18 @@ echarts.use([
   LegendComponent,
 ]);
 
-export function Chart({ series }: { series: ChartSerie[] }) {
+export function Chart({ id, series }: { id: string; series: ChartSerie[] }) {
   const options = useMemo(() => mergeSeriesWithDefaultParams(series), [series]);
+  const { selectedChartId, toggleSelectedChartId } = useChannelChartsStore();
 
-  return <ReactEChartsCore echarts={echarts} option={options} notMerge={true} lazyUpdate={true} />;
+  return (
+    <div
+      className={`w-full p-4 border-2 rounded-sm ${selectedChartId === id ? 'border-slate-900/35' : 'border-transparent'}`}
+      onClick={() => toggleSelectedChartId(id)}
+    >
+      <ReactEChartsCore echarts={echarts} option={options} notMerge={true} lazyUpdate={true} />
+    </div>
+  );
 }
 
 function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {

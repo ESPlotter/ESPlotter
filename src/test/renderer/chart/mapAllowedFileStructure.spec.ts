@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { mapAllowedFileStructure } from '@renderer/components/Chart/mapAllowedFileStructure';
+import { mapToChartSeries } from '@renderer/components/Chart/mapAllowedFileStructure';
 import { ChannelFileContentPrimitiveMother } from 'src/test/shared/domain/primitives/ChannelFileContentPrimitiveMother';
 
 describe('mapTestData', () => {
@@ -22,7 +22,7 @@ describe('mapTestData', () => {
       ],
     });
 
-    const result = mapAllowedFileStructure(testData);
+    const result = mapToChartSeries(testData);
 
     expect(result).toEqual([
       {
@@ -62,7 +62,7 @@ describe('mapTestData', () => {
       ],
     });
 
-    const result = mapAllowedFileStructure(testData);
+    const result = mapToChartSeries(testData);
 
     expect(result).toEqual([
       {

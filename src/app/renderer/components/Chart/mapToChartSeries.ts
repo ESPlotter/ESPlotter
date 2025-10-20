@@ -2,7 +2,7 @@ import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFi
 
 import { ChartSerie } from './ChartSerie';
 
-export function mapAllowedFileStructure(data: ChannelFileContentPrimitive): ChartSerie[] {
+export function mapToChartSeries(data: ChannelFileContentPrimitive): ChartSerie[] {
   const xValues = data?.x?.values ?? [];
   const series = Array.isArray(data?.series) ? data.series : [];
 
