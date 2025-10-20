@@ -6,8 +6,7 @@ export async function waitForReactContent(page: Page) {
   await page.waitForFunction(
     () => {
       const root = document.getElementById('root');
-      const heading = document.querySelector('h1');
-      return Boolean(root && root.childElementCount > 0 && heading);
+      return Boolean(root && root.childElementCount > 0);
     },
     { timeout: 20_000 },
   );

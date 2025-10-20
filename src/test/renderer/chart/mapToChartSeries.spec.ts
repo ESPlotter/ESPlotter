@@ -1,9 +1,9 @@
+import { mapToChartSerie } from '@renderer/components/Chart/mapToChartSerie';
 import { describe, expect, test } from 'vitest';
 
-import { mapToChartSeries } from '@renderer/components/Chart/mapAllowedFileStructure';
 import { ChannelFileContentPrimitiveMother } from 'src/test/shared/domain/primitives/ChannelFileContentPrimitiveMother';
 
-describe('mapTestData', () => {
+describe('mapToChartSerie', () => {
   test('should map test data with one serie', () => {
     const testData = ChannelFileContentPrimitiveMother.with({
       x: {
@@ -22,20 +22,18 @@ describe('mapTestData', () => {
       ],
     });
 
-    const result = mapToChartSeries(testData);
+    const result = mapToChartSerie(testData.series[0], testData.x.values);
 
-    expect(result).toEqual([
-      {
-        name: 'Voltage',
-        type: 'line',
-        data: [
-          [1, 10],
-          [2, 20],
-          [3, 30],
-          [4, 40],
-        ],
-      },
-    ]);
+    expect(result).toEqual({
+      name: 'Voltage',
+      type: 'line',
+      data: [
+        [1, 10],
+        [2, 20],
+        [3, 30],
+        [4, 40],
+      ],
+    });
   });
 
   test('should map test data with one serie', () => {
@@ -62,29 +60,29 @@ describe('mapTestData', () => {
       ],
     });
 
-    const result = mapToChartSeries(testData);
+    const firstSerie = mapToChartSerie(testData.series[0], testData.x.values);
+    const secondSerie = mapToChartSerie(testData.series[1], testData.x.values);
 
-    expect(result).toEqual([
-      {
-        name: 'Voltage',
-        type: 'line',
-        data: [
-          [1, 10],
-          [2, 20],
-          [3, 30],
-          [4, 40],
-        ],
-      },
-      {
-        name: 'Frequency',
-        type: 'line',
-        data: [
-          [1, 100],
-          [2, 200],
-          [3, 300],
-          [4, 400],
-        ],
-      },
-    ]);
+    expect(firstSerie).toEqual({
+      name: 'Voltage',
+      type: 'line',
+      data: [
+        [1, 10],
+        [2, 20],
+        [3, 30],
+        [4, 40],
+      ],
+    });
+
+    expect(secondSerie).toEqual({
+      name: 'Frequency',
+      type: 'line',
+      data: [
+        [1, 100],
+        [2, 200],
+        [3, 300],
+        [4, 400],
+      ],
+    });
   });
 });
