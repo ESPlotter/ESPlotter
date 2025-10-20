@@ -68,12 +68,10 @@ test.describe('Electron App', () => {
   });
 
   test('should render React UI', async () => {
-    const heading = mainPage.getByRole('heading', { level: 1 });
-    await expect(heading).toHaveText('Hello from React!');
+    const sideBarHeading = mainPage.getByText('CHANNELS');
+    const newChartButton = mainPage.getByRole('button', { name: 'New Chart' });
 
-    const versionsParagraph = mainPage.locator('p');
-    await expect(versionsParagraph).toContainText('Chrome');
-    await expect(versionsParagraph).toContainText('Node.js');
-    await expect(versionsParagraph).toContainText('Electron');
+    expect(sideBarHeading).toBeVisible();
+    expect(newChartButton).toBeVisible();
   });
 });

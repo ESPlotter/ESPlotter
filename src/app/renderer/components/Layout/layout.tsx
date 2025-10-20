@@ -1,12 +1,24 @@
+import { IconPlus } from '@tabler/icons-react';
+import { nanoid } from 'nanoid';
+
 import { AppSidebar } from '@components/AppSidebar/AppSidebar';
-import { SidebarProvider, SidebarTrigger } from '@shadcn/components/ui/sidebar';
+import { Button } from '@renderer/shadcn/components/ui/button';
+import { useChannelChartsStore } from '@renderer/store/ChannelChartsStore';
+import { SidebarProvider } from '@shadcn/components/ui/sidebar';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const { addChart } = useChannelChartsStore();
+
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main>
-        <SidebarTrigger />
+      <main className="w-full">
+        <div className="flex items-center justify-end border-b px-2">
+          {/* <SidebarTrigger /> */}
+          <Button variant="outline" className="m-4" onClick={() => addChart(nanoid())}>
+            <IconPlus /> New Chart
+          </Button>
+        </div>
         {children}
       </main>
     </SidebarProvider>

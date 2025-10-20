@@ -25,7 +25,7 @@ test.describe('Open file flow', () => {
     await triggerFileOpenMenu(electronApp);
     await parsedPromise;
 
-    await expectChartVisible(mainPage);
+    await expectChannelVisible(mainPage);
   });
 
   test('opens a valid file using keyboard shortcut (Ctrl/Cmd+O)', async () => {
@@ -33,7 +33,7 @@ test.describe('Open file flow', () => {
 
     await triggerFileOpenShortcut(electronApp, mainPage);
 
-    await expectChartVisible(mainPage);
+    await expectChannelVisible(mainPage);
   });
 
   test('fails to open invalid format (test1.json)', async () => {
@@ -41,7 +41,7 @@ test.describe('Open file flow', () => {
 
     await triggerFileOpenMenu(electronApp);
 
-    await expectNoCharts(mainPage);
+    await expectNoChannelVisible(mainPage);
   });
 
   test('fails to open not found path', async () => {
@@ -49,7 +49,7 @@ test.describe('Open file flow', () => {
 
     await triggerFileOpenMenu(electronApp);
 
-    await expectNoCharts(mainPage);
+    await expectNoChannelVisible(mainPage);
   });
 });
 
@@ -57,10 +57,18 @@ async function triggerFileOpenMenu(app: ElectronApplication): Promise<void> {
   await clickMenuItem(app, ['File', 'Open File']);
 }
 
-async function expectChartVisible(page: Page): Promise<void> {
-  await expect(page.locator('canvas').first()).toBeVisible();
+async function expectChannelVisible(page: Page): Promise<void> {
+  await expect(page.getByRole('heading', { level: 3 })).toHaveText('test3');
 }
 
-async function expectNoCharts(page: Page): Promise<void> {
-  await expect(page.locator('canvas')).toHaveCount(0);
+async function expectNoChannelVisible(page: Page): Promise<void> {
+  await expect(page.getByRole('heading', { level: 3, name: 'test3' })).toHaveCount(0);
 }
+
+// async function expectChartVisible(page: Page): Promise<void> {
+//   await expect(page.locator('canvas').first()).toBeVisible();
+// }
+
+// async function expectNoCharts(page: Page): Promise<void> {
+//   await expect(page.locator('canvas')).toHaveCount(0);
+// }
