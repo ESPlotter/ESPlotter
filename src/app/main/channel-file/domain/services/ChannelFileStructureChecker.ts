@@ -1,22 +1,15 @@
+import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFileContentPrimitive';
+
 import { ChannelFileStructureDoesNotHaveAllowedStructure } from '../exceptions/ChannelFileStructureDoesNotHaveAllowedStructure';
 
 export class ChannelFileStructureChecker {
-  constructor() {}
-
-  async run(content: string): Promise<void> {
-    let data: unknown;
-    try {
-      data = JSON.parse(content);
-    } catch {
-      throw new ChannelFileStructureDoesNotHaveAllowedStructure();
-    }
-
-    if (!this.isAllowedFileStructure(data)) {
+  public ensure(content: unknown): asserts content is ChannelFileContentPrimitive {
+    if (!this.isAllowedFileStructure(content)) {
       throw new ChannelFileStructureDoesNotHaveAllowedStructure();
     }
   }
 
-  private isAllowedFileStructure(fileContent: unknown): boolean {
+  private isAllowedFileStructure(fileContent: unknown): fileContent is ChannelFileContentPrimitive {
     const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
     const isNumArray = (v: unknown): v is number[] =>
       Array.isArray(v) && v.every((n) => typeof n === 'number' && Number.isFinite(n));

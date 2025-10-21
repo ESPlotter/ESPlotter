@@ -12,28 +12,26 @@ describe('ChannelFileStructureChecker', () => {
     checker = new ChannelFileStructureChecker();
   });
 
-  it('accepts a valid channel file structure', async () => {
+  it('accepts a valid channel file structure', () => {
     const validContent = ChannelFileContentPrimitiveMother.random();
 
-    const result = checker.run(JSON.stringify(validContent));
-
-    await expect(result).resolves.toBeUndefined();
+    expect(() => checker.ensure(validContent)).not.toThrow();
   });
 
-  it('throws when content is invalid JSON', async () => {
+  it('throws when content is not an object', () => {
     const invalidContent = 'invalid content';
 
-    const result = checker.run(invalidContent);
-
-    await expect(result).rejects.toBeInstanceOf(ChannelFileStructureDoesNotHaveAllowedStructure);
+    expect(() => checker.ensure(invalidContent)).toThrow(
+      ChannelFileStructureDoesNotHaveAllowedStructure,
+    );
   });
 
-  it('throws when series contain values that are not finite numbers', async () => {
+  it('throws when series contain values that are not finite numbers', () => {
     const invalidContent = ChannelFileContentPrimitiveMother.random();
     invalidContent.series[0].values = ['not-a-number'] as unknown as number[];
 
-    const result = checker.run(JSON.stringify(invalidContent));
-
-    await expect(result).rejects.toBeInstanceOf(ChannelFileStructureDoesNotHaveAllowedStructure);
+    expect(() => checker.ensure(invalidContent)).toThrow(
+      ChannelFileStructureDoesNotHaveAllowedStructure,
+    );
   });
 });

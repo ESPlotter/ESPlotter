@@ -7,20 +7,21 @@ export function useOpenedChannelFiles(): ChannelFilePrimitive[] {
 
   useEffect(() => {
     const offLast = window.files.onLastOpenedChannelFileChanged((file) => {
-      setData((prev) => [...prev, file]);
+      setData((prev) => {
+        const remaining = prev.filter((item) => item.path !== file.path);
+        return [file, ...remaining];
+      });
     });
 
-    getOpenedChannelFiles();
+    void loadOpenedChannelFiles();
 
     return () => {
       offLast();
     };
 
-    async function getOpenedChannelFiles() {
-      const file = await window.files.getOpenedChannelFiles();
-      if (file) {
-        setData(file);
-      }
+    async function loadOpenedChannelFiles() {
+      const files = await window.files.getOpenedChannelFiles();
+      setData(files);
     }
   }, []);
 

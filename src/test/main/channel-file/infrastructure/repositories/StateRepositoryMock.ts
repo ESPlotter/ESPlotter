@@ -1,55 +1,58 @@
 import { expect } from 'vitest';
 
+import { ChannelFile } from '@main/channel-file/domain/entities/ChannelFile';
+
 import type { StateRepository } from '@main/channel-file/domain/repositories/StateRepository';
 
 export class StateRepositoryMock implements StateRepository {
-  private lastOpenedFilePath: string | null = null;
-  private openedFilePaths: string[] = [];
+  private lastOpenedFile: ChannelFile | null = null;
+  private openedFiles: ChannelFile[] = [];
 
-  private saveOpenedFilePathsCalls: string[][] = [];
-  private getLastOpenedChannelFilePathCalls = 0;
-  private getOpenedFilePathsCalls = 0;
+  private saveOpenedChannelFilesCalls: ChannelFile[][] = [];
+  private getLastOpenedChannelFileCalls = 0;
+  private getOpenedChannelFilesCalls = 0;
 
-  setLastOpenedFilePath(path: string | null): void {
-    this.lastOpenedFilePath = path;
+  setLastOpenedFile(file: ChannelFile | null): void {
+    this.lastOpenedFile = file;
   }
 
-  setOpenedFilePaths(paths: string[]): void {
-    this.openedFilePaths = [...paths];
+  setOpenedFiles(files: ChannelFile[]): void {
+    this.openedFiles = [...files];
   }
 
-  async saveOpenedFilePaths(filePaths: string[]): Promise<void> {
-    this.saveOpenedFilePathsCalls.push([...filePaths]);
-    this.openedFilePaths = [...filePaths];
+  async saveOpenedChannelFiles(files: ChannelFile[]): Promise<void> {
+    this.saveOpenedChannelFilesCalls.push([...files]);
+    this.openedFiles = [...files];
   }
 
-  async getLastOpenedChannelFilePath(): Promise<string | null> {
-    this.getLastOpenedChannelFilePathCalls += 1;
-    return this.lastOpenedFilePath;
+  async getLastOpenedChannelFile(): Promise<ChannelFile | null> {
+    this.getLastOpenedChannelFileCalls += 1;
+    return this.lastOpenedFile;
   }
 
-  async getOpenedFilePaths(): Promise<string[]> {
-    this.getOpenedFilePathsCalls += 1;
-    return [...this.openedFilePaths];
+  async getOpenedChannelFiles(): Promise<ChannelFile[]> {
+    this.getOpenedChannelFilesCalls += 1;
+    return [...this.openedFiles];
   }
 
-  onLastOpenedChannelFilePathChange(_cb: () => void): () => void {
+  onLastOpenedChannelFileChange(_cb: (file: ChannelFile | null) => void): () => void {
     return () => undefined;
   }
 
-  expectGetLastOpenedChannelFilePathCalledTimes(times: number): void {
-    expect(this.getLastOpenedChannelFilePathCalls).toBe(times);
+  expectGetLastOpenedChannelFileCalledTimes(times: number): void {
+    expect(this.getLastOpenedChannelFileCalls).toBe(times);
   }
 
-  expectGetOpenedFilePathsCalledTimes(times: number): void {
-    expect(this.getOpenedFilePathsCalls).toBe(times);
+  expectGetOpenedChannelFilesCalledTimes(times: number): void {
+    expect(this.getOpenedChannelFilesCalls).toBe(times);
   }
 
-  expectSaveOpenedFilePathsCalledTimes(times: number): void {
-    expect(this.saveOpenedFilePathsCalls).toHaveLength(times);
+  expectSaveOpenedChannelFilesCalledTimes(times: number): void {
+    expect(this.saveOpenedChannelFilesCalls).toHaveLength(times);
   }
 
-  expectSaveOpenedFilePathsCalledWith(expected: string[]): void {
-    expect(this.saveOpenedFilePathsCalls).toContainEqual(expected);
+  expectSaveOpenedChannelFilesCalledWith(expected: string[]): void {
+    const recorded = this.saveOpenedChannelFilesCalls.map((call) => call.map((file) => file.path));
+    expect(recorded).toContainEqual(expected);
   }
 }

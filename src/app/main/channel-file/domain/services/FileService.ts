@@ -1,3 +1,5 @@
+import { ChannelFile } from '../entities/ChannelFile';
+
 export interface FileService {
-  readFileUtf8(path: string): Promise<string>;
+  readChannelFile(path: string): Promise<ChannelFile>;
 }

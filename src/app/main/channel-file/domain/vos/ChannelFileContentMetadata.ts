@@ -1,15 +1,23 @@
 import { ChannelFileContentMetadataPrimitive } from '@shared/domain/primitives/ChannelFileContentMetadataPrimitive';
 
 export class ChannelFileContentMetadata {
-  private constructor(
-    public timestamp: string,
-    public SCR: number,
-  ) {}
+  private constructor(private readonly value: ChannelFileContentMetadataPrimitive) {}
+
+  public static fromPrimitives(
+    primitives: ChannelFileContentMetadataPrimitive,
+  ): ChannelFileContentMetadata {
+    return new ChannelFileContentMetadata({ ...primitives });
+  }
 
   public toPrimitives(): ChannelFileContentMetadataPrimitive {
-    return {
-      timestamp: this.timestamp,
-      SCR: this.SCR,
-    };
+    return { ...this.value };
+  }
+
+  public get timestamp(): string {
+    return this.value.timestamp;
+  }
+
+  public get SCR(): number {
+    return this.value.SCR;
   }
 }

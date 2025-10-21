@@ -2,7 +2,9 @@ import { type Schema } from 'electron-store';
 
 import { BaseElectronStore } from '@shared/infrastructure/repositories/BaseElectronStore';
 
+import { ChannelFile } from '../../domain/entities/ChannelFile';
 import { StateRepository } from '../../domain/repositories/StateRepository';
+import { FileService } from '../../domain/services/FileService';
 
 type AppState = {
   openedFilePath?: string[];
@@ -19,31 +21,45 @@ export class ElectronStoreStateRepository
   extends BaseElectronStore<AppState>
   implements StateRepository
 {
-  constructor() {
+  constructor(private readonly fileService: FileService) {
     super('state', schema);
   }
 
-  public async saveOpenedFilePaths(filePaths: string[]): Promise<void> {
-    this.stateStore.set('openedFilePath', filePaths);
+  public async saveOpenedChannelFiles(files: ChannelFile[]): Promise<void> {
+    const paths = files.map((file) => file.path);
+    this.stateStore.set('openedFilePath', paths);
   }
 
-  public async getLastOpenedChannelFilePath(): Promise<string | null> {
-    const paths = this.stateStore.get('openedFilePath') ?? [];
-
-    if (paths.length === 0) {
+  public async getLastOpenedChannelFile(): Promise<ChannelFile | null> {
+    const path = this.stateStore.get('openedFilePath')?.[0];
+    if (!path) {
       return null;
     }
-
-    return paths[0];
+    return this.fileService.readChannelFile(path);
   }
 
-  public async getOpenedFilePaths(): Promise<string[]> {
-    return this.stateStore.get('openedFilePath') ?? [];
+  public async getOpenedChannelFiles(): Promise<ChannelFile[]> {
+    const paths = this.stateStore.get('openedFilePath') ?? [];
+    const results = await Promise.all(paths.map((path) => this.fileService.readChannelFile(path)));
+
+    return results;
   }
 
-  public onLastOpenedChannelFilePathChange(cb: () => void): () => void {
-    return this.stateStore.onDidChange('openedFilePath', () => {
-      cb();
+  public onLastOpenedChannelFileChange(cb: (file: ChannelFile | null) => void): () => void {
+    return this.stateStore.onDidChange('openedFilePath', async (paths) => {
+      if (!paths) {
+        cb(null);
+        return;
+      }
+
+      const [first] = paths;
+      if (!first) {
+        cb(null);
+        return;
+      }
+
+      const file = await this.fileService.readChannelFile(first);
+      cb(file);
     });
   }
 }

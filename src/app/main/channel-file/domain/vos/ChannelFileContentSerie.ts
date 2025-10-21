@@ -2,11 +2,19 @@ import { ChannelFileContentSeriePrimitive } from '@shared/domain/primitives/Chan
 
 export class ChannelFileContentSerie {
   private constructor(
-    public id: string,
-    public label: string,
-    public unit: string,
-    public values: number[],
+    public readonly id: string,
+    public readonly label: string,
+    public readonly unit: string,
+    public readonly values: number[],
   ) {}
+
+  public static fromPrimitives(
+    primitives: ChannelFileContentSeriePrimitive,
+  ): ChannelFileContentSerie {
+    return new ChannelFileContentSerie(primitives.id, primitives.label, primitives.unit, [
+      ...primitives.values,
+    ]);
+  }
 
   public toPrimitives(): ChannelFileContentSeriePrimitive {
     return {

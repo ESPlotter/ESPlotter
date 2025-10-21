@@ -1,73 +1,76 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { SaveChannelFilePath } from '@main/channel-file/application/use-cases/SaveChannelFile';
+import { SaveChannelFilePath } from '@main/channel-file/application/use-cases/SaveChannelFilePath';
+import { ChannelFile } from '@main/channel-file/domain/entities/ChannelFile';
 import { ChannelFileStructureDoesNotHaveAllowedStructure } from '@main/channel-file/domain/exceptions/ChannelFileStructureDoesNotHaveAllowedStructure';
-import { ChannelFileStructureChecker } from '@main/channel-file/domain/services/ChannelFileStructureChecker';
 
-import { ChannelFileContentPrimitiveMother } from '../../../../shared/domain/primitives/ChannelFileContentPrimitiveMother';
 import { ChannelFilePrimitiveMother } from '../../../../shared/domain/primitives/ChannelFilePrimitiveMother';
 import { StateRepositoryMock } from '../../infrastructure/repositories/StateRepositoryMock';
 import { FileServiceMock } from '../../infrastructure/services/FileServiceMock';
 
 let stateRepository: StateRepositoryMock;
 let fileService: FileServiceMock;
-let channelFileStructureChecker: ChannelFileStructureChecker;
 let useCase: SaveChannelFilePath;
 
 describe('SaveChannelFilePath', () => {
   beforeEach(() => {
     stateRepository = new StateRepositoryMock();
     fileService = new FileServiceMock();
-    channelFileStructureChecker = new ChannelFileStructureChecker();
-    useCase = new SaveChannelFilePath(stateRepository, fileService, channelFileStructureChecker);
+    useCase = new SaveChannelFilePath(stateRepository, fileService);
   });
 
   it('persists the channel file path at the beginning of the list without duplicates', async () => {
-    const existingPaths = [
-      ChannelFilePrimitiveMother.randomPath(),
-      ChannelFilePrimitiveMother.randomPath(),
+    const [firstPrimitive, secondPrimitive] = [
+      ChannelFilePrimitiveMother.random(),
+      ChannelFilePrimitiveMother.random(),
     ];
-    const newPath = existingPaths[1];
-    const fileContent = ChannelFileContentPrimitiveMother.random();
-    const fileContentString = JSON.stringify(fileContent);
+    const firstFile = ChannelFile.fromPrimitives(firstPrimitive);
+    const secondFile = ChannelFile.fromPrimitives(secondPrimitive);
+    const newFile = ChannelFile.fromPrimitives(secondPrimitive);
 
-    stateRepository.setOpenedFilePaths(existingPaths);
-    fileService.setFileContent(newPath, fileContentString);
+    stateRepository.setOpenedFiles([firstFile, secondFile]);
+    fileService.setChannelFile(newFile);
 
-    await useCase.run(newPath);
+    await useCase.run(newFile.path);
 
-    fileService.expectReadFileUtf8CalledTimes(1);
-    fileService.expectReadFileUtf8CalledWith(newPath);
-    stateRepository.expectGetOpenedFilePathsCalledTimes(1);
-    stateRepository.expectSaveOpenedFilePathsCalledTimes(1);
-    stateRepository.expectSaveOpenedFilePathsCalledWith([newPath, existingPaths[0]]);
+    fileService.expectReadChannelFileCalledTimes(1);
+    fileService.expectReadChannelFileCalledWith(newFile.path);
+    stateRepository.expectGetOpenedChannelFilesCalledTimes(1);
+    stateRepository.expectSaveOpenedChannelFilesCalledTimes(1);
+    stateRepository.expectSaveOpenedChannelFilesCalledWith([newFile.path, firstFile.path]);
   });
 
   it('does not persist channel file paths when the structure is invalid', async () => {
     const invalidChannelFile = ChannelFilePrimitiveMother.invalidContent();
 
-    fileService.setFileContent(invalidChannelFile.path, '{"invalid_content": true}');
+    fileService.setFailure(
+      invalidChannelFile.path,
+      new ChannelFileStructureDoesNotHaveAllowedStructure(),
+    );
 
     await expect(useCase.run(invalidChannelFile.path)).rejects.toThrow(
       ChannelFileStructureDoesNotHaveAllowedStructure,
     );
-    fileService.expectReadFileUtf8CalledTimes(1);
-    fileService.expectReadFileUtf8CalledWith(invalidChannelFile.path);
-    stateRepository.expectGetOpenedFilePathsCalledTimes(0);
-    stateRepository.expectSaveOpenedFilePathsCalledTimes(0);
+    fileService.expectReadChannelFileCalledTimes(1);
+    fileService.expectReadChannelFileCalledWith(invalidChannelFile.path);
+    stateRepository.expectGetOpenedChannelFilesCalledTimes(0);
+    stateRepository.expectSaveOpenedChannelFilesCalledTimes(0);
   });
 
   it('does not persist channel file paths when the structure is not a JSON', async () => {
     const invalidChannelFile = ChannelFilePrimitiveMother.invalidContent();
 
-    fileService.setFileContent(invalidChannelFile.path, 'invalid_content');
+    fileService.setFailure(
+      invalidChannelFile.path,
+      new ChannelFileStructureDoesNotHaveAllowedStructure(),
+    );
 
     await expect(useCase.run(invalidChannelFile.path)).rejects.toThrow(
       ChannelFileStructureDoesNotHaveAllowedStructure,
     );
-    fileService.expectReadFileUtf8CalledTimes(1);
-    fileService.expectReadFileUtf8CalledWith(invalidChannelFile.path);
-    stateRepository.expectGetOpenedFilePathsCalledTimes(0);
-    stateRepository.expectSaveOpenedFilePathsCalledTimes(0);
+    fileService.expectReadChannelFileCalledTimes(1);
+    fileService.expectReadChannelFileCalledWith(invalidChannelFile.path);
+    stateRepository.expectGetOpenedChannelFilesCalledTimes(0);
+    stateRepository.expectSaveOpenedChannelFilesCalledTimes(0);
   });
 });
