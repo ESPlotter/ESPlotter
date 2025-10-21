@@ -5,11 +5,20 @@ import { ChannelFileContentSerie } from './ChannelFileContentSerie';
 
 export class ChannelFileContent {
   private constructor(
-    public schemaVersion: number,
-    public metadata: ChannelFileContentMetadata,
-    public x: ChannelFileContentSerie,
-    public series: ChannelFileContentSerie[],
+    public readonly schemaVersion: number,
+    public readonly metadata: ChannelFileContentMetadata,
+    public readonly x: ChannelFileContentSerie,
+    public readonly series: ChannelFileContentSerie[],
   ) {}
+
+  public static fromPrimitives(primitives: ChannelFileContentPrimitive): ChannelFileContent {
+    return new ChannelFileContent(
+      primitives.schemaVersion,
+      ChannelFileContentMetadata.fromPrimitives(primitives.metadata),
+      ChannelFileContentSerie.fromPrimitives(primitives.x),
+      primitives.series.map((serie) => ChannelFileContentSerie.fromPrimitives(serie)),
+    );
+  }
 
   public toPrimitives(): ChannelFileContentPrimitive {
     return {

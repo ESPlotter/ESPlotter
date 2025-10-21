@@ -40,22 +40,31 @@ async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
 }
 
 async function addNewOpenedFilePath(path: string): Promise<void> {
+  const { stateRepository, fileService } = await createChannelFileDependencies();
   const saveChannelFilePath = new (
     await import('@main/channel-file/application/use-cases/SaveChannelFilePath')
-  ).SaveChannelFilePath(
-    new (
-      await import('@main/channel-file/infrastructure/repositories/ElectronStoreStateRepository')
-    ).ElectronStoreStateRepository(),
-    new (
-      await import('@main/channel-file/infrastructure/services/NodeFileService')
-    ).NodeFileService(),
-    new (
-      await import('@main/channel-file/domain/services/ChannelFileStructureChecker')
-    ).ChannelFileStructureChecker(),
-  );
+  ).SaveChannelFilePath(stateRepository, fileService);
   try {
     await saveChannelFilePath.run(path);
   } catch {
     // file has invalid structure
   }
+}
+
+async function createChannelFileDependencies() {
+  const { ChannelFileStructureChecker } = await import(
+    '@main/channel-file/domain/services/ChannelFileStructureChecker'
+  );
+  const { NodeFileService } = await import(
+    '@main/channel-file/infrastructure/services/NodeFileService'
+  );
+  const { ElectronStoreStateRepository } = await import(
+    '@main/channel-file/infrastructure/repositories/ElectronStoreStateRepository'
+  );
+
+  const structureChecker = new ChannelFileStructureChecker();
+  const fileService = new NodeFileService(structureChecker);
+  const stateRepository = new ElectronStoreStateRepository(fileService);
+
+  return { fileService, stateRepository };
 }

@@ -1,38 +1,48 @@
 import { expect } from 'vitest';
 
+import type { ChannelFile } from '@main/channel-file/domain/entities/ChannelFile';
 import type { FileService } from '@main/channel-file/domain/services/FileService';
 
 export class FileServiceMock implements FileService {
-  private readonly files = new Map<string, string>();
-  private readonly readFileUtf8Calls: string[] = [];
+  private readonly files = new Map<string, ChannelFile>();
+  private readonly failures = new Map<string, Error>();
+  private readonly readChannelFileCalls: string[] = [];
 
-  setFileContent(path: string, content: string): void {
-    this.files.set(path, content);
+  setChannelFile(file: ChannelFile): void {
+    this.files.set(file.path, file);
   }
 
-  async readFileUtf8(path: string): Promise<string> {
-    this.readFileUtf8Calls.push(path);
+  setFailure(path: string, error: Error): void {
+    this.failures.set(path, error);
+  }
+
+  async readChannelFile(path: string): Promise<ChannelFile> {
+    this.readChannelFileCalls.push(path);
+
+    if (this.failures.has(path)) {
+      throw this.failures.get(path) as Error;
+    }
 
     if (!this.files.has(path)) {
       throw new Error(`File content not mocked for path: ${path}`);
     }
 
-    return this.files.get(path) as string;
+    return this.files.get(path) as ChannelFile;
   }
 
-  expectReadFileUtf8CalledTimes(times: number): void {
-    expect(this.readFileUtf8Calls).toHaveLength(times);
+  expectReadChannelFileCalledTimes(times: number): void {
+    expect(this.readChannelFileCalls).toHaveLength(times);
   }
 
-  expectReadFileUtf8CalledWith(path: string): void {
-    expect(this.readFileUtf8Calls).toContain(path);
+  expectReadChannelFileCalledWith(path: string): void {
+    expect(this.readChannelFileCalls).toContain(path);
   }
 
-  expectReadFileUtf8NthCalledWith(callIndex: number, path: string): void {
-    expect(this.readFileUtf8Calls.at(callIndex - 1)).toBe(path);
+  expectReadChannelFileNthCalledWith(callIndex: number, path: string): void {
+    expect(this.readChannelFileCalls.at(callIndex - 1)).toBe(path);
   }
 
-  expectReadFileUtf8NotCalled(): void {
-    this.expectReadFileUtf8CalledTimes(0);
+  expectReadChannelFileNotCalled(): void {
+    this.expectReadChannelFileCalledTimes(0);
   }
 }

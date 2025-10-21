@@ -1,6 +1,8 @@
+import { ChannelFile } from '../entities/ChannelFile';
+
 export interface StateRepository {
-  saveOpenedFilePaths(filePath: string[]): Promise<void>;
-  getLastOpenedChannelFilePath(): Promise<string | null>;
-  getOpenedFilePaths(): Promise<string[]>;
-  onLastOpenedChannelFilePathChange(cb: () => void): () => void;
+  saveOpenedChannelFiles(files: ChannelFile[]): Promise<void>;
+  getLastOpenedChannelFile(): Promise<ChannelFile | null>;
+  getOpenedChannelFiles(): Promise<ChannelFile[]>;
+  onLastOpenedChannelFileChange(cb: (file: ChannelFile | null) => void): () => void;
 }

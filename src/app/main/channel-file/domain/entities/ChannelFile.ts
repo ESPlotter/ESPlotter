@@ -4,9 +4,13 @@ import { ChannelFileContent } from '../vos/ChannelFileContent';
 
 export class ChannelFile {
   private constructor(
-    public path: string,
-    public content: ChannelFileContent,
+    public readonly path: string,
+    public readonly content: ChannelFileContent,
   ) {}
+
+  public static fromPrimitives(primitives: ChannelFilePrimitive): ChannelFile {
+    return new ChannelFile(primitives.path, ChannelFileContent.fromPrimitives(primitives.content));
+  }
 
   public toPrimitives(): ChannelFilePrimitive {
     return {

@@ -1,17 +1,18 @@
 export class SaveChannelFilePath {
   constructor(
-    private stateRepository: import('../../domain/repositories/StateRepository').StateRepository,
-    private fileService: import('../../domain/services/FileService').FileService,
-    private channelFileStructureChecker: import('../../domain/services/ChannelFileStructureChecker').ChannelFileStructureChecker,
+    private readonly stateRepository: import('../../domain/repositories/StateRepository').StateRepository,
+    private readonly fileService: import('../../domain/services/FileService').FileService,
   ) {}
 
   async run(path: string): Promise<void> {
-    const file = await this.fileService.readFileUtf8(path);
-    await this.channelFileStructureChecker.run(file);
+    const channelFile = await this.fileService.readChannelFile(path);
+    const openedFiles = await this.stateRepository.getOpenedChannelFiles();
 
-    const currentOpenedFilePaths = await this.stateRepository.getOpenedFilePaths();
-    const newOpenedFilePaths = [...new Set([path, ...currentOpenedFilePaths])];
+    const deduplicated = [
+      channelFile,
+      ...openedFiles.filter((openedFile) => openedFile.path !== channelFile.path),
+    ];
 
-    return this.stateRepository.saveOpenedFilePaths(newOpenedFilePaths);
+    await this.stateRepository.saveOpenedChannelFiles(deduplicated);
   }
 }
