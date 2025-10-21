@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { SaveChannelFilePath } from '@main/channel-file/application/use-cases/SaveChannelFile';
+import { SaveChannelFilePath } from '@main/channel-file/application/use-cases/SaveChannelFilePath';
 import { ChannelFileStructureDoesNotHaveAllowedStructure } from '@main/channel-file/domain/exceptions/ChannelFileStructureDoesNotHaveAllowedStructure';
 import { ChannelFileStructureChecker } from '@main/channel-file/domain/services/ChannelFileStructureChecker';
 

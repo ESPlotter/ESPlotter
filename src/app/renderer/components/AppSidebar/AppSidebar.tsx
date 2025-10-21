@@ -129,7 +129,7 @@ function mapToMenuItems(data: ChannelFilePrimitive): ChannelMenuItem {
       filePath
         .split(/[\\/]/)
         .pop()
-        ?.replace(/\.[^/.]+$/, '') || 'test'
+        ?.replace(/\.[^/.]+$/, '') || filePath
     );
   }
 }

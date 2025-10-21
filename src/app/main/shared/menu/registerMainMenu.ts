@@ -41,7 +41,7 @@ async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
 
 async function addNewOpenedFilePath(path: string): Promise<void> {
   const saveChannelFilePath = new (
-    await import('@main/channel-file/application/use-cases/SaveChannelFile')
+    await import('@main/channel-file/application/use-cases/SaveChannelFilePath')
   ).SaveChannelFilePath(
     new (
       await import('@main/channel-file/infrastructure/repositories/ElectronStoreStateRepository')
