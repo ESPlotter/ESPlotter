@@ -10,6 +10,7 @@ Before generating or modifying code, identify the relevant topic in the table an
 | ---------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------ |
 | New Features           | [docs/new-features.md](./docs/new-features.md)                                       | Priority, libraries, Electron APIs         |
 | Code standards         | [docs/code-standards.md](./docs/code-standards.md)                                   | Best practices, code standards, formatting |
+| Zustand Best Practices | [docs/zustand-best-practices.md](./docs/zustand-best-practices.md)                   | State management, hooks, selectors         |
 | IPC Main ↔ Renderer   | [docs/ipc-inter-process-communication.md](./docs/ipc-inter-process-communication.md) | Message channels, contracts, sync          |
 | Components             | [docs/components.md](./docs/components.md)                                           | Component, ui, design system               |
 | Business Logic         | [docs/business-logic.md](./docs/business-logic.md)                                   | Services, use cases, validations           |

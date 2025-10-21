@@ -1,7 +1,11 @@
 import { useMemo } from 'react';
 
 import { useOpenedChannelFiles } from '@renderer/hooks/useOpenedChannelFiles';
-import { useChannelChartsStore } from '@renderer/store/ChannelChartsStore';
+import {
+  useSelectedChartId,
+  useCharts,
+  useChannelChartsActions,
+} from '@renderer/store/ChannelChartsStore';
 import {
   Accordion,
   AccordionItem,
@@ -32,8 +36,9 @@ interface ChannelMenuItem {
 
 export function AppSidebar() {
   const openedChannelFiles = useOpenedChannelFiles();
-  const { selectedChartId, charts, addChannelToChart, removeChannelFromChart } =
-    useChannelChartsStore();
+  const selectedChartId = useSelectedChartId();
+  const charts = useCharts();
+  const { addChannelToChart, removeChannelFromChart } = useChannelChartsActions();
 
   const allItems = useMemo(() => {
     return openedChannelFiles.map(mapToMenuItems);

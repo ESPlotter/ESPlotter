@@ -3,11 +3,11 @@ import { nanoid } from 'nanoid';
 
 import { AppSidebar } from '@components/AppSidebar/AppSidebar';
 import { Button } from '@renderer/shadcn/components/ui/button';
-import { useChannelChartsStore } from '@renderer/store/ChannelChartsStore';
+import { useChannelChartsActions } from '@renderer/store/ChannelChartsStore';
 import { SidebarProvider } from '@shadcn/components/ui/sidebar';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const { addChart } = useChannelChartsStore();
+  const { addChart } = useChannelChartsActions();
 
   return (
     <SidebarProvider>
