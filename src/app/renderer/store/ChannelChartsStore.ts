@@ -12,88 +12,96 @@ interface ChannelChartsState {
     };
   };
   selectedChartId: string | null;
-  toggleSelectedChartId: (chartId: string) => void;
-  addChart: (chartId: string) => void;
-  removeChart: (chartId: string) => void;
-  addChannelToChart: (chartId: string, channelId: string, serie: ChartSerie) => void;
-  removeChannelFromChart: (chartId: string, channelId: string) => void;
-  changeNameOfChart: (chartId: string, newName: string) => void;
+  actions: {
+    toggleSelectedChartId: (chartId: string) => void;
+    addChart: (chartId: string) => void;
+    removeChart: (chartId: string) => void;
+    addChannelToChart: (chartId: string, channelId: string, serie: ChartSerie) => void;
+    removeChannelFromChart: (chartId: string, channelId: string) => void;
+    changeNameOfChart: (chartId: string, newName: string) => void;
+  };
 }
 
-export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
+const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
   charts: {},
   selectedChartId: null,
-  toggleSelectedChartId: (chartId: string) =>
-    set((state) => ({
-      selectedChartId: state.selectedChartId === chartId ? null : chartId,
-    })),
-  addChart: (chartId: string) =>
-    set((state) => {
-      if (state.charts[chartId]) {
-        throw new Error(`Chart with id ${chartId} already exists.`);
-      }
-      return {
-        charts: {
-          ...state.charts,
-          [chartId]: {
-            name: `Chart: ${chartId}`,
-            channels: {},
-          },
-        },
-      };
-    }),
-  removeChart: (chartId: string) =>
-    set((state) => {
-      const { [chartId]: _removedChart, ...remainingCharts } = state.charts;
-      return { charts: remainingCharts };
-    }),
-  addChannelToChart: (chartId: string, channelId: string, serie: ChartSerie) =>
-    set((state) => {
-      const chart = state.charts[chartId] || {};
-      if (!chart) {
-        throw new Error(`Chart with id ${chartId} does not exist.`);
-      }
-      return {
-        charts: {
-          ...state.charts,
-          [chartId]: {
-            ...chart,
-            channels: {
-              ...chart.channels,
-              [channelId]: serie,
+  actions: {
+    toggleSelectedChartId: (chartId: string) =>
+      set((state) => ({
+        selectedChartId: state.selectedChartId === chartId ? null : chartId,
+      })),
+    addChart: (chartId: string) =>
+      set((state) => {
+        if (state.charts[chartId]) {
+          throw new Error(`Chart with id ${chartId} already exists.`);
+        }
+        return {
+          charts: {
+            ...state.charts,
+            [chartId]: {
+              name: `Chart: ${chartId}`,
+              channels: {},
             },
           },
-        },
-      };
-    }),
-  removeChannelFromChart: (chartId: string, channelId: string) =>
-    set((state) => {
-      const chart = state.charts[chartId];
-      if (!chart) {
-        throw new Error(`Chart with id ${chartId} does not exist.`);
-      }
-      const { [channelId]: _removedChannel, ...remainingChannels } = chart.channels;
-      return {
-        charts: {
-          ...state.charts,
-          [chartId]: {
-            ...chart,
-            channels: remainingChannels,
+        };
+      }),
+    removeChart: (chartId: string) =>
+      set((state) => {
+        const { [chartId]: _removedChart, ...remainingCharts } = state.charts;
+        return { charts: remainingCharts };
+      }),
+    addChannelToChart: (chartId: string, channelId: string, serie: ChartSerie) =>
+      set((state) => {
+        const chart = state.charts[chartId];
+        if (!chart) {
+          throw new Error(`Chart with id ${chartId} does not exist.`);
+        }
+        return {
+          charts: {
+            ...state.charts,
+            [chartId]: {
+              ...chart,
+              channels: {
+                ...chart.channels,
+                [channelId]: serie,
+              },
+            },
           },
-        },
-      };
-    }),
-  changeNameOfChart: (chartId: string, newName: string) =>
-    set((state) => {
-      const chart = state.charts[chartId] || {};
-      if (!chart) {
-        throw new Error(`Chart with id ${chartId} does not exist.`);
-      }
-      return {
-        charts: {
-          ...state.charts,
-          [chartId]: { ...chart, name: newName },
-        },
-      };
-    }),
+        };
+      }),
+    removeChannelFromChart: (chartId: string, channelId: string) =>
+      set((state) => {
+        const chart = state.charts[chartId];
+        if (!chart) {
+          throw new Error(`Chart with id ${chartId} does not exist.`);
+        }
+        const { [channelId]: _removedChannel, ...remainingChannels } = chart.channels;
+        return {
+          charts: {
+            ...state.charts,
+            [chartId]: {
+              ...chart,
+              channels: remainingChannels,
+            },
+          },
+        };
+      }),
+    changeNameOfChart: (chartId: string, newName: string) =>
+      set((state) => {
+        const chart = state.charts[chartId];
+        if (!chart) {
+          throw new Error(`Chart with id ${chartId} does not exist.`);
+        }
+        return {
+          charts: {
+            ...state.charts,
+            [chartId]: { ...chart, name: newName },
+          },
+        };
+      }),
+  },
 }));
+
+export const useSelectedChartId = () => useChannelChartsStore((state) => state.selectedChartId);
+export const useCharts = () => useChannelChartsStore((state) => state.charts);
+export const useChannelChartsActions = () => useChannelChartsStore((state) => state.actions);
