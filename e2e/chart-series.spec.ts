@@ -4,6 +4,8 @@ import { mapToChartSerie } from '@renderer/components/Chart/mapToChartSerie';
 
 import test3Fixture from '../fixtures/test3.json';
 
+import { createChart } from './support/createChart';
+import { getChartTitles } from './support/getChartTitles';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 import { triggerFileOpenShortcut } from './support/triggerFileOpenShortcut';
@@ -40,89 +42,92 @@ test.describe('Chart channel selection', () => {
   });
 
   test('adds the Voltage serie to the selected chart', async () => {
-    const chartId = await createAndSelectChart(mainPage);
+    const chartTitle = await createAndSelectChart(mainPage);
 
     await clickSidebarChannel(mainPage, 'Voltage (V)');
-    await expectSelectedChartId(mainPage, chartId);
+    await expectSelectedChart(mainPage, chartTitle);
 
-    await expectChartSeries(mainPage, chartId, [expectedVoltageSummary]);
+    await expectChartSeries(mainPage, chartTitle, [expectedVoltageSummary]);
   });
 
   test('adds the Frequency serie to the selected chart', async () => {
-    const chartId = await createAndSelectChart(mainPage);
+    const chartTitle = await createAndSelectChart(mainPage);
 
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChartId(mainPage, chartId);
+    await expectSelectedChart(mainPage, chartTitle);
 
-    await expectChartSeries(mainPage, chartId, [expectedFrequencySummary]);
+    await expectChartSeries(mainPage, chartTitle, [expectedFrequencySummary]);
   });
 
   test('allows selecting both series on the same chart', async () => {
-    const chartId = await createAndSelectChart(mainPage);
+    const chartTitle = await createAndSelectChart(mainPage);
 
     await clickSidebarChannel(mainPage, 'Voltage (V)');
-    await expectSelectedChartId(mainPage, chartId);
-    await expectChartSeries(mainPage, chartId, [expectedVoltageSummary]);
+    await expectSelectedChart(mainPage, chartTitle);
+    await expectChartSeries(mainPage, chartTitle, [expectedVoltageSummary]);
 
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChartId(mainPage, chartId);
+    await expectSelectedChart(mainPage, chartTitle);
 
-    await expectChartSeries(mainPage, chartId, [expectedVoltageSummary, expectedFrequencySummary]);
+    await expectChartSeries(mainPage, chartTitle, [
+      expectedVoltageSummary,
+      expectedFrequencySummary,
+    ]);
   });
 
   test('allows switching the selected serie within a chart', async () => {
-    const chartId = await createAndSelectChart(mainPage);
+    const chartTitle = await createAndSelectChart(mainPage);
 
     await clickSidebarChannel(mainPage, 'Voltage (V)');
-    await expectChartSeries(mainPage, chartId, [expectedVoltageSummary]);
+    await expectChartSeries(mainPage, chartTitle, [expectedVoltageSummary]);
 
     await clickSidebarChannel(mainPage, 'Voltage (V)');
-    await expectSelectedChartId(mainPage, chartId);
-    await expectChartSeries(mainPage, chartId, []);
+    await expectSelectedChart(mainPage, chartTitle);
+    await expectChartSeries(mainPage, chartTitle, []);
 
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChartId(mainPage, chartId);
-    await expectChartSeries(mainPage, chartId, [expectedFrequencySummary]);
+    await expectSelectedChart(mainPage, chartTitle);
+    await expectChartSeries(mainPage, chartTitle, [expectedFrequencySummary]);
 
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChartId(mainPage, chartId);
-    await expectChartSeries(mainPage, chartId, []);
+    await expectSelectedChart(mainPage, chartTitle);
+    await expectChartSeries(mainPage, chartTitle, []);
   });
 
   test('keeps channel selections isolated per chart', async () => {
-    const firstChartId = await createAndSelectChart(mainPage);
+    const firstChartTitle = await createAndSelectChart(mainPage);
     await clickSidebarChannel(mainPage, 'Voltage (V)');
-    await expectChartSeries(mainPage, firstChartId, [expectedVoltageSummary]);
+    await expectChartSeries(mainPage, firstChartTitle, [expectedVoltageSummary]);
 
-    const secondChartId = await createAndSelectChart(mainPage);
+    const secondChartTitle = await createAndSelectChart(mainPage);
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectChartSeries(mainPage, secondChartId, [expectedFrequencySummary]);
+    await expectChartSeries(mainPage, secondChartTitle, [expectedFrequencySummary]);
 
-    await expectChartSeries(mainPage, firstChartId, [expectedVoltageSummary]);
+    await expectChartSeries(mainPage, firstChartTitle, [expectedVoltageSummary]);
   });
 
   test('creates new charts from the New Chart button', async () => {
-    const firstChartId = await createChart(mainPage);
-    await expect(mainPage.getByRole('heading', { name: new RegExp(firstChartId) })).toBeVisible();
+    const firstChartTitle = await createChart(mainPage);
+    await expect(chartTitleButton(mainPage, firstChartTitle)).toHaveText(firstChartTitle);
 
-    const secondChartId = await createChart(mainPage);
+    const secondChartTitle = await createChart(mainPage);
 
-    await expect(mainPage.getByRole('heading', { name: new RegExp(secondChartId) })).toBeVisible();
+    await expect(chartTitleButton(mainPage, secondChartTitle)).toHaveText(secondChartTitle);
     await expect(mainPage.locator('.echarts-for-react')).toHaveCount(2);
   });
 
   test('switches the selected chart when clicking different charts', async () => {
-    const firstChartId = await createChart(mainPage);
-    const secondChartId = await createChart(mainPage);
+    const firstChartTitle = await createChart(mainPage);
+    const secondChartTitle = await createChart(mainPage);
 
-    await selectChartById(mainPage, firstChartId);
-    await expectSelectedChartId(mainPage, firstChartId);
+    await selectChartByTitle(mainPage, firstChartTitle);
+    await expectSelectedChart(mainPage, firstChartTitle);
 
-    await selectChartById(mainPage, secondChartId);
-    await expectSelectedChartId(mainPage, secondChartId);
+    await selectChartByTitle(mainPage, secondChartTitle);
+    await expectSelectedChart(mainPage, secondChartTitle);
 
-    await selectChartById(mainPage, secondChartId);
-    await expectSelectedChartId(mainPage, null);
+    await selectChartByTitle(mainPage, secondChartTitle);
+    await expectSelectedChart(mainPage, null);
   });
 });
 
@@ -195,86 +200,67 @@ async function openAndExpandTest3File(app: ElectronApplication, page: Page): Pro
 }
 
 async function createAndSelectChart(page: Page): Promise<string> {
-  const chartId = await createChart(page);
-  await selectChartById(page, chartId);
-  return chartId;
-}
-
-async function createChart(page: Page): Promise<string> {
-  const before = await getChartIds(page);
-
-  await page.getByRole('button', { name: 'New Chart' }).click();
-
-  const headingsLocator = page.locator('h2', { hasText: /^Chart ID:/ });
-  await expect(headingsLocator).toHaveCount(before.length + 1);
-
-  const after = await getChartIds(page);
-
-  const newChartId = after.find((id) => !before.includes(id));
-  return newChartId ?? after[after.length - 1];
+  const chartTitle = await createChart(page);
+  await selectChartByTitle(page, chartTitle);
+  return chartTitle;
 }
 
 async function clickSidebarChannel(page: Page, channelLabel: string): Promise<void> {
   await page.getByRole('button', { name: channelLabel }).click();
 }
 
-async function selectChartById(page: Page, chartId: string): Promise<void> {
-  const chartLocator = chartContainer(page, chartId);
+async function selectChartByTitle(page: Page, chartTitle: string): Promise<void> {
+  const chartLocator = chartContainer(page, chartTitle);
 
   await chartLocator.waitFor({ state: 'visible' });
 
-  const currentSelected = await getSelectedChartId(page);
-  const expectedSelection = currentSelected === chartId ? null : chartId;
+  const currentSelected = await getSelectedChartTitle(page);
+  const expectedSelectionTitle = currentSelected === chartTitle ? null : chartTitle;
 
   await chartLocator.click();
-  await expectSelectedChartId(page, expectedSelection);
+  await expectSelectedChart(page, expectedSelectionTitle);
 }
 
-async function expectSelectedChartId(page: Page, expectedId: string | null): Promise<void> {
-  await expect.poll(async () => await getSelectedChartId(page)).toBe(expectedId);
+async function expectSelectedChart(page: Page, expectedTitle: string | null): Promise<void> {
+  await expect.poll(async () => await getSelectedChartTitle(page)).toBe(expectedTitle);
 }
 
 async function expectChartSeries(
   page: Page,
-  chartId: string,
+  chartTitle: string,
   expected: RenderedSerieSummary[],
 ): Promise<void> {
   const expectedSnapshot = expected.map(buildComparisonSnapshot);
 
   await expect
     .poll(async () => {
-      const renderedSeries = await getRenderedSeriesSummary(page, chartId);
+      const renderedSeries = await getRenderedSeriesSummary(page, chartTitle);
       return renderedSeries.map(buildComparisonSnapshot);
     })
     .toEqual(expectedSnapshot);
 }
 
-async function getChartIndex(page: Page, chartId: string): Promise<number> {
-  const chartIds = await getChartIds(page);
-  const index = chartIds.indexOf(chartId);
+async function getChartIndex(page: Page, chartTitle: string): Promise<number> {
+  const chartTitles = await getChartTitles(page);
+  const index = chartTitles.indexOf(chartTitle);
 
   if (index === -1) {
-    throw new Error(`Chart with id ${chartId} was not found.`);
+    throw new Error(`Chart with title "${chartTitle}" was not found.`);
   }
 
   return index;
 }
 
-async function getChartIds(page: Page): Promise<string[]> {
-  const texts = await page.locator('h2', { hasText: /^Chart ID:/ }).allTextContents();
-  return texts.map((text) => text.replace('Chart ID:', '').trim());
-}
+async function getSelectedChartTitle(page: Page): Promise<string | null> {
+  const chartTitles = await getChartTitles(page);
 
-async function getSelectedChartId(page: Page): Promise<string | null> {
-  const chartIds = await getChartIds(page);
-
-  for (const id of chartIds) {
-    const isSelected = await chartContainer(page, id).evaluate((element) =>
+  for (const title of chartTitles) {
+    const isSelected = await chartContainer(page, title).evaluate((element) =>
       element.className.includes('border-slate-900/35'),
     );
 
     if (isSelected) {
-      return id;
+      return title;
     }
   }
 
@@ -283,9 +269,9 @@ async function getSelectedChartId(page: Page): Promise<string | null> {
 
 async function getRenderedSeriesSummary(
   page: Page,
-  chartId: string,
+  chartTitle: string,
 ): Promise<RenderedSerieSummary[]> {
-  const chartIndex = await getChartIndex(page, chartId);
+  const chartIndex = await getChartIndex(page, chartTitle);
 
   return page.evaluate(
     async ({ chartIndex: idx }) => {
@@ -376,14 +362,16 @@ async function getRenderedSeriesSummary(
   );
 }
 
-function chartSection(page: Page, chartId: string) {
-  return page
-    .locator('div.p-4.w-full')
-    .filter({ has: page.getByRole('heading', { name: `Chart ID: ${chartId}` }) });
+function chartContainer(page: Page, chartTitle: string) {
+  return chartTitleButton(page, chartTitle)
+    .locator('..')
+    .locator('..')
+    .locator('div.border-2')
+    .first();
 }
 
-function chartContainer(page: Page, chartId: string) {
-  return chartSection(page, chartId).locator('div.border-2').first();
+function chartTitleButton(page: Page, chartTitle: string) {
+  return page.getByRole('button', { name: chartTitle });
 }
 
 function buildComparisonSnapshot(summary: RenderedSerieSummary): SerieComparisonSnapshot {
