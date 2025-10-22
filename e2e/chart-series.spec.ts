@@ -363,11 +363,7 @@ async function getRenderedSeriesSummary(
 }
 
 function chartContainer(page: Page, chartTitle: string) {
-  return chartTitleButton(page, chartTitle)
-    .locator('..')
-    .locator('..')
-    .locator('div.border-2')
-    .first();
+  return chartTitleButton(page, chartTitle).locator('..').locator('div.border-2').first();
 }
 
 function chartTitleButton(page: Page, chartTitle: string) {
