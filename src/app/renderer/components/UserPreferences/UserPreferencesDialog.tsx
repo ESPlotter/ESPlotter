@@ -1,12 +1,5 @@
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  PlusIcon,
-  RotateCcwIcon,
-  Trash2Icon,
-  SlidersHorizontalIcon,
-} from 'lucide-react';
-import { JSX, useState } from 'react';
+import { PlusIcon, RotateCcwIcon, Trash2Icon } from 'lucide-react';
+import { JSX, useMemo, useState } from 'react';
 
 import {
   useUserPreferencesActions,
@@ -17,17 +10,9 @@ import {
 import { Button } from '@shadcn/components/ui/button';
 import { Input } from '@shadcn/components/ui/input';
 import { Separator } from '@shadcn/components/ui/separator';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@shadcn/components/ui/sheet';
 import { normalizeChartSeriesColor } from '@shared/domain/validators/normalizeChartSeriesColor';
 
-export function UserPreferencesDialog(): JSX.Element {
+export function UserPreferencesDialog(): JSX.Element | null {
   const palette = useUserPreferencesChartSeriesPalette();
   const isDialogOpen = useUserPreferencesDialogState();
   const validationErrors = useUserPreferencesValidationErrors();
@@ -40,15 +25,21 @@ export function UserPreferencesDialog(): JSX.Element {
     closeDialog,
     setChartSeriesPalette,
   } = useUserPreferencesActions();
+
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [draftColor, setDraftColor] = useState<string>('');
 
-  const invalidIndices = new Set<number>();
-  palette.forEach((color, index) => {
-    if (!normalizeChartSeriesColor(color)) {
-      invalidIndices.add(index);
-    }
-  });
+  const invalidIndices = useMemo(() => {
+    const invalid = new Set<number>();
+    palette.forEach((color, index) => {
+      if (!normalizeChartSeriesColor(color)) {
+        invalid.add(index);
+      }
+    });
+    return invalid;
+  }, [palette]);
 
   async function handleSave() {
     if (validationErrors.length > 0 || invalidIndices.size > 0) {
@@ -80,54 +71,108 @@ export function UserPreferencesDialog(): JSX.Element {
     closeDialog();
   }
 
+  if (!isDialogOpen) {
+    return null;
+  }
+
   return (
-    <Sheet open={isDialogOpen} onOpenChange={(open) => (!open ? void handleCancel() : undefined)}>
-      <SheetContent side="right" className="sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle>User Preferences</SheetTitle>
-          <SheetDescription>Organize the chart series palette used across all charts.</SheetDescription>
-        </SheetHeader>
-
-        <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Chart Series Palette
-            </h2>
-            <Button variant="ghost" size="sm" onClick={() => resetToDefaults()}>
-              <RotateCcwIcon className="mr-2 size-4" /> Reset to defaults
-            </Button>
-          </div>
-          <Separator />
-
-          <div className="flex flex-col gap-3">
-            {palette.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                The palette is empty. Random colors will be generated when charts need them.
-              </p>
-            )}
-            {palette.map((color, index) => (
-              <PaletteRow
-                key={`${color}-${index}`}
-                value={color}
-                index={index}
-                total={palette.length}
-                onChangeColor={(value) => replaceColor(index, value)}
-                onRemove={() => removeColor(index)}
-                onMoveUp={() => reorder(index, index - 1)}
-                onMoveDown={() => reorder(index, index + 1)}
-                isInvalid={invalidIndices.has(index)}
-              />
-            ))}
-          </div>
-
-          <div>
-            <Button onClick={() => addColor()} variant="outline" className="w-full">
-              <PlusIcon className="mr-2 size-4" /> Add colour
-            </Button>
-          </div>
+    <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col bg-background">
+      <header className="flex items-center justify-between border-b px-6 py-4 shadow-sm lg:px-10">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Preferences
+          </p>
+          <h1 className="text-2xl font-semibold">User Preferences</h1>
+          <p className="text-sm text-muted-foreground">
+            Organize all application settings from a single, full-width workspace.
+          </p>
         </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => void handleCancel()} disabled={isSaving}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => void handleSave()}
+            disabled={isSaving || validationErrors.length > 0 || invalidIndices.size > 0}
+          >
+            {isSaving ? 'Saving...' : 'Save'}
+          </Button>
+        </div>
+      </header>
 
-        <SheetFooter>
+      <div className="grid flex-1 grid-cols-1 gap-6 overflow-hidden px-6 py-6 lg:grid-cols-[280px_1fr] lg:px-10">
+        <nav className="flex flex-col gap-2 rounded-lg border bg-muted/40 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Sections
+          </p>
+          <Button variant="secondary" className="justify-start" disabled>
+            Appearance (actual)
+          </Button>
+          <Button variant="ghost" className="justify-start" disabled>
+            Data & Storage (pronto)
+          </Button>
+          <Button variant="ghost" className="justify-start" disabled>
+            Shortcuts (pronto)
+          </Button>
+          <Button variant="ghost" className="justify-start" disabled>
+            Notifications (pronto)
+          </Button>
+        </nav>
+
+        <div className="flex flex-col gap-6 overflow-y-auto pr-1">
+          <section className="flex flex-col gap-4 rounded-lg border bg-muted/30 p-5 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Chart Series Palette
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Reorder, edit or add colours. Click a swatch to edit.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={() => resetToDefaults()}>
+                  <RotateCcwIcon className="mr-2 size-4" /> Reset to defaults
+                </Button>
+                <Button onClick={() => addColor()} variant="outline" size="sm">
+                  <PlusIcon className="mr-2 size-4" /> Add colour
+                </Button>
+              </div>
+            </div>
+            <Separator />
+
+            <div className="flex flex-col gap-4">
+              <p className="text-sm text-muted-foreground">
+                Estos colores se usan en todas las series de tus gráficas, en orden. Ajusta cada
+                tono para mantener contraste y consistencia visual.
+              </p>
+
+              {palette.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  The palette is empty. Random colors will be generated when charts need them.
+                </p>
+              )}
+                <CompactPalette
+                  palette={palette}
+                  invalidIndices={invalidIndices}
+                  editingIndex={editingIndex}
+                  draftColor={draftColor}
+                  onSelect={(index) => {
+                    setEditingIndex(index);
+                    setDraftColor(palette[index] ?? '');
+                  }}
+                  onChangeDraft={(value) => setDraftColor(value)}
+                  onSave={(index) => {
+                    replaceColor(index, draftColor);
+                    setEditingIndex(null);
+                  }}
+                  onCancel={() => setEditingIndex(null)}
+                  onReorder={(source, target) => reorder(source, target)}
+                  onRemove={(index) => removeColor(index)}
+                />
+              </div>
+          </section>
+
           {(validationErrors.length > 0 || saveError) && (
             <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
               <ul className="list-disc space-y-1 pl-4">
@@ -138,194 +183,168 @@ export function UserPreferencesDialog(): JSX.Element {
               </ul>
             </div>
           )}
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => void handleCancel()} disabled={isSaving}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => void handleSave()}
-              disabled={isSaving || validationErrors.length > 0 || invalidIndices.size > 0}
-            >
-              {isSaving ? 'Saving...' : 'Save'}
-            </Button>
-          </div>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
-}
 
-function PaletteRow({
-  value,
-  index,
-  total,
-  onChangeColor,
-  onRemove,
-  onMoveUp,
-  onMoveDown,
-  isInvalid,
-}: {
-  value: string;
-  index: number;
-  total: number;
-  onChangeColor: (value: string) => void;
-  onRemove: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  isInvalid: boolean;
-}) {
-  const normalized = normalizeChartSeriesColor(value) ?? 'rgb(0, 0, 0)';
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const channels = parseColorChannels(value);
-
-  return (
-    <div className="flex flex-col gap-2 rounded-md border border-border p-3">
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          aria-label={`Pick colour ${index + 1}`}
-          className="h-10 w-14 rounded-md border border-border transition-transform focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          style={{ backgroundColor: normalized }}
-          onClick={() => setIsPickerOpen((current) => !current)}
-        />
-        <Input
-          value={value}
-          onChange={(event) => onChangeColor(event.target.value)}
-          aria-label={`Colour ${index + 1}`}
-          className={isInvalid ? 'border-destructive focus-visible:ring-destructive' : undefined}
-        />
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="text-xs text-muted-foreground">Position {index + 1}</div>
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsPickerOpen((open) => !open)}
-            aria-label={isPickerOpen ? 'Hide colour sliders' : 'Adjust colour with sliders'}
-          >
-            <SlidersHorizontalIcon className={`size-4 ${isPickerOpen ? 'text-foreground' : ''}`} />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onMoveUp}
-            disabled={index === 0}
-          >
-            <ArrowUpIcon className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onMoveDown}
-            disabled={index === total - 1}
-          >
-            <ArrowDownIcon className="size-4" />
-          </Button>
-          <Button type="button" variant="ghost" size="icon" onClick={onRemove}>
-            <Trash2Icon className="size-4" />
-          </Button>
+          <section className="flex flex-col gap-3 rounded-lg border border-dashed bg-muted/10 p-5 text-sm text-muted-foreground">
+            <p className="text-sm font-semibold text-foreground">More preferences coming</p>
+            <p>Layout here is ready for additional sections (data, shortcuts, notifications).</p>
+          </section>
         </div>
       </div>
-      {isPickerOpen && (
-        <div className="flex flex-col gap-3 rounded-md border border-border/60 bg-muted/20 p-3">
-          <ChannelSlider
-            label="Red"
-            value={channels.r}
-            max={255}
-            onChange={(next) => onChangeColor(fromChannels({ ...channels, r: next }))}
-          />
-          <ChannelSlider
-            label="Green"
-            value={channels.g}
-            max={255}
-            onChange={(next) => onChangeColor(fromChannels({ ...channels, g: next }))}
-          />
-          <ChannelSlider
-            label="Blue"
-            value={channels.b}
-            max={255}
-            onChange={(next) => onChangeColor(fromChannels({ ...channels, b: next }))}
-          />
-          <ChannelSlider
-            label="Opacity"
-            value={Math.round(channels.a * 100)}
-            max={100}
-            step={1}
-            onChange={(next) =>
-              onChangeColor(fromChannels({ ...channels, a: Number((next / 100).toFixed(2)) }))
-            }
-          />
-        </div>
-      )}
+
     </div>
   );
 }
 
-function ChannelSlider({
-  label,
-  value,
-  max,
-  step = 1,
-  onChange,
+function CompactPalette({
+  palette,
+  invalidIndices,
+  editingIndex,
+  draftColor,
+  onSelect,
+  onChangeDraft,
+  onSave,
+  onCancel,
+  onReorder,
+  onRemove,
 }: {
-  label: string;
-  value: number;
-  max: number;
-  step?: number;
-  onChange: (value: number) => void;
+  palette: string[];
+  invalidIndices: Set<number>;
+  editingIndex: number | null;
+  draftColor: string;
+  onSelect: (index: number) => void;
+  onChangeDraft: (value: string) => void;
+  onSave: (index: number) => void;
+  onCancel: () => void;
+  onReorder: (sourceIndex: number, targetIndex: number) => void;
+  onRemove: (index: number) => void;
 }) {
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  function handleDrop(targetIndex: number) {
+    if (dragIndex === null || dragIndex === targetIndex) return;
+    onReorder(dragIndex, targetIndex);
+    setDragIndex(null);
+    setDragOverIndex(null);
+  }
+
   return (
-    <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-      {label}
-      <div className="flex items-center gap-2">
-        <input
-          type="range"
-          min={0}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(event) => onChange(Number.parseInt(event.target.value, 10))}
-          className="flex-1"
-        />
-        <span className="w-12 text-right text-foreground text-xs">{value}</span>
-      </div>
-    </label>
+    <div className="flex flex-col gap-3">
+      {palette.map((color, index) => {
+        const isDragSource = dragIndex === index;
+        const isDragTarget = dragOverIndex === index && !isDragSource;
+
+        return (
+        <div
+          key={`${color}-${index}`}
+          className={`group rounded-md border border-border/70 bg-background p-3 shadow-sm transition ${
+            isDragSource ? 'opacity-60 ring-2 ring-primary/40' : ''
+          } ${isDragTarget ? 'ring-2 ring-dashed ring-primary/50' : ''}`}
+          draggable
+          onDragStart={() => {
+            setDragIndex(index);
+            setDragOverIndex(index);
+          }}
+          onDragOver={(event) => {
+            event.preventDefault();
+            if (dragOverIndex !== index) {
+              setDragOverIndex(index);
+            }
+          }}
+          onDragLeave={() => {
+            if (dragOverIndex === index) {
+              setDragOverIndex(null);
+            }
+          }}
+          onDrop={() => handleDrop(index)}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 text-center text-xs font-semibold text-muted-foreground bg-muted/40 rounded border">
+              {index + 1}
+            </div>
+            <button
+              type="button"
+              aria-label={`Edit colour ${index + 1}`}
+              onClick={() => onSelect(index)}
+              className={`flex h-12 flex-1 items-center justify-start gap-3 rounded-md border px-3 transition focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 ${invalidIndices.has(index) ? 'border-destructive' : 'border-border'}`}
+              style={{ backgroundColor: normalizeChartSeriesColor(color) ?? color }}
+            >
+              <span className="text-xs font-medium text-muted-foreground bg-background/70 rounded px-2 py-1">
+                {color}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onRemove(index)}
+              className="rounded p-2 hover:bg-muted"
+              aria-label="Remove colour"
+            >
+              <Trash2Icon className="size-4" />
+            </button>
+          </div>
+
+          {editingIndex === index && (
+            <div className="mt-3 space-y-2 rounded-md border border-border/70 bg-muted/10 p-3 shadow-inner">
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  aria-label="Pick colour"
+                  className="h-10 w-16 cursor-pointer rounded border border-border bg-transparent"
+                  value={toHexOrFallback(draftColor || color)}
+                  onChange={(event) => onChangeDraft(hexToRgb(event.target.value))}
+                />
+                <Input
+                  value={draftColor}
+                  onChange={(event) => onChangeDraft(event.target.value)}
+                  placeholder={normalizeChartSeriesColor(color) ?? 'rgb(59, 130, 246)'}
+                  aria-label="Colour value"
+                  className="flex-1 text-xs"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button size="sm" variant="ghost" onClick={onCancel}>
+                  Close
+                </Button>
+                <Button size="sm" onClick={() => onSave(index)}>
+                  Save
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+        );
+      })}
+    </div>
   );
 }
 
-function parseColorChannels(color: string): { r: number; g: number; b: number; a: number } {
-  const normalized = normalizeChartSeriesColor(color) ?? 'rgb(0, 0, 0)';
-  const match = normalized.match(/rgba?\((\d+), (\d+), (\d+)(?:, ([0-9.]+))?\)/);
+function toHexOrFallback(color: string): string {
+  const element = document.createElement('div');
+  element.style.color = color;
+  document.body.appendChild(element);
+  const computed = getComputedStyle(element).color;
+  document.body.removeChild(element);
+
+  const match = computed.match(/rgb\((\d+), (\d+), (\d+)\)/);
   if (!match) {
-    return { r: 0, g: 0, b: 0, a: 1 };
+    return '#000000';
   }
-  const [, r, g, b, a] = match;
-  return {
-    r: Number.parseInt(r, 10),
-    g: Number.parseInt(g, 10),
-    b: Number.parseInt(b, 10),
-    a: a !== undefined ? Number.parseFloat(a) : 1,
-  };
+  const [, r, g, b] = match.map(Number);
+  const toHex = (value: number) => value.toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
-function fromChannels({ r, g, b, a }: { r: number; g: number; b: number; a: number }): string {
-  const clamped = {
-    r: clamp(r, 0, 255),
-    g: clamp(g, 0, 255),
-    b: clamp(b, 0, 255),
-    a: clamp(a, 0, 1),
-  };
-  const raw =
-    clamped.a >= 1
-      ? `rgb(${clamped.r}, ${clamped.g}, ${clamped.b})`
-      : `rgba(${clamped.r}, ${clamped.g}, ${clamped.b}, ${Math.round(clamped.a * 100) / 100})`;
-  return normalizeChartSeriesColor(raw) ?? raw;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
+function hexToRgb(hex: string): string {
+  const normalized = hex.replace('#', '');
+  if (normalized.length === 3) {
+    const [r, g, b] = normalized.split('').map((ch) => ch + ch);
+    return `rgb(${Number.parseInt(r, 16)}, ${Number.parseInt(g, 16)}, ${Number.parseInt(b, 16)})`;
+  }
+  if (normalized.length === 6) {
+    const r = normalized.slice(0, 2);
+    const g = normalized.slice(2, 4);
+    const b = normalized.slice(4, 6);
+    return `rgb(${Number.parseInt(r, 16)}, ${Number.parseInt(g, 16)}, ${Number.parseInt(b, 16)})`;
+  }
+  return normalizeChartSeriesColor(hex) ?? hex;
 }

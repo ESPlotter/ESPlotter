@@ -1,5 +1,4 @@
 import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useUserPreferencesActions } from '@renderer/store/UserPreferencesStore';
@@ -12,7 +11,9 @@ declare global {
     userPreferences: {
       getChartSeriesPalette: () => Promise<string[]>;
       updateChartSeriesPalette: (palette: string[]) => Promise<{ chartSeriesPalette: string[] }>;
-      onChanged: (listener: (preferences: { chartSeriesPalette: string[] }) => void) => () => void;
+      onChangedChartSeriesPalette: (
+        listener: (preferences: { chartSeriesPalette: string[] }) => void,
+      ) => () => void;
       onOpenRequested: (listener: () => void) => () => void;
     };
   }
@@ -22,7 +23,7 @@ describe('UserPreferencesDialog', () => {
   const userPreferencesMock = {
     getChartSeriesPalette: vi.fn(),
     updateChartSeriesPalette: vi.fn(),
-    onChanged: vi.fn(),
+    onChangedChartSeriesPalette: vi.fn(),
     onOpenRequested: vi.fn(),
   };
 
@@ -31,7 +32,7 @@ describe('UserPreferencesDialog', () => {
     userPreferencesMock.updateChartSeriesPalette.mockResolvedValue({
       chartSeriesPalette: DEFAULT_CHART_SERIES_PALETTE,
     });
-    userPreferencesMock.onChanged.mockReturnValue(() => {});
+    userPreferencesMock.onChangedChartSeriesPalette.mockReturnValue(() => {});
     userPreferencesMock.onOpenRequested.mockReturnValue(() => {});
     window.userPreferences = userPreferencesMock as unknown as Window['userPreferences'];
   });
@@ -49,9 +50,7 @@ describe('UserPreferencesDialog', () => {
     });
 
     const inputs = await screen.findAllByLabelText(/Colour/);
-    const user = userEvent.setup();
-    await user.clear(inputs[0]);
-    await user.type(inputs[0], 'invalid-colour');
+    fireEvent.change(inputs[0], { target: { value: 'invalid-colour' } });
 
     const saveButton = screen.getByRole('button', { name: /save/i });
     expect(saveButton).toBeDisabled();
@@ -66,8 +65,7 @@ describe('UserPreferencesDialog', () => {
     });
 
     const swatch = await screen.findByLabelText('Pick colour 1');
-    const user = userEvent.setup();
-    await user.click(swatch);
+    fireEvent.click(swatch);
 
     expect(screen.getByText('Red')).toBeInTheDocument();
 
@@ -86,8 +84,7 @@ describe('UserPreferencesDialog', () => {
     });
 
     const saveButton = await screen.findByRole('button', { name: /save/i });
-    const user = userEvent.setup();
-    await user.click(saveButton);
+    fireEvent.click(saveButton);
 
     expect(userPreferencesMock.updateChartSeriesPalette).toHaveBeenCalledWith(
       DEFAULT_CHART_SERIES_PALETTE,

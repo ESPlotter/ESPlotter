@@ -4,10 +4,11 @@ import path from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ElectronStoreUserPreferencesRepository } from '@main/user-preferences/infrastructure/repositories/ElectronStoreUserPreferencesRepository';
 import { UserPreferences } from '@main/user-preferences/domain/entities/UserPreferences';
-import { UserPreferencesPrimitiveMother } from '../../../../shared/domain/primitives/UserPreferencesPrimitiveMother';
+import { ElectronStoreUserPreferencesRepository } from '@main/user-preferences/infrastructure/repositories/ElectronStoreUserPreferencesRepository';
 import { BaseElectronStore } from '@shared/infrastructure/repositories/BaseElectronStore';
+
+import { UserPreferencesPrimitiveMother } from '../../../../shared/domain/primitives/UserPreferencesPrimitiveMother';
 
 let repository: ElectronStoreUserPreferencesRepository;
 
