@@ -1,7 +1,11 @@
-import { BrowserWindow, Menu, type MenuItemConstructorOptions } from 'electron';
+import { app, BrowserWindow, Menu, type MenuItemConstructorOptions } from 'electron';
+
+import { webContentsBroadcast } from '@main/shared/ipc/webContentsBroadcast';
 
 export function registerMainMenu(): void {
+  const isMac = process.platform === 'darwin';
   const template: MenuItemConstructorOptions[] = [
+    ...(isMac ? [buildMacAppMenu()] : []),
     {
       label: 'File',
       submenu: [
@@ -20,12 +24,32 @@ export function registerMainMenu(): void {
             await addNewOpenedFilePath(selected);
           },
         },
+        ...(isMac
+          ? []
+          : [{ type: 'separator' } as MenuItemConstructorOptions, createPreferencesMenuItem()]),
       ],
     },
   ];
 
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
+}
+
+function buildMacAppMenu(): MenuItemConstructorOptions {
+  return {
+    label: app.name,
+    submenu: [createPreferencesMenuItem(), { type: 'separator' }, { role: 'quit' }],
+  };
+}
+
+function createPreferencesMenuItem(): MenuItemConstructorOptions {
+  return {
+    label: 'Preferences',
+    accelerator: 'CmdOrCtrl+,',
+    click: () => {
+      webContentsBroadcast('userPreferencesOpenRequested', undefined);
+    },
+  };
 }
 
 async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {

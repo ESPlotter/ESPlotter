@@ -5,12 +5,12 @@ type StoreRecord = Record<string, unknown>;
 export abstract class BaseElectronStore<T extends StoreRecord> {
   private static stores = new Map<string, Store<StoreRecord>>();
 
-  protected stateStore: Store<T>;
+  protected store: Store<T>;
 
   protected constructor(name: string, schema: Schema<T>) {
     const existing = BaseElectronStore.stores.get(name);
     if (existing) {
-      this.stateStore = existing as Store<T>;
+      this.store = existing as Store<T>;
       return;
     }
 
@@ -21,6 +21,6 @@ export abstract class BaseElectronStore<T extends StoreRecord> {
     });
 
     BaseElectronStore.stores.set(name, store as Store<StoreRecord>);
-    this.stateStore = store;
+    this.store = store;
   }
 }

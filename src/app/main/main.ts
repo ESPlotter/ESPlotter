@@ -7,6 +7,7 @@ import { app, BrowserWindow, globalShortcut } from 'electron';
 import { registerChannelFileObservers } from '@main/channel-file/infrastructure/observers/registerChannelFileObservers';
 import { registerMainIpcHandlers } from '@main/shared/ipc/registerMainIpcHandlers';
 import { registerMainMenu } from '@main/shared/menu/registerMainMenu';
+import { registerUserPreferencesObservers } from '@main/user-preferences/infrastructure/observers/registerUserPreferencesObservers';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -66,6 +67,7 @@ const createWindow = () => {
 app.whenReady().then(() => {
   registerMainIpcHandlers();
   registerChannelFileObservers();
+  registerUserPreferencesObservers();
   registerMainMenu();
   createWindow();
 });

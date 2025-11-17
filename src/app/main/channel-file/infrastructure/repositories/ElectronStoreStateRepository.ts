@@ -27,11 +27,11 @@ export class ElectronStoreStateRepository
 
   public async saveOpenedChannelFiles(files: ChannelFile[]): Promise<void> {
     const paths = files.map((file) => file.path);
-    this.stateStore.set('openedFilePath', paths);
+    this.store.set('openedFilePath', paths);
   }
 
   public async getLastOpenedChannelFile(): Promise<ChannelFile | null> {
-    const path = this.stateStore.get('openedFilePath')?.[0];
+    const path = this.store.get('openedFilePath')?.[0];
     if (!path) {
       return null;
     }
@@ -39,14 +39,14 @@ export class ElectronStoreStateRepository
   }
 
   public async getOpenedChannelFiles(): Promise<ChannelFile[]> {
-    const paths = this.stateStore.get('openedFilePath') ?? [];
+    const paths = this.store.get('openedFilePath') ?? [];
     const results = await Promise.all(paths.map((path) => this.fileService.readChannelFile(path)));
 
     return results;
   }
 
   public onLastOpenedChannelFileChange(cb: (file: ChannelFile | null) => void): () => void {
-    return this.stateStore.onDidChange('openedFilePath', async (paths) => {
+    return this.store.onDidChange('openedFilePath', async (paths) => {
       if (!paths) {
         cb(null);
         return;
