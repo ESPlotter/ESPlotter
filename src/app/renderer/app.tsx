@@ -1,23 +1,29 @@
+import { useMemo } from 'react';
 import { createHashRouter, RouterProvider } from 'react-router';
 
-import { UserPreferencesDialog } from '@renderer/components/UserPreferences/UserPreferencesDialog';
-import { useUserPreferences } from '@renderer/hooks/useUserPreferences';
+import { useOpenPreferencesOnRequest } from './hooks/useOpenPreferencesOnRequest';
+import { HomePage } from './pages/home/page';
+import { UserPreferencesPage } from './pages/preferences/page';
 
-import { HomePage } from './pages/home';
+export type RouterType = ReturnType<typeof createHashRouter>;
 
 export function App() {
-  useUserPreferences();
-  const router = createHashRouter([
-    {
-      path: '/',
-      Component: HomePage,
-    },
-  ]);
-
-  return (
-    <>
-      <RouterProvider router={router} />
-      <UserPreferencesDialog />
-    </>
+  const router = useMemo(
+    () =>
+      createHashRouter([
+        {
+          path: '/',
+          Component: HomePage,
+        },
+        {
+          path: '/preferences',
+          Component: UserPreferencesPage,
+        },
+      ]),
+    [],
   );
+
+  useOpenPreferencesOnRequest(router);
+
+  return <RouterProvider router={router} />;
 }

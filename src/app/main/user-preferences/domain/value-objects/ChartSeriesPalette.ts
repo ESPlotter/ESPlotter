@@ -1,15 +1,7 @@
-import { normalizeChartSeriesColor } from '@shared/domain/validators/normalizeChartSeriesColor';
-
 import { InvalidChartSeriesColorFormatError } from '../errors/InvalidChartSeriesColorFormatError';
 
 export class ChartSeriesPalette {
-  static DEFAULT_VALUE: readonly string[] = [
-    'rgb(59, 130, 246)',
-    'rgb(239, 68, 68)',
-    'rgb(16, 185, 129)',
-    'rgb(245, 158, 11)',
-    'rgb(99, 102, 241)',
-  ];
+  static DEFAULT_VALUE: readonly string[] = ['#3a82f4', '#ef4343', '#10b981', '#f59e0b', '#6366f1'];
 
   private constructor(private colors: string[]) {}
 
@@ -18,12 +10,12 @@ export class ChartSeriesPalette {
       if (typeof color !== 'string') {
         throw new InvalidChartSeriesColorFormatError(String(color), index);
       }
-      const validated = normalizeChartSeriesColor(color);
-      if (!validated) {
+      if (!this.isHexColorString(color)) {
         throw new InvalidChartSeriesColorFormatError(color, index);
       }
-      return validated;
+      return color;
     });
+
     return new ChartSeriesPalette(normalized);
   }
 
@@ -37,5 +29,9 @@ export class ChartSeriesPalette {
 
   public toPrimitives(): string[] {
     return [...this.colors];
+  }
+
+  private static isHexColorString(value: string): boolean {
+    return /^#([0-9A-Fa-f]{8}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{3})$/.test(value); // Matches #RRGGBB, #RGB, #RRGGBBAA, #RGBA
   }
 }

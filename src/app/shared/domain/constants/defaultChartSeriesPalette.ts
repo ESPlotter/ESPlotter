@@ -1,7 +1,7 @@
 export const DEFAULT_CHART_SERIES_PALETTE: readonly string[] = [
-  'rgb(59, 130, 246)',
-  'rgb(239, 68, 68)',
-  'rgb(16, 185, 129)',
-  'rgb(245, 158, 11)',
-  'rgb(99, 102, 241)',
+  '#3B82F6',
+  '#EF4444',
+  '#10B981',
+  '#F59E0B',
+  '#6366F1',
 ];

@@ -1,16 +1,12 @@
 import { create } from 'zustand';
 
+import { generateRandomHexColor } from '@renderer/components/Chart/Chart';
 import { DEFAULT_CHART_SERIES_PALETTE } from '@shared/domain/constants/defaultChartSeriesPalette';
-import { normalizeChartSeriesColor } from '@shared/domain/validators/normalizeChartSeriesColor';
 
 interface UserPreferencesState {
   chartSeriesPalette: string[];
-  isDialogOpen: boolean;
-  validationErrors: string[];
   actions: {
     setChartSeriesPalette: (palette: string[]) => void;
-    openDialog: () => void;
-    closeDialog: () => void;
     replaceColor: (index: number, value: string) => void;
     addColor: (color?: string) => void;
     removeColor: (index: number) => void;
@@ -21,28 +17,11 @@ interface UserPreferencesState {
 
 const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
   chartSeriesPalette: [...DEFAULT_CHART_SERIES_PALETTE],
-  isDialogOpen: false,
-  validationErrors: [],
   actions: {
     setChartSeriesPalette: (palette: string[]) =>
       set(() => ({
         chartSeriesPalette: [...palette],
-        validationErrors: validatePalette(palette),
       })),
-    openDialog: () =>
-      set((state) => {
-        if (state.isDialogOpen) {
-          return state;
-        }
-        return { isDialogOpen: true };
-      }),
-    closeDialog: () =>
-      set((state) => {
-        if (!state.isDialogOpen) {
-          return state;
-        }
-        return { isDialogOpen: false };
-      }),
     replaceColor: (index: number, value: string) =>
       set((state) => {
         if (index < 0 || index >= state.chartSeriesPalette.length) {
@@ -52,15 +31,16 @@ const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
         nextPalette[index] = value.trim();
         return {
           chartSeriesPalette: nextPalette,
-          validationErrors: validatePalette(nextPalette),
         };
       }),
     addColor: (color?: string) =>
       set((state) => {
-        const nextPalette = [...state.chartSeriesPalette, (color ?? generateRandomColor()).trim()];
+        const nextPalette = [
+          ...state.chartSeriesPalette,
+          (color ?? generateRandomHexColor()).trim(),
+        ];
         return {
           chartSeriesPalette: nextPalette,
-          validationErrors: validatePalette(nextPalette),
         };
       }),
     removeColor: (index: number) =>
@@ -71,7 +51,6 @@ const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
         const nextPalette = state.chartSeriesPalette.filter((_, idx) => idx !== index);
         return {
           chartSeriesPalette: nextPalette,
-          validationErrors: validatePalette(nextPalette),
         };
       }),
     reorder: (sourceIndex: number, targetIndex: number) =>
@@ -90,44 +69,17 @@ const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
         nextPalette.splice(targetIndex, 0, moved);
         return {
           chartSeriesPalette: nextPalette,
-          validationErrors: validatePalette(nextPalette),
         };
       }),
     resetToDefaults: () =>
       set(() => ({
         chartSeriesPalette: [...DEFAULT_CHART_SERIES_PALETTE],
-        validationErrors: [],
       })),
   },
 }));
 
-function validatePalette(palette: string[]): string[] {
-  const errors: string[] = [];
-  palette.forEach((value, index) => {
-    if (!normalizeChartSeriesColor(value)) {
-      errors.push(`Color ${index + 1} must be in rgb(...) or rgba(...) format.`);
-    }
-  });
-  return errors;
-}
-
-function generateRandomColor(): string {
-  const r = Math.floor(Math.random() * 256);
-  const g = Math.floor(Math.random() * 256);
-  const b = Math.floor(Math.random() * 256);
-  return `rgb(${r}, ${g}, ${b})`;
-}
-
 export function useUserPreferencesChartSeriesPalette(): string[] {
   return useUserPreferencesStore((state) => state.chartSeriesPalette);
-}
-
-export function useUserPreferencesDialogState(): boolean {
-  return useUserPreferencesStore((state) => state.isDialogOpen);
-}
-
-export function useUserPreferencesValidationErrors(): string[] {
-  return useUserPreferencesStore((state) => state.validationErrors);
 }
 
 export function useUserPreferencesActions() {

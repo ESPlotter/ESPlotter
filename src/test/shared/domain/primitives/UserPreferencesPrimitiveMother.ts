@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker';
 import { PartialDeep } from 'type-fest';
 
 import { DEFAULT_CHART_SERIES_PALETTE } from '@shared/domain/constants/defaultChartSeriesPalette';
@@ -27,14 +26,14 @@ export class UserPreferencesPrimitiveMother {
   }
 
   static randomColor(): string {
-    const format = faker.helpers.arrayElement(['rgb', 'rgba']);
-    const r = faker.number.int({ min: 0, max: 255 });
-    const g = faker.number.int({ min: 0, max: 255 });
-    const b = faker.number.int({ min: 0, max: 255 });
-    if (format === 'rgb') {
-      return `rgb(${r}, ${g}, ${b})`;
+    let hash = 0;
+    for (let i = 0; i < 10; i++) {
+      hash = (hash << 5) - hash + Math.floor(Math.random() * 256);
+      hash |= 0;
     }
-    const a = faker.number.float({ min: 0, max: 1, fractionDigits: 2 });
-    return `rgba(${r}, ${g}, ${b}, ${a})`;
+    const r = (hash >> 16) & 0xff;
+    const g = (hash >> 8) & 0xff;
+    const b = hash & 0xff;
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
   }
 }

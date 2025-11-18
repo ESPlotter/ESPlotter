@@ -13,7 +13,6 @@ import { useMemo } from 'react';
 
 import { useChannelChartsActions } from '@renderer/store/ChannelChartsStore';
 import { useUserPreferencesChartSeriesPalette } from '@renderer/store/UserPreferencesStore';
-import { normalizeChartSeriesColor } from '@shared/domain/validators/normalizeChartSeriesColor';
 
 import { ChartSerie } from './ChartSerie';
 
@@ -52,10 +51,7 @@ export function Chart({
   );
 }
 
-function mergeSeriesWithDefaultParams(
-  series: ChartSerie[],
-  palette: string[],
-): EChartsOption {
+function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): EChartsOption {
   const colors = resolveSeriesColors(series, palette);
   return {
     animation: false,
@@ -97,23 +93,23 @@ function mergeSeriesWithDefaultParams(
 }
 
 function resolveSeriesColors(series: ChartSerie[], palette: string[]): string[] {
-  const normalizedPalette = palette.map((color) => normalizeChartSeriesColor(color));
   return series.map((serie, index) => {
-    const existing = normalizedPalette[index];
+    const existing = palette[index];
     if (existing) {
       return existing;
     }
-    return generateDeterministicColor(`${serie.name}-${index}`);
+    return generateRandomHexColor();
   });
 }
 
-function generateDeterministicColor(seed: string): string {
+export function generateRandomHexColor(): string {
   let hash = 0;
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
+  for (let i = 0; i < 10; i++) {
+    hash = (hash << 5) - hash + Math.floor(Math.random() * 256);
+    hash |= 0;
   }
-  const red = 64 + (hash & 0xff) % 192;
-  const green = 64 + ((hash >> 8) & 0xff) % 192;
-  const blue = 64 + ((hash >> 16) & 0xff) % 192;
-  return `rgb(${red}, ${green}, ${blue})`;
+  const r = (hash >> 16) & 0xff;
+  const g = (hash >> 8) & 0xff;
+  const b = hash & 0xff;
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }

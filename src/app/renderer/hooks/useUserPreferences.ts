@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useUserPreferencesActions } from '@renderer/store/UserPreferencesStore';
 
 export function useUserPreferences(): void {
-  const { setChartSeriesPalette, openDialog } = useUserPreferencesActions();
+  const { setChartSeriesPalette } = useUserPreferencesActions();
 
   useEffect(() => {
     let isMounted = true;
@@ -28,14 +28,4 @@ export function useUserPreferences(): void {
       unsubscribe();
     };
   }, [setChartSeriesPalette]);
-
-  useEffect(() => {
-    const unsubscribe = window.userPreferences.onOpenRequested(() => {
-      openDialog();
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [openDialog]);
 }
