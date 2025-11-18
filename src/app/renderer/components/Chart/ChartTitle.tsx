@@ -64,7 +64,7 @@ export function ChartTitle({ chartId, name }: ChartTitleProps) {
           }
         }}
         aria-label="Chart name"
-        className="text-2xl font-bold mb-2"
+        className="text-2xl font-bold"
       />
     );
   }
@@ -72,7 +72,7 @@ export function ChartTitle({ chartId, name }: ChartTitleProps) {
   return (
     <button
       type="button"
-      className="text-2xl font-bold mb-2 cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="text-2xl font-bold cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       onClick={() => setIsEditing(true)}
     >
       {name}

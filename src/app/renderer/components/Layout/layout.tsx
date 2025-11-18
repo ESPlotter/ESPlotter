@@ -12,14 +12,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="w-full">
-        <div className="flex items-center justify-end border-b px-2">
+      <main className="flex h-screen w-full flex-col">
+        <div className="flex shrink-0 items-center justify-end border-b px-4 py-2">
           {/* <SidebarTrigger /> */}
           <Button variant="outline" className="m-4" onClick={() => addChart(nanoid())}>
             <IconPlus /> New Chart
           </Button>
         </div>
-        {children}
+        <section className="flex-1 overflow-auto p-4">{children}</section>
       </main>
     </SidebarProvider>
   );
