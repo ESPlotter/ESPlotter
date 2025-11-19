@@ -1,9 +1,9 @@
 import { expect } from 'vitest';
 
 import type { ChannelFile } from '@main/channel-file/domain/entities/ChannelFile';
-import type { FileService } from '@main/channel-file/domain/services/FileService';
+import type { ChannelFileService } from '@main/channel-file/domain/services/ChannelFileService';
 
-export class FileServiceMock implements FileService {
+export class FileServiceMock implements ChannelFileService {
   private readonly files = new Map<string, ChannelFile>();
   private readonly failures = new Map<string, Error>();
   private readonly readChannelFileCalls: string[] = [];

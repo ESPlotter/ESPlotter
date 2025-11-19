@@ -1,11 +1,11 @@
-export class SaveChannelFilePath {
+export class IngestPsseOutFilePath {
   constructor(
     private readonly stateRepository: import('../../domain/repositories/ChannelFileStateRepository').ChannelFileStateRepository,
-    private readonly fileService: import('../../domain/services/ChannelFileService').ChannelFileService,
+    private readonly fileService: import('../../domain/services/PsseOutFileService').PsseOutFileService,
   ) {}
 
   async run(path: string): Promise<void> {
-    const channelFile = await this.fileService.readChannelFile(path);
+    const channelFile = await this.fileService.transformToChannelFile(path);
     const openedFiles = await this.stateRepository.getOpenedChannelFiles();
 
     const deduplicated = [

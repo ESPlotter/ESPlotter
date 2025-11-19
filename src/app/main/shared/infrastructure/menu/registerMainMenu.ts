@@ -1,6 +1,6 @@
 import { app, BrowserWindow, Menu, type MenuItemConstructorOptions } from 'electron';
 
-import { webContentsBroadcast } from '@main/shared/ipc/webContentsBroadcast';
+import { webContentsBroadcast } from '@main/shared/infrastructure/ipc/webContentsBroadcast';
 
 export function registerMainMenu(): void {
   const isMac = process.platform === 'darwin';
@@ -22,6 +22,20 @@ export function registerMainMenu(): void {
               return;
             }
             await addNewOpenedFilePath(selected);
+          },
+        },
+        {
+          label: 'Open File (.out)',
+          click: async () => {
+            const win = BrowserWindow.getFocusedWindow();
+            if (!win) {
+              return;
+            }
+            const selected = await showOpenFileDialog(win);
+            if (!selected) {
+              return;
+            }
+            await addPSSESOutFilePath(selected);
           },
         },
         ...(isMac
@@ -64,10 +78,10 @@ async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
 }
 
 async function addNewOpenedFilePath(path: string): Promise<void> {
-  const { stateRepository, fileService } = await createChannelFileDependencies();
+  const { stateRepository, channelFileService } = await createChannelFileDependencies();
   const saveChannelFilePath = new (
     await import('@main/channel-file/application/use-cases/SaveChannelFilePath')
-  ).SaveChannelFilePath(stateRepository, fileService);
+  ).SaveChannelFilePath(stateRepository, channelFileService);
   try {
     await saveChannelFilePath.run(path);
   } catch {
@@ -75,20 +89,40 @@ async function addNewOpenedFilePath(path: string): Promise<void> {
   }
 }
 
+async function addPSSESOutFilePath(path: string): Promise<void> {
+  const { stateRepository, psseOutFileService } = await createIngestionDependencies();
+  const savePsseOutFilePath = new (
+    await import('@main/channel-file/application/use-cases/IngestPsseOutFilePath')
+  ).IngestPsseOutFilePath(stateRepository, psseOutFileService);
+
+  await savePsseOutFilePath.run(path);
+}
+
 async function createChannelFileDependencies() {
   const { ChannelFileStructureChecker } = await import(
     '@main/channel-file/domain/services/ChannelFileStructureChecker'
   );
-  const { NodeFileService } = await import(
-    '@main/channel-file/infrastructure/services/NodeFileService'
+  const { NodeChannelFileService } = await import(
+    '@main/channel-file/infrastructure/services/NodeChannelFileService'
   );
-  const { ElectronStoreStateRepository } = await import(
-    '@main/channel-file/infrastructure/repositories/ElectronStoreStateRepository'
+  const { ElectronStoreChannelFileStateRepository } = await import(
+    '@main/channel-file/infrastructure/repositories/ElectronStoreChannelFileStateRepository'
   );
 
   const structureChecker = new ChannelFileStructureChecker();
-  const fileService = new NodeFileService(structureChecker);
-  const stateRepository = new ElectronStoreStateRepository(fileService);
+  const channelFileService = new NodeChannelFileService(structureChecker);
+  const stateRepository = new ElectronStoreChannelFileStateRepository(channelFileService);
 
-  return { fileService, stateRepository };
+  return { channelFileService, stateRepository };
+}
+
+async function createIngestionDependencies() {
+  const { stateRepository } = await createChannelFileDependencies();
+  const { NodePsseOutFileService } = await import(
+    '@main/channel-file/infrastructure/services/NodePsseOutFileService'
+  );
+
+  const psseOutFileService = new NodePsseOutFileService();
+
+  return { psseOutFileService, stateRepository };
 }

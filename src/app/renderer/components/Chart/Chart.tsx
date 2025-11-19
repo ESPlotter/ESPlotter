@@ -43,10 +43,17 @@ export function Chart({
 
   return (
     <div
-      className={`w-full p-4 border-2 rounded-sm ${isSelected ? 'border-slate-900/35' : 'border-transparent'}`}
+      className={`flex h-full w-full rounded-sm border-2 ${isSelected ? 'border-slate-900/35' : 'border-transparent'}`}
       onClick={() => toggleSelectedChartId(id)}
     >
-      <ReactEChartsCore echarts={echarts} option={options} notMerge={true} lazyUpdate={true} />
+      <ReactEChartsCore
+        className="h-full w-full"
+        echarts={echarts}
+        option={options}
+        notMerge={true}
+        lazyUpdate={true}
+        style={{ height: '100%', width: '100%' }}
+      />
     </div>
   );
 }
