@@ -1,4 +1,4 @@
-import { ipcMainHandle } from '@main/shared/ipc/ipcMainHandle';
+import { ipcMainHandle } from '@main/shared/infrastructure/ipc/ipcMainHandle';
 
 export function registerChannelFileIpcHandlers(): void {
   ipcMainHandle('getLastOpenedChannelFile', async () => {
@@ -21,16 +21,16 @@ async function createChannelFileDependencies() {
   const { ChannelFileStructureChecker } = await import(
     '@main/channel-file/domain/services/ChannelFileStructureChecker'
   );
-  const { NodeFileService } = await import(
-    '@main/channel-file/infrastructure/services/NodeFileService'
+  const { NodeChannelFileService } = await import(
+    '@main/channel-file/infrastructure/services/NodeChannelFileService'
   );
-  const { ElectronStoreStateRepository } = await import(
-    '@main/channel-file/infrastructure/repositories/ElectronStoreStateRepository'
+  const { ElectronStoreChannelFileStateRepository } = await import(
+    '@main/channel-file/infrastructure/repositories/ElectronStoreChannelFileStateRepository'
   );
 
   const structureChecker = new ChannelFileStructureChecker();
-  const fileService = new NodeFileService(structureChecker);
-  const stateRepository = new ElectronStoreStateRepository(fileService);
+  const fileService = new NodeChannelFileService(structureChecker);
+  const stateRepository = new ElectronStoreChannelFileStateRepository(fileService);
 
   return { fileService, stateRepository };
 }

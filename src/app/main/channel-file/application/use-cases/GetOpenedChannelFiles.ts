@@ -2,7 +2,7 @@ import type { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFile
 
 export class GetOpenedChannelFiles {
   constructor(
-    private readonly stateRepository: import('../../domain/repositories/StateRepository').StateRepository,
+    private readonly stateRepository: import('../../domain/repositories/ChannelFileStateRepository').ChannelFileStateRepository,
   ) {}
 
   async run(): Promise<ChannelFilePrimitive[]> {

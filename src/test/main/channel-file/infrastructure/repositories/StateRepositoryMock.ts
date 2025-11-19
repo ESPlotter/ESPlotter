@@ -2,9 +2,9 @@ import { expect } from 'vitest';
 
 import { ChannelFile } from '@main/channel-file/domain/entities/ChannelFile';
 
-import type { StateRepository } from '@main/channel-file/domain/repositories/StateRepository';
+import type { ChannelFileStateRepository } from '@main/channel-file/domain/repositories/ChannelFileStateRepository';
 
-export class StateRepositoryMock implements StateRepository {
+export class StateRepositoryMock implements ChannelFileStateRepository {
   private lastOpenedFile: ChannelFile | null = null;
   private openedFiles: ChannelFile[] = [];
 
