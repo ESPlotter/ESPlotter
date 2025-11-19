@@ -1,6 +1,6 @@
 import { app } from 'electron';
 
-import { webContentsBroadcast } from '@main/shared/ipc/webContentsBroadcast';
+import { webContentsBroadcast } from '@main/shared/infrastructure/ipc/webContentsBroadcast';
 
 import { ElectronStoreUserPreferencesRepository } from '../repositories/ElectronStoreUserPreferencesRepository';
 

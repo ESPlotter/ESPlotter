@@ -1,4 +1,4 @@
-import { ipcMainHandle } from '@main/shared/ipc/ipcMainHandle';
+import { ipcMainHandle } from '@main/shared/infrastructure/ipc/ipcMainHandle';
 
 import { ElectronStoreUserPreferencesRepository } from '../repositories/ElectronStoreUserPreferencesRepository';
 

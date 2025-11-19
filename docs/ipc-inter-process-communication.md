@@ -20,7 +20,7 @@ Direct use of `ipcRenderer` or `ipcMain` is not allowed.
 
 ### IPC Strong Types
 
-3. Update `src/app/shared/ipc/IPCContracts.ts` whenever preload exposes new APIs or main registers new handlers.
+3. Update `src/app/shared/infrastructure/ipc/IPCContracts.ts` whenever preload exposes new APIs or main registers new handlers.
 4. Use the type `IpcChannelMap` to define channels between main and renderer.
 5. Use the type `RendererExposureMap` to define what the renderer can access.
 
@@ -55,7 +55,7 @@ Direct use of `ipcRenderer` or `ipcMain` is not allowed.
   - Typed broadcast send to all windows.
   - Location: `src/app/main/ipc/webContentsSend.ts`.
 
-Shared IPC contracts live in `src/app/shared/ipc/IPCContracts.ts`.
+Shared IPC contracts live in `src/app/shared/infrastructure/ipc/IPCContracts.ts`.
 
 ### Import Boundaries
 
