@@ -19,7 +19,7 @@ export class NodePsseOutFileService implements PsseOutFileService {
 
     return ChannelFile.fromPrimitives({
       path: filePath,
-      content: channelFileContent,
+      content: channelFileContent.toPrimitives(),
     });
   }
 
