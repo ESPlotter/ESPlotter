@@ -3,8 +3,8 @@ import { type Schema } from 'electron-store';
 import { BaseElectronStore } from '@shared/infrastructure/repositories/BaseElectronStore';
 
 import { ChannelFile } from '../../domain/entities/ChannelFile';
-import { StateRepository } from '../../domain/repositories/StateRepository';
-import { FileService } from '../../domain/services/FileService';
+import { ChannelFileStateRepository } from '../../domain/repositories/ChannelFileStateRepository';
+import { ChannelFileService } from '../../domain/services/ChannelFileService';
 
 type AppState = {
   openedFilePath?: string[];
@@ -17,11 +17,11 @@ const schema: Schema<AppState> = {
   },
 };
 
-export class ElectronStoreStateRepository
+export class ElectronStoreChannelFileStateRepository
   extends BaseElectronStore<AppState>
-  implements StateRepository
+  implements ChannelFileStateRepository
 {
-  constructor(private readonly fileService: FileService) {
+  constructor(private readonly fileService: ChannelFileService) {
     super('state', schema);
   }
 

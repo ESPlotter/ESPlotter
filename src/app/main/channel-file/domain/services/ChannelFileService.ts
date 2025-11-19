@@ -1,5 +1,5 @@
 import { ChannelFile } from '../entities/ChannelFile';
 
-export interface FileService {
+export interface ChannelFileService {
   readChannelFile(path: string): Promise<ChannelFile>;
 }
