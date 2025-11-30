@@ -3,14 +3,14 @@ import numpy as np
 import json
 import os
 
-# Crear el vector de tiempo
+# Create time vector
 time = np.arange(0.001, 10.001, 0.001)
 
-# Calcular V y F
+# Xreate dummy V and F values
 V = 0.98 + 0.05 * np.sin(2 * np.pi * 1 * time + 0.5)
 F = 50 + 2 * np.sin(2 * np.pi * 2 * time + 0.5)
 
-# Construcción del nuevo formato JSON
+# Build json format
 json_structure = {
     "schemaVersion": 1,
     "metadata": {
@@ -39,11 +39,11 @@ json_structure = {
     ]
 }
 
-# Guardar en un archivo JSON
-nombre_json = "test2.json"
+# Save in a JSON file
+name_json = "test2.json"
 os.makedirs("fixtures", exist_ok=True)
 
-with open(os.path.join("fixtures", nombre_json), "w") as f:
+with open(os.path.join("fixtures", name_json), "w") as f:
     json.dump(json_structure, f, indent=4)
 
-print(f"Archivo {nombre_json} creado con éxito")
+print(f"Archivo {name_json} creado con éxito")
