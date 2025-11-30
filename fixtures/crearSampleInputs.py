@@ -3,30 +3,45 @@ import json
 import os
 
 # Crear el vector de tiempo
-time = np.arange(0.001, 10.001, 0.001)  # Empieza en 0.001 para coincidir con el ejemplo
+time = np.arange(0.001, 10.001, 0.001)
 
-# Calcular V y F (puedes ajustar las fórmulas si necesitas otros valores)
-V = 0.98 + 0.05 * np.sin(2 * np.pi * 1 * time+0.5)
-F = 50 + 2 * np.sin(2 * np.pi * 2 * time+0.5)
+# Calcular V y F
+V = 0.98 + 0.05 * np.sin(2 * np.pi * 1 * time + 0.5)
+F = 50 + 2 * np.sin(2 * np.pi * 2 * time + 0.5)
 
-# Construir la estructura de datos como en test3.json
-data = {
-    "channel": ["time", "V", "F"],
-    "values": np.stack([time, V, F], axis=1).tolist()
-}
-
-metadata = {
-    "timestamp": "05/10/2025 11:34:01",
-    "SCR": 4.5
-}
-
+# Construcción del nuevo formato JSON
 json_structure = {
-    "data": data,
-    "metadata": metadata
+    "schemaVersion": 1,
+    "metadata": {
+        "timestamp": "05/10/2025 11:34:01",
+        "SCR": 4.5
+    },
+    "x": {
+        "id": "time",
+        "label": "Time",
+        "unit": "s",
+        "values": time.tolist()
+    },
+    "series": [
+        {
+            "id": "V",
+            "label": "Voltage",
+            "unit": "V",
+            "values": V.tolist()
+        },
+        {
+            "id": "F",
+            "label": "Frequency",
+            "unit": "Hz",
+            "values": F.tolist()
+        }
+    ]
 }
 
 # Guardar en un archivo JSON
 nombre_json = "test2.json"
+os.makedirs("fixtures", exist_ok=True)
+
 with open(os.path.join("fixtures", nombre_json), "w") as f:
     json.dump(json_structure, f, indent=4)
 
