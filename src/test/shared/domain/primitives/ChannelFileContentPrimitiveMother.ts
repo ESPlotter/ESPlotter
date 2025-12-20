@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { PartialDeep } from 'type-fest';
 
+import { ChannelFileContentMetadataPrimitive } from '@shared/domain/primitives/ChannelFileContentMetadataPrimitive';
 import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFileContentPrimitive';
 import { ChannelFileContentSeriePrimitive } from '@shared/domain/primitives/ChannelFileContentSeriePrimitive';
 
@@ -11,9 +12,9 @@ export class ChannelFileContentPrimitiveMother {
   static with(data: PartialDeep<ChannelFileContentPrimitive> = {}): ChannelFileContentPrimitive {
     const newData = data as PartialDeep<{
       schemaVersion: number;
-      metadata: any;
-      x: any;
-      series: any[];
+      metadata: ChannelFileContentMetadataPrimitive;
+      x: ChannelFileContentSeriePrimitive;
+      series: ChannelFileContentSeriePrimitive[];
     }>;
     return {
       schemaVersion: newData.schemaVersion ?? 1,
