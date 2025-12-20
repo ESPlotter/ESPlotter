@@ -15,10 +15,10 @@ export async function setupE2eTestEnvironment(): Promise<{
 }> {
   const tmpStateDir = path.join(
     os.tmpdir(),
-    `uniplot-e2e-state-${Date.now()}-${crypto.randomUUID()}`,
+    `ESPlotter-e2e-state-${Date.now()}-${crypto.randomUUID()}`,
   );
   await fs.mkdir(tmpStateDir, { recursive: true });
-  process.env.UNIPLOT_STATE_CWD = tmpStateDir;
+  process.env.ESPlotter_STATE_CWD = tmpStateDir;
 
   const electronApp = await getElectronAppForE2eTest();
   const mainPage = await electronApp.firstWindow();

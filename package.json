@@ -1,6 +1,6 @@
 {
-  "name": "uniplot",
-  "productName": "uniplot",
+  "name": "ESPlotter",
+  "productName": "ESPlotter",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".vite/build/main.mjs",

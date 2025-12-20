@@ -1,4 +1,4 @@
-# Uniplot
+# ESPlotter
 
 ## Requirements
 
