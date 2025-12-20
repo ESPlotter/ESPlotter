@@ -1,5 +1,3 @@
-import { registerChannelFileIpcHandlers } from '@main/channel-file/infrastructure/ipc/registerChannelFileIpcHandlers';
-
 export function registerMainIpcHandlers(): void {
-  registerChannelFileIpcHandlers();
+  // No IPC handlers needed - data is now pushed to renderer via webContentsSend
 }
