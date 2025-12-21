@@ -80,7 +80,12 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {allItems.map((item) => (
-                <Accordion type="single" collapsible key={item.filePath}>
+                <Accordion
+                  type="single"
+                  collapsible
+                  key={item.filePath}
+                  defaultValue={allItems[0]?.filePath === item.filePath ? item.filePath : undefined}
+                >
                   <AccordionItem value={item.filePath}>
                     <AccordionTrigger className="text-sm font-medium">
                       {item.fileName}
