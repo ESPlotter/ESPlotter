@@ -31,18 +31,38 @@ export class ElectronStoreChannelFileStateRepository
   }
 
   public async getLastOpenedChannelFile(): Promise<ChannelFile | null> {
-    const path = this.stateStore.get('openedFilePath')?.[0];
-    if (!path) {
+    const paths = this.stateStore.get('openedFilePath') ?? [];
+    const lastPath = paths[0];
+    if (!lastPath) {
       return null;
     }
-    return this.fileService.readChannelFile(path);
+
+    try {
+      return await this.fileService.readChannelFile(lastPath);
+    } catch {
+      // Remove invalid path
+      const updatedPaths = paths.filter((p) => p !== lastPath);
+      this.stateStore.set('openedFilePath', updatedPaths);
+      return null;
+    }
   }
 
   public async getOpenedChannelFiles(): Promise<ChannelFile[]> {
     const paths = this.stateStore.get('openedFilePath') ?? [];
-    const results = await Promise.all(paths.map((path) => this.fileService.readChannelFile(path)));
+    const validFiles: ChannelFile[] = [];
 
-    return results;
+    for (const path of paths) {
+      try {
+        const file = await this.fileService.readChannelFile(path);
+        validFiles.push(file);
+      } catch {
+        // Remove invalid path from store
+        const updatedPaths = paths.filter((p) => p !== path);
+        this.stateStore.set('openedFilePath', updatedPaths);
+      }
+    }
+
+    return validFiles;
   }
 
   public onLastOpenedChannelFileChange(cb: (file: ChannelFile | null) => void): () => void {
@@ -58,8 +78,15 @@ export class ElectronStoreChannelFileStateRepository
         return;
       }
 
-      const file = await this.fileService.readChannelFile(first);
-      cb(file);
+      try {
+        const file = await this.fileService.readChannelFile(first);
+        cb(file);
+      } catch {
+        // Remove invalid path
+        const updatedPaths = paths.filter((p) => p !== first);
+        this.stateStore.set('openedFilePath', updatedPaths);
+        cb(null);
+      }
     });
   }
 }
