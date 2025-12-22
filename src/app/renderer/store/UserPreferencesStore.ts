@@ -43,16 +43,22 @@ const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
           chartSeriesPalette: nextPalette,
         };
       }),
-    removeColor: (index: number) =>
+    removeColor: async (index: number) => {
+      let nextPalette: string[] = [];
+    
       set((state) => {
         if (index < 0 || index >= state.chartSeriesPalette.length) {
           return state;
         }
-        const nextPalette = state.chartSeriesPalette.filter((_, idx) => idx !== index);
-        return {
-          chartSeriesPalette: nextPalette,
-        };
-      }),
+      
+        nextPalette = state.chartSeriesPalette.filter((_, idx) => idx !== index);
+      
+        return { chartSeriesPalette: nextPalette };
+      });
+    
+      await window.userPreferences.updateChartSeriesPalette(nextPalette);
+    },
+
     reorder: (sourceIndex: number, targetIndex: number) =>
       set((state) => {
         if (
