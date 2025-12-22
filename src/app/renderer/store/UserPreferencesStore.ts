@@ -33,16 +33,21 @@ const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
           chartSeriesPalette: nextPalette,
         };
       }),
-    addColor: (color?: string) =>
+    addColor: async (color?: string) => {
+      let nextPalette: string[] = [];
+
       set((state) => {
-        const nextPalette = [
+        nextPalette = [
           ...state.chartSeriesPalette,
           (color ?? generateRandomHexColor()).trim(),
         ];
         return {
           chartSeriesPalette: nextPalette,
         };
-      }),
+      });
+
+      await window.userPreferences.updateChartSeriesPalette(nextPalette);
+      },
     removeColor: async (index: number) => {
       let nextPalette: string[] = [];
     
