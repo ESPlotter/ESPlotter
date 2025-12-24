@@ -22,17 +22,22 @@ const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
       set(() => ({
         chartSeriesPalette: [...palette],
       })),
-    replaceColor: (index: number, value: string) =>
+  replaceColor: async (index: number, value: string) => {
+      let nextPalette: string[] = [];
+    
       set((state) => {
         if (index < 0 || index >= state.chartSeriesPalette.length) {
           return state;
         }
-        const nextPalette = [...state.chartSeriesPalette];
+        nextPalette = [...state.chartSeriesPalette];
         nextPalette[index] = value.trim();
         return {
           chartSeriesPalette: nextPalette,
         };
-      }),
+      });
+
+      await window.userPreferences.updateChartSeriesPalette(nextPalette);
+    },
     addColor: async (color?: string) => {
       let nextPalette: string[] = [];
 
@@ -89,7 +94,7 @@ const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
   },
 }));
 
-export function useUserPreferencesChartSeriesPalette(): string[] {
+export function useUserPreferencesChartSeriesPalette(): string[] {  
   return useUserPreferencesStore((state) => state.chartSeriesPalette);
 }
 

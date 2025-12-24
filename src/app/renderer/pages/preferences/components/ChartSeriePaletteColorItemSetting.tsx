@@ -1,5 +1,5 @@
 import { Trash2Icon } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { ChartSeriePalleteColorPicker } from './ChartSeriePalleteColorPicker';
 
@@ -16,6 +16,12 @@ export function ChartSeriePaletteColorItemSetting({
 }) {
   const [color, setColor] = useState(defaultColor);
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    if (!isEditing) {
+      onChange(color);
+    }
+  }, [isEditing]);
 
   return (
     <>
