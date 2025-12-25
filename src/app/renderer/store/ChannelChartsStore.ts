@@ -2,6 +2,8 @@ import { create } from 'zustand';
 
 import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
 
+const DEFAULT_CHART_NAME_PATTERN = /^Chart \d+$/;
+
 interface ChannelChartsState {
   charts: {
     [chartId: string]: {
@@ -63,7 +65,7 @@ const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
 
         const channelCount = Object.keys(chart.channels).length;
         const isFirstChannel = channelCount === 0;
-        const hasDefaultName = /^Chart \d+$/.test(chart.name);
+        const hasDefaultName = DEFAULT_CHART_NAME_PATTERN.test(chart.name);
 
         const shouldRenameChart = isFirstChannel && hasDefaultName;
         const newName = shouldRenameChart ? serie.name : chart.name;
