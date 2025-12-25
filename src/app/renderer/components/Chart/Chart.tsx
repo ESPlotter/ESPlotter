@@ -28,6 +28,8 @@ echarts.use([
   DataZoomComponent,
 ]);
 
+const DRAG_THRESHOLD_PIXELS = 10;
+
 export function Chart({
   id,
   isSelected,
@@ -81,81 +83,78 @@ export function Chart({
     }
   }, []);
 
-  const handleMouseUp = useCallback(
-    (e: React.MouseEvent) => {
-      if (e.button === 2 && dragStartRef.current && isDraggingRef.current) {
-        e.preventDefault();
-        e.stopPropagation();
+  const handleMouseUp = useCallback((e: React.MouseEvent) => {
+    if (e.button === 2 && dragStartRef.current && isDraggingRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
 
-        const chartInstance = chartRef.current?.getEchartsInstance();
-        if (!chartInstance) {
-          dragStartRef.current = null;
-          isDraggingRef.current = false;
-          return;
-        }
+      const chartInstance = chartRef.current?.getEchartsInstance();
+      if (!chartInstance) {
+        dragStartRef.current = null;
+        isDraggingRef.current = false;
+        return;
+      }
 
-        const rect = e.currentTarget.getBoundingClientRect();
-        const endPixelX = e.clientX - rect.left;
-        const endPixelY = e.clientY - rect.top;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const endPixelX = e.clientX - rect.left;
+      const endPixelY = e.clientY - rect.top;
 
-        const deltaX = endPixelX - dragStartRef.current.pixelX;
+      const deltaX = endPixelX - dragStartRef.current.pixelX;
 
-        if (deltaX < -10) {
-          chartInstance.dispatchAction({
-            type: 'restore',
-          });
-        } else if (deltaX > 10) {
-          const endPoint = chartInstance.convertFromPixel({ gridIndex: 0 }, [endPixelX, endPixelY]);
+      if (deltaX < -DRAG_THRESHOLD_PIXELS) {
+        chartInstance.dispatchAction({
+          type: 'restore',
+        });
+      } else if (deltaX > DRAG_THRESHOLD_PIXELS) {
+        const endPoint = chartInstance.convertFromPixel({ gridIndex: 0 }, [endPixelX, endPixelY]);
 
-          if (endPoint) {
-            const startX = Math.min(dragStartRef.current.x, endPoint[0]);
-            const endX = Math.max(dragStartRef.current.x, endPoint[0]);
-            const startY = Math.min(dragStartRef.current.y, endPoint[1]);
-            const endY = Math.max(dragStartRef.current.y, endPoint[1]);
+        if (endPoint) {
+          const startX = Math.min(dragStartRef.current.x, endPoint[0]);
+          const endX = Math.max(dragStartRef.current.x, endPoint[0]);
+          const startY = Math.min(dragStartRef.current.y, endPoint[1]);
+          const endY = Math.max(dragStartRef.current.y, endPoint[1]);
 
-            const option = chartInstance.getOption();
-            const xAxis = option.xAxis?.[0];
-            const yAxis = option.yAxis?.[0];
+          const option = chartInstance.getOption();
+          const xAxis = option.xAxis?.[0];
+          const yAxis = option.yAxis?.[0];
 
-            if (xAxis && yAxis) {
-              const xMin = typeof xAxis.min === 'number' ? xAxis.min : 0;
-              const xMax = typeof xAxis.max === 'number' ? xAxis.max : 1;
-              const yMin = typeof yAxis.min === 'number' ? yAxis.min : 0;
-              const yMax = typeof yAxis.max === 'number' ? yAxis.max : 1;
+          if (xAxis && yAxis) {
+            const xMin = typeof xAxis.min === 'number' ? xAxis.min : startX;
+            const xMax = typeof xAxis.max === 'number' ? xAxis.max : endX;
+            const yMin = typeof yAxis.min === 'number' ? yAxis.min : startY;
+            const yMax = typeof yAxis.max === 'number' ? yAxis.max : endY;
 
-              const xRange = xMax - xMin;
-              const yRange = yMax - yMin;
+            const xRange = xMax - xMin;
+            const yRange = yMax - yMin;
 
-              if (xRange > 0 && yRange > 0) {
-                const startPercent = ((startX - xMin) / xRange) * 100;
-                const endPercent = ((endX - xMin) / xRange) * 100;
-                const startYPercent = ((startY - yMin) / yRange) * 100;
-                const endYPercent = ((endY - yMin) / yRange) * 100;
+            if (xRange > 0 && yRange > 0) {
+              const startPercent = ((startX - xMin) / xRange) * 100;
+              const endPercent = ((endX - xMin) / xRange) * 100;
+              const startYPercent = ((startY - yMin) / yRange) * 100;
+              const endYPercent = ((endY - yMin) / yRange) * 100;
 
-                chartInstance.dispatchAction({
-                  type: 'dataZoom',
-                  dataZoomIndex: 0,
-                  start: Math.max(0, Math.min(100, startPercent)),
-                  end: Math.max(0, Math.min(100, endPercent)),
-                });
+              chartInstance.dispatchAction({
+                type: 'dataZoom',
+                dataZoomIndex: 0,
+                start: Math.max(0, Math.min(100, startPercent)),
+                end: Math.max(0, Math.min(100, endPercent)),
+              });
 
-                chartInstance.dispatchAction({
-                  type: 'dataZoom',
-                  dataZoomIndex: 1,
-                  start: Math.max(0, Math.min(100, startYPercent)),
-                  end: Math.max(0, Math.min(100, endYPercent)),
-                });
-              }
+              chartInstance.dispatchAction({
+                type: 'dataZoom',
+                dataZoomIndex: 1,
+                start: Math.max(0, Math.min(100, startYPercent)),
+                end: Math.max(0, Math.min(100, endYPercent)),
+              });
             }
           }
         }
-
-        dragStartRef.current = null;
-        isDraggingRef.current = false;
       }
-    },
-    [chartRef],
-  );
+
+      dragStartRef.current = null;
+      isDraggingRef.current = false;
+    }
+  }, []);
 
   const handleClick = useCallback(() => {
     if (!isDraggingRef.current) {
