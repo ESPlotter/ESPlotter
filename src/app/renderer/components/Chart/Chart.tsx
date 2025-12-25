@@ -114,45 +114,23 @@ export function Chart({
           const startY = Math.min(dragStartRef.current.y, endPoint[1]);
           const endY = Math.max(dragStartRef.current.y, endPoint[1]);
 
-          const option = chartInstance.getOption();
-          const xAxis = option.xAxis?.[0];
-          const yAxis = option.yAxis?.[0];
-
-          if (xAxis && yAxis) {
-            const xMin = typeof xAxis.min === 'number' ? xAxis.min : startX;
-            const xMax = typeof xAxis.max === 'number' ? xAxis.max : endX;
-            const yMin = typeof yAxis.min === 'number' ? yAxis.min : startY;
-            const yMax = typeof yAxis.max === 'number' ? yAxis.max : endY;
-
-            const xRange = xMax - xMin;
-            const yRange = yMax - yMin;
-
-            if (xRange > 0 && yRange > 0) {
-              const startPercent = ((startX - xMin) / xRange) * 100;
-              const endPercent = ((endX - xMin) / xRange) * 100;
-              const startYPercent = ((startY - yMin) / yRange) * 100;
-              const endYPercent = ((endY - yMin) / yRange) * 100;
-
-              chartInstance.dispatchAction({
-                type: 'dataZoom',
-                dataZoomIndex: 0,
-                start: Math.max(0, Math.min(100, startPercent)),
-                end: Math.max(0, Math.min(100, endPercent)),
-              });
-
-              chartInstance.dispatchAction({
-                type: 'dataZoom',
-                dataZoomIndex: 1,
-                start: Math.max(0, Math.min(100, startYPercent)),
-                end: Math.max(0, Math.min(100, endYPercent)),
-              });
-            }
-          }
+          chartInstance.setOption({
+            xAxis: {
+              min: startX,
+              max: endX,
+            },
+            yAxis: {
+              min: startY,
+              max: endY,
+            },
+          });
         }
       }
 
       dragStartRef.current = null;
-      isDraggingRef.current = false;
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 0);
     }
   }, []);
 
