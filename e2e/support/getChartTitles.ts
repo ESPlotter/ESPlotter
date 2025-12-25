@@ -1,22 +1,41 @@
 import { Page } from '@playwright/test';
 
 export async function getChartTitles(page: Page): Promise<string[]> {
-  // Get all buttons and filter for those that look like chart titles
-  // Chart titles are simple text buttons without icons, excluding "New Chart"
-  const buttons = await page.getByRole('button').all();
+  // Get all buttons that match "Chart X" pattern or have been renamed
+  // Exclude buttons that are in the sidebar or have icons (like "New Chart")
+
+  const allButtons = await page.locator('button').all();
   const titles: string[] = [];
 
-  for (const button of buttons) {
+  for (const button of allButtons) {
     const text = (await button.textContent())?.trim() || '';
-    // Chart title buttons contain only text (no nested elements that would add extra whitespace or icons)
-    // We exclude the "New Chart" button specifically
-    // Chart titles will be "Chart 1", "Chart 2", or custom names
-    if (text && text !== 'New Chart' && !text.includes('\n')) {
-      // Additional check: chart title buttons should NOT have an svg child
-      const svgCount = await button.locator('svg').count();
-      if (svgCount === 0) {
-        titles.push(text);
-      }
+
+    // Skip empty buttons
+    if (!text) {
+      continue;
+    }
+
+    // Skip "New Chart" button
+    if (text === 'New Chart') {
+      continue;
+    }
+
+    // Skip buttons with SVG children (icon buttons)
+    const svgCount = await button.locator('svg').count();
+    if (svgCount > 0) {
+      continue;
+    }
+
+    // Skip sidebar buttons (they have specific classes or are nested in specific elements)
+    // Channel buttons have format like "Voltage (V)" with parentheses
+    if (text.includes('(') && text.includes(')')) {
+      continue;
+    }
+
+    // Check if this button has the chart title styling (text-2xl class)
+    const className = (await button.getAttribute('class')) || '';
+    if (className.includes('text-2xl')) {
+      titles.push(text);
     }
   }
 
