@@ -5,7 +5,7 @@ export async function getChartTitles(page: Page): Promise<string[]> {
   // Chart titles are simple text buttons without icons, excluding "New Chart"
   const buttons = await page.getByRole('button').all();
   const titles: string[] = [];
-  
+
   for (const button of buttons) {
     const text = (await button.textContent())?.trim() || '';
     // Chart title buttons contain only text (no nested elements that would add extra whitespace or icons)
@@ -19,6 +19,6 @@ export async function getChartTitles(page: Page): Promise<string[]> {
       }
     }
   }
-  
+
   return titles;
 }
