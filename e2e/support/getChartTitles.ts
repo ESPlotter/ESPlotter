@@ -1,10 +1,18 @@
 import { Page } from '@playwright/test';
 
 export async function getChartTitles(page: Page): Promise<string[]> {
-  return page
-    .locator('button')
-    .filter({ hasText: /^Chart:/ })
-    .evaluateAll((buttons) =>
-      buttons.map((button) => (button.textContent ?? '').trim()).filter((text) => text.length > 0),
-    );
+  const chartContainers = page.locator('.echarts-for-react').locator('..');
+  const count = await chartContainers.count();
+
+  const titles: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const container = chartContainers.nth(i);
+    const titleButton = container.locator('button').first();
+    const text = await titleButton.textContent();
+    if (text) {
+      titles.push(text.trim());
+    }
+  }
+
+  return titles;
 }
