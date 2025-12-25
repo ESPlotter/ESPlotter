@@ -7,7 +7,6 @@ import {
   LegendComponent,
   ToolboxComponent,
   DataZoomComponent,
-  BrushComponent,
 } from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -27,7 +26,6 @@ echarts.use([
   LegendComponent,
   ToolboxComponent,
   DataZoomComponent,
-  BrushComponent,
 ]);
 
 export function Chart({
@@ -42,7 +40,10 @@ export function Chart({
   const options = useMemo(() => mergeSeriesWithDefaultParams(series), [series]);
   const { toggleSelectedChartId } = useChannelChartsActions();
   const chartRef = useRef<ReactEChartsCore>(null);
-  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+  const dragStartRef = useRef<{ x: number; y: number; pixelX: number; pixelY: number } | null>(
+    null,
+  );
+  const isDraggingRef = useRef(false);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -51,52 +52,124 @@ export function Chart({
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button === 2) {
       e.preventDefault();
+      e.stopPropagation();
+      const chartInstance = chartRef.current?.getEchartsInstance();
+      if (!chartInstance) {
+        return;
+      }
+
       const rect = e.currentTarget.getBoundingClientRect();
-      dragStartRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
+      const pixelX = e.clientX - rect.left;
+      const pixelY = e.clientY - rect.top;
+
+      const pointInGrid = chartInstance.convertFromPixel({ gridIndex: 0 }, [pixelX, pixelY]);
+      if (pointInGrid) {
+        dragStartRef.current = {
+          x: pointInGrid[0],
+          y: pointInGrid[1],
+          pixelX,
+          pixelY,
+        };
+        isDraggingRef.current = true;
+      }
+    }
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isDraggingRef.current && dragStartRef.current && e.buttons === 2) {
+      e.preventDefault();
     }
   }, []);
 
   const handleMouseUp = useCallback(
     (e: React.MouseEvent) => {
-      if (e.button === 2 && dragStartRef.current) {
+      if (e.button === 2 && dragStartRef.current && isDraggingRef.current) {
         e.preventDefault();
-        const rect = e.currentTarget.getBoundingClientRect();
-        const endX = e.clientX - rect.left;
-        const startX = dragStartRef.current.x;
-        const deltaX = endX - startX;
+        e.stopPropagation();
 
         const chartInstance = chartRef.current?.getEchartsInstance();
         if (!chartInstance) {
           dragStartRef.current = null;
+          isDraggingRef.current = false;
           return;
         }
 
+        const rect = e.currentTarget.getBoundingClientRect();
+        const endPixelX = e.clientX - rect.left;
+        const endPixelY = e.clientY - rect.top;
+
+        const deltaX = endPixelX - dragStartRef.current.pixelX;
+
         if (deltaX < -10) {
-          chartInstance.dispatchAction({
-            type: 'dataZoom',
-            start: 0,
-            end: 100,
-          });
           chartInstance.dispatchAction({
             type: 'restore',
           });
+        } else if (deltaX > 10) {
+          const endPoint = chartInstance.convertFromPixel({ gridIndex: 0 }, [endPixelX, endPixelY]);
+
+          if (endPoint) {
+            const startX = Math.min(dragStartRef.current.x, endPoint[0]);
+            const endX = Math.max(dragStartRef.current.x, endPoint[0]);
+            const startY = Math.min(dragStartRef.current.y, endPoint[1]);
+            const endY = Math.max(dragStartRef.current.y, endPoint[1]);
+
+            const option = chartInstance.getOption();
+            const xAxis = option.xAxis?.[0];
+            const yAxis = option.yAxis?.[0];
+
+            if (xAxis && yAxis) {
+              const xMin = typeof xAxis.min === 'number' ? xAxis.min : 0;
+              const xMax = typeof xAxis.max === 'number' ? xAxis.max : 1;
+              const yMin = typeof yAxis.min === 'number' ? yAxis.min : 0;
+              const yMax = typeof yAxis.max === 'number' ? yAxis.max : 1;
+
+              const xRange = xMax - xMin;
+              const yRange = yMax - yMin;
+
+              if (xRange > 0 && yRange > 0) {
+                const startPercent = ((startX - xMin) / xRange) * 100;
+                const endPercent = ((endX - xMin) / xRange) * 100;
+                const startYPercent = ((startY - yMin) / yRange) * 100;
+                const endYPercent = ((endY - yMin) / yRange) * 100;
+
+                chartInstance.dispatchAction({
+                  type: 'dataZoom',
+                  dataZoomIndex: 0,
+                  start: Math.max(0, Math.min(100, startPercent)),
+                  end: Math.max(0, Math.min(100, endPercent)),
+                });
+
+                chartInstance.dispatchAction({
+                  type: 'dataZoom',
+                  dataZoomIndex: 1,
+                  start: Math.max(0, Math.min(100, startYPercent)),
+                  end: Math.max(0, Math.min(100, endYPercent)),
+                });
+              }
+            }
+          }
         }
 
         dragStartRef.current = null;
+        isDraggingRef.current = false;
       }
     },
     [chartRef],
   );
 
+  const handleClick = useCallback(() => {
+    if (!isDraggingRef.current) {
+      toggleSelectedChartId(id);
+    }
+  }, [id, toggleSelectedChartId]);
+
   return (
     <div
       className={`flex h-full w-full rounded-sm border-2 ${isSelected ? 'border-slate-900/35' : 'border-transparent'}`}
-      onClick={() => toggleSelectedChartId(id)}
+      onClick={handleClick}
       onContextMenu={handleContextMenu}
       onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
       <ReactEChartsCore
@@ -166,24 +239,13 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
         type: 'inside',
         xAxisIndex: [0],
         filterMode: 'none',
-        disabled: true,
       },
       {
         type: 'inside',
         yAxisIndex: [0],
         filterMode: 'none',
-        disabled: true,
       },
     ],
-    brush: {
-      toolbox: ['rect'],
-      xAxisIndex: 0,
-      yAxisIndex: 0,
-      brushMode: 'single',
-      transformable: false,
-      throttleType: 'debounce',
-      throttleDelay: 300,
-    },
     series: series.map((s) => ({
       ...s,
       showSymbol: false,
