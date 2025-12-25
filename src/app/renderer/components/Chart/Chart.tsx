@@ -5,6 +5,8 @@ import {
   TooltipComponent,
   TitleComponent,
   LegendComponent,
+  ToolboxComponent,
+  DataZoomComponent,
 } from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -22,6 +24,8 @@ echarts.use([
   LineChart,
   CanvasRenderer,
   LegendComponent,
+  ToolboxComponent,
+  DataZoomComponent,
 ]);
 
 export function Chart({
@@ -85,6 +89,35 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
         animation: false,
       },
     },
+    toolbox: {
+      show: true,
+      feature: {
+        dataZoom: {
+          yAxisIndex: 'none',
+          title: {
+            zoom: 'Zoom In',
+            back: 'Zoom Out',
+          },
+        },
+        restore: {
+          title: 'Reset',
+        },
+      },
+      right: 10,
+      top: 0,
+    },
+    dataZoom: [
+      {
+        type: 'inside',
+        xAxisIndex: [0],
+        filterMode: 'none',
+      },
+      {
+        type: 'inside',
+        yAxisIndex: [0],
+        filterMode: 'none',
+      },
+    ],
     series: series.map((s) => ({
       ...s,
       showSymbol: false,
