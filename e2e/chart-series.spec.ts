@@ -42,43 +42,52 @@ test.describe('Chart channel selection', () => {
   });
 
   test('adds the Voltage serie to the selected chart', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
+    await createAndSelectChart(mainPage);
 
     await clickSidebarChannel(mainPage, 'Voltage (V)');
-    await expectSelectedChart(mainPage, chartTitle);
+    // Chart title changes to "Voltage" after adding first channel
+    const updatedTitle = await getSelectedChartTitle(mainPage);
+    await expectSelectedChart(mainPage, updatedTitle);
 
-    await expectChartSeries(mainPage, chartTitle, [expectedVoltageSummary]);
+    await expectChartSeries(mainPage, updatedTitle, [expectedVoltageSummary]);
   });
 
   test('adds the Frequency serie to the selected chart', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
+    await createAndSelectChart(mainPage);
 
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChart(mainPage, chartTitle);
+    // Chart title changes to "Frequency" after adding first channel
+    const updatedTitle = await getSelectedChartTitle(mainPage);
+    await expectSelectedChart(mainPage, updatedTitle);
 
-    await expectChartSeries(mainPage, chartTitle, [expectedFrequencySummary]);
+    await expectChartSeries(mainPage, updatedTitle, [expectedFrequencySummary]);
   });
 
   test('allows selecting both series on the same chart', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
+    await createAndSelectChart(mainPage);
 
     await clickSidebarChannel(mainPage, 'Voltage (V)');
-    await expectSelectedChart(mainPage, chartTitle);
-    await expectChartSeries(mainPage, chartTitle, [expectedVoltageSummary]);
+    // Chart title changes to "Voltage" after adding first channel
+    let updatedTitle = await getSelectedChartTitle(mainPage);
+    await expectSelectedChart(mainPage, updatedTitle);
+    await expectChartSeries(mainPage, updatedTitle, [expectedVoltageSummary]);
 
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChart(mainPage, chartTitle);
+    // Title remains "Voltage" after adding second channel
+    await expectSelectedChart(mainPage, updatedTitle);
 
-    await expectChartSeries(mainPage, chartTitle, [
+    await expectChartSeries(mainPage, updatedTitle, [
       expectedVoltageSummary,
       expectedFrequencySummary,
     ]);
   });
 
   test('allows switching the selected serie within a chart', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
+    await createAndSelectChart(mainPage);
 
     await clickSidebarChannel(mainPage, 'Voltage (V)');
+    // Chart title changes to "Voltage" after adding first channel
+    let chartTitle = await getSelectedChartTitle(mainPage);
     await expectChartSeries(mainPage, chartTitle, [expectedVoltageSummary]);
 
     await clickSidebarChannel(mainPage, 'Voltage (V)');
@@ -95,12 +104,16 @@ test.describe('Chart channel selection', () => {
   });
 
   test('keeps channel selections isolated per chart', async () => {
-    const firstChartTitle = await createAndSelectChart(mainPage);
+    await createAndSelectChart(mainPage);
     await clickSidebarChannel(mainPage, 'Voltage (V)');
+    // Chart title changes to "Voltage" after adding first channel
+    const firstChartTitle = await getSelectedChartTitle(mainPage);
     await expectChartSeries(mainPage, firstChartTitle, [expectedVoltageSummary]);
 
-    const secondChartTitle = await createAndSelectChart(mainPage);
+    await createAndSelectChart(mainPage);
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
+    // Chart title changes to "Frequency" after adding first channel
+    const secondChartTitle = await getSelectedChartTitle(mainPage);
     await expectChartSeries(mainPage, secondChartTitle, [expectedFrequencySummary]);
 
     await expectChartSeries(mainPage, firstChartTitle, [expectedVoltageSummary]);
