@@ -1,18 +1,11 @@
 import { Page } from '@playwright/test';
 
 export async function getChartTitles(page: Page): Promise<string[]> {
-  const chartContainers = page.locator('.echarts-for-react').locator('..');
-  const count = await chartContainers.count();
-
-  const titles: string[] = [];
-  for (let i = 0; i < count; i++) {
-    const container = chartContainers.nth(i);
-    const titleButton = container.locator('button').first();
-    const text = await titleButton.textContent();
-    if (text) {
-      titles.push(text.trim());
-    }
-  }
-
-  return titles;
+  // Find all buttons with class "text-2xl font-bold" which are chart title buttons
+  // This matches the className in ChartTitle.tsx
+  return page
+    .locator('button.text-2xl.font-bold')
+    .evaluateAll((buttons) =>
+      buttons.map((button) => (button.textContent ?? '').trim()).filter((text) => text.length > 0),
+    );
 }
