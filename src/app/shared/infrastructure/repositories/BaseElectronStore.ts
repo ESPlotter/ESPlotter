@@ -17,7 +17,7 @@ export abstract class BaseElectronStore<T extends StoreRecord> {
     const store = new Store<T>({
       name,
       schema,
-      ...(process.env.UNIPLOT_STATE_CWD ? { cwd: process.env.UNIPLOT_STATE_CWD } : {}),
+      ...(process.env.ESPLOTTER_STATE_CWD ? { cwd: process.env.ESPLOTTER_STATE_CWD } : {}),
     });
 
     BaseElectronStore.stores.set(name, store as Store<StoreRecord>);

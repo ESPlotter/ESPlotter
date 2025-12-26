@@ -2,7 +2,7 @@
 
 ## Overview
 
-Uniplot follows a hexagonal architecture inside the Electron main process, separating business logic, application logic, and infrastructure concerns.
+ESPlotter follows a hexagonal architecture inside the Electron main process, separating business logic, application logic, and infrastructure concerns.
 This design keeps the core logic independent from Electron APIs and allows new features to be added or tested in isolation.
 
 ```
@@ -26,7 +26,7 @@ For inter-process communication details, see [IPC Documentation](./ipc-inter-pro
 
 ### Purpose
 
-The main process acts as the backend of Uniplot.
+The main process acts as the backend of ESPlotter.
 It owns the application’s lifecycle, domain logic, and persistence, while exposing only typed APIs to the renderer.
 
 ```sh
