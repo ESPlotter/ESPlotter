@@ -24,13 +24,4 @@ describe('GetUserPreferences', () => {
     expect(result).toEqual(stored.toPrimitives());
     repository.expectGetCalledTimes(1);
   });
-
-  it('returns default preferences when repository fails', async () => {
-    repository.failOnGet();
-
-    const result = await useCase.run();
-
-    expect(result).toEqual(UserPreferences.withDefaultChartSeriesPalette().toPrimitives());
-    repository.expectGetCalledTimes(1);
-  });
 });

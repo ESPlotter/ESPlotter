@@ -15,19 +15,18 @@ let repository: ElectronStoreUserPreferencesRepository;
 describe('ElectronStoreUserPreferencesRepository', () => {
   beforeEach(async () => {
     const cwd = await createIsolatedDirectory();
-    process.env.UNIPLOT_STATE_CWD = cwd;
+    process.env.ESPLOTTER_STATE_CWD = cwd;
     resetElectronStoreCache();
     repository = new ElectronStoreUserPreferencesRepository();
   });
 
   afterEach(() => {
     resetElectronStoreCache();
-    delete process.env.UNIPLOT_STATE_CWD;
+    delete process.env.ESPLOTTER_STATE_CWD;
   });
 
   it('returns default preferences when settings file is empty', async () => {
     const preferences = await repository.get();
-
     expect(preferences.toPrimitives()).toEqual(
       UserPreferences.withDefaultChartSeriesPalette().toPrimitives(),
     );
@@ -68,7 +67,7 @@ describe('ElectronStoreUserPreferencesRepository', () => {
 });
 
 async function createIsolatedDirectory(): Promise<string> {
-  const prefix = path.join(os.tmpdir(), 'uniplot-user-preferences-');
+  const prefix = path.join(os.tmpdir(), 'esplotter-user-preferences-');
   return fs.mkdtemp(prefix);
 }
 
