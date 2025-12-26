@@ -6,6 +6,8 @@ export class ChartSeriesPalette {
   private constructor(private colors: string[]) {}
 
   public static create(colors: string[]): ChartSeriesPalette {
+    console.log('prueba');
+    
     const normalized = colors.map((color, index) => {
       if (typeof color !== 'string') {
         throw new InvalidChartSeriesColorFormatError(String(color), index);
