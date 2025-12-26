@@ -1,5 +1,5 @@
 import { Trash2Icon } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { ChartSeriePalleteColorPicker } from './ChartSeriePalleteColorPicker';
 
@@ -16,8 +16,18 @@ export function ChartSeriePaletteColorItemSetting({
 }) {
   const [color, setColor] = useState(defaultColor);
   const [isEditing, setIsEditing] = useState(false);
-
+  const hasMountedRef = useRef(false);
+  // Keep internal color in sync when prop changes (e.g. after loading prefs)
   useEffect(() => {
+    setColor(defaultColor);
+  }, [defaultColor]);
+
+  // Only run onChange when editing finishes, but skip the very first mount
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
     if (!isEditing) {
       onChange(color);
     }
