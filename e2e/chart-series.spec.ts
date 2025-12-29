@@ -213,7 +213,11 @@ async function createAndSelectChart(page: Page): Promise<string> {
 }
 
 async function clickSidebarChannel(page: Page, channelLabel: string): Promise<void> {
-  await page.getByRole('button', { name: channelLabel }).click();
+  await page
+    .locator('[data-sidebar="menu-button"]')
+    .filter({ hasText: channelLabel })
+    .first()
+    .click();
 }
 
 async function selectChartByTitle(page: Page, chartTitle: string): Promise<void> {
@@ -370,7 +374,11 @@ async function getRenderedSeriesSummary(
 }
 
 function chartContainer(page: Page, chartTitle: string) {
-  return chartTitleButton(page, chartTitle).locator('..').locator('div.border-2').first();
+  return page
+    .locator('article')
+    .filter({ has: chartTitleButton(page, chartTitle) })
+    .locator('div.border-2')
+    .first();
 }
 
 function chartTitleButton(page: Page, chartTitle: string) {

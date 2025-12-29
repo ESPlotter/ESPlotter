@@ -40,7 +40,7 @@ test.describe('Chart title initialization', () => {
     await clickSidebarChannel(mainPage, 'Voltage (V)');
 
     const updatedTitles = await getChartTitles(mainPage);
-    expect(updatedTitles).toContain('Voltage');
+    expect(updatedTitles).toContain('Voltage (V)');
     expect(updatedTitles).not.toContain('Chart 1');
   });
 
@@ -53,13 +53,13 @@ test.describe('Chart title initialization', () => {
     await clickSidebarChannel(mainPage, 'Voltage (V)');
 
     const titlesAfterFirstChannel = await getChartTitles(mainPage);
-    expect(titlesAfterFirstChannel).toContain('Voltage');
+    expect(titlesAfterFirstChannel).toContain('Voltage (V)');
 
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
 
     const titlesAfterSecondChannel = await getChartTitles(mainPage);
-    expect(titlesAfterSecondChannel).toContain('Voltage');
-    expect(titlesAfterSecondChannel).not.toContain('Frequency');
+    expect(titlesAfterSecondChannel).toContain('Voltage (V)');
+    expect(titlesAfterSecondChannel).not.toContain('Frequency (Hz)');
   });
 
   test('does not rename chart if user has manually changed the title', async () => {
@@ -80,7 +80,7 @@ test.describe('Chart title initialization', () => {
 
     const updatedTitles = await getChartTitles(mainPage);
     expect(updatedTitles).toContain(customTitle);
-    expect(updatedTitles).not.toContain('Voltage');
+    expect(updatedTitles).not.toContain('Voltage (V)');
   });
 });
 
@@ -98,8 +98,8 @@ async function openAndExpandTest3File(app: ElectronApplication, page: Page): Pro
 
 async function selectChartByTitle(page: Page, chartTitle: string): Promise<void> {
   const chartLocator = page
-    .getByRole('button', { name: chartTitle })
-    .locator('..')
+    .locator('article')
+    .filter({ has: page.getByRole('button', { name: chartTitle }) })
     .locator('div.border-2')
     .first();
 
@@ -108,5 +108,9 @@ async function selectChartByTitle(page: Page, chartTitle: string): Promise<void>
 }
 
 async function clickSidebarChannel(page: Page, channelLabel: string): Promise<void> {
-  await page.getByRole('button', { name: channelLabel }).click();
+  await page
+    .locator('[data-sidebar="menu-button"]')
+    .filter({ hasText: channelLabel })
+    .first()
+    .click();
 }
