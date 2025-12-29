@@ -22,6 +22,8 @@ test.describe('Open .out files', () => {
   });
 
   test('shows channels and plots a serie from example.out', async () => {
+    test.skip(process.env.CI === 'true', 'Skipping in CI because it depends on dyntools');
+
     await openExampleOutFile(electronApp, mainPage);
 
     const channelButton = await getFirstChannelButton(mainPage);
