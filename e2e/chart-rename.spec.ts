@@ -1,6 +1,7 @@
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test';
 
 import { createChart } from './support/createChart';
+import { expectSelectedChart } from './support/expectSelectedChart';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
 let electronApp: ElectronApplication;
