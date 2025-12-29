@@ -116,6 +116,7 @@ jobs:
           fi
           for VERSION in $LIGHTNINGCSS_VERSIONS; do
               npm install --package-lock-only --ignore-scripts --platform=win32 --arch=x64 "lightningcss-win32-x64-msvc@${VERSION}"
+          done
 
       - name: Install dependencies
         run: npm ci
