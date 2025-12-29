@@ -8,7 +8,6 @@ import { chartContainer } from './support/chartContainer';
 import { chartTitleButton } from './support/chartTitleButton';
 import { createChart } from './support/createChart';
 import { expectSelectedChart } from './support/expectSelectedChart';
-import { getChartTitles } from './support/getChartTitles';
 import { getRenderedSeriesSummary } from './support/getRenderedSeriesSummary';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
@@ -142,7 +141,7 @@ test.describe('Chart channel selection', () => {
     await selectChartByTitle(mainPage, secondChartTitle);
     await expectSelectedChart(mainPage, secondChartTitle);
 
-    await selectChartByTitle(mainPage, secondChartTitle);
+    await selectChartByTitle(mainPage, secondChartTitle, null);
     await expectSelectedChart(mainPage, null);
   });
 });
@@ -152,46 +151,6 @@ type RenderedSerieSummary = {
   dataLength: number;
   firstPoint: [number, number] | null;
   lastPoint: [number, number] | null;
-};
-
-type SerieComparisonSnapshot = {
-  name: string;
-  dataLength: number;
-  firstPoint: [number, number] | null;
-  lastPoint: [number, number] | null;
-};
-
-type FiberProps = {
-  option?: { series?: unknown };
-  series?: unknown;
-};
-
-type FiberNode = {
-  memoizedProps?: FiberProps;
-  pendingProps?: FiberProps;
-  return?: FiberNode | null;
-  stateNode?: StateNode | null;
-};
-
-type ChartLikeSerie = {
-  name?: unknown;
-  data?: unknown;
-};
-
-type EChartsOption = {
-  series?: unknown;
-};
-
-type EChartsInstance = {
-  getOption: () => EChartsOption;
-};
-
-type ReactEChartsComponent = {
-  getEchartsInstance: () => EChartsInstance | undefined;
-};
-
-type StateNode = {
-  getEchartsInstance?: () => EChartsInstance | undefined;
 };
 
 function buildSerieSummary(serie: ChartSerie): RenderedSerieSummary {
@@ -229,11 +188,15 @@ async function clickSidebarChannel(page: Page, channelLabel: string): Promise<vo
     .click();
 }
 
-async function selectChartByTitle(page: Page, chartTitle: string): Promise<void> {
+async function selectChartByTitle(
+  page: Page,
+  chartTitle: string,
+  expectedSelection: string | null = chartTitle,
+): Promise<void> {
   const chartLocator = chartContainer(page, chartTitle);
   await chartLocator.waitFor({ state: 'visible' });
   await chartLocator.click();
-  await expectSelectedChart(page, chartTitle);
+  await expectSelectedChart(page, expectedSelection);
 }
 
 async function expectChartSeries(
@@ -252,44 +215,4 @@ async function expectChartSeries(
       return actual;
     })
     .toEqual(expectedSeries);
-}
-
-// Removed duplicate expectChartSeries definition (now imported from helpers)
-
-async function getChartIndex(page: Page, chartTitle: string): Promise<number> {
-  const chartTitles = await getChartTitles(page);
-  const index = chartTitles.indexOf(chartTitle);
-
-  if (index === -1) {
-    throw new Error(`Chart with title "${chartTitle}" was not found.`);
-  }
-
-  return index;
-}
-
-async function getSelectedChartTitle(page: Page): Promise<string | null> {
-  const chartTitles = await getChartTitles(page);
-
-  for (const title of chartTitles) {
-    const isSelected = await chartContainer(page, title).evaluate((element) =>
-      element.className.includes('border-slate-900/35'),
-    );
-
-    if (isSelected) {
-      return title;
-    }
-  }
-
-  return null;
-}
-
-// Removed duplicate chartContainer and chartTitleButton definitions (now imported from helpers)
-
-function buildComparisonSnapshot(summary: RenderedSerieSummary): SerieComparisonSnapshot {
-  return {
-    name: summary.name,
-    dataLength: summary.dataLength,
-    firstPoint: summary.firstPoint ? ([...summary.firstPoint] as [number, number]) : null,
-    lastPoint: summary.lastPoint ? ([...summary.lastPoint] as [number, number]) : null,
-  };
 }
