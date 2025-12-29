@@ -40,7 +40,7 @@ test.describe('Chart title initialization', () => {
     await clickSidebarChannel(mainPage, 'Voltage (V)');
 
     const updatedTitles = await getChartTitles(mainPage);
-    expect(updatedTitles).toContain('Voltage (V)');
+    expect(updatedTitles).toContain('Voltage');
     expect(updatedTitles).not.toContain('Chart 1');
   });
 
@@ -53,13 +53,13 @@ test.describe('Chart title initialization', () => {
     await clickSidebarChannel(mainPage, 'Voltage (V)');
 
     const titlesAfterFirstChannel = await getChartTitles(mainPage);
-    expect(titlesAfterFirstChannel).toContain('Voltage (V)');
+    expect(titlesAfterFirstChannel).toContain('Voltage');
 
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
 
     const titlesAfterSecondChannel = await getChartTitles(mainPage);
-    expect(titlesAfterSecondChannel).toContain('Voltage (V)');
-    expect(titlesAfterSecondChannel).not.toContain('Frequency (Hz)');
+    expect(titlesAfterSecondChannel).toContain('Voltage');
+    expect(titlesAfterSecondChannel).not.toContain('Frequency');
   });
 
   test('does not rename chart if user has manually changed the title', async () => {
@@ -80,7 +80,7 @@ test.describe('Chart title initialization', () => {
 
     const updatedTitles = await getChartTitles(mainPage);
     expect(updatedTitles).toContain(customTitle);
-    expect(updatedTitles).not.toContain('Voltage (V)');
+    expect(updatedTitles).not.toContain('Voltage');
   });
 });
 
