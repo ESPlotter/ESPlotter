@@ -4,7 +4,7 @@ import { createChart } from './support/createChart';
 import { getChartTitles } from './support/getChartTitles';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
-import { triggerFileOpenShortcut } from './support/triggerFileOpenShortcut';
+import { triggerImportMenu } from './support/triggerImportMenu';
 import { waitForLastOpenedChannelFileChanged } from './support/waitForLastOpenedChannelFileChanged';
 
 let electronApp: ElectronApplication;
@@ -88,7 +88,7 @@ async function openAndExpandTest3File(app: ElectronApplication, page: Page): Pro
   await setNextOpenFixturePath(app, 'test3.json');
 
   const parsedPromise = waitForLastOpenedChannelFileChanged(page);
-  await triggerFileOpenShortcut(app, page);
+  await triggerImportMenu(app, page);
   await parsedPromise;
 
   const fileTrigger = page.getByRole('button', { name: 'test3' });

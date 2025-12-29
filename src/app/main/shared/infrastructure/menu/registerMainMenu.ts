@@ -8,8 +8,7 @@ export function registerMainMenu(): void {
       label: 'File',
       submenu: [
         {
-          label: 'Open File',
-          accelerator: 'CmdOrCtrl+O',
+          label: 'Import',
           click: async () => {
             const win = BrowserWindow.getFocusedWindow();
             if (!win) {
@@ -24,6 +23,7 @@ export function registerMainMenu(): void {
         },
         {
           label: 'Open File (.out)',
+          accelerator: 'CmdOrCtrl+O',
           click: async () => {
             const win = BrowserWindow.getFocusedWindow();
             if (!win) {
