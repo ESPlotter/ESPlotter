@@ -1,10 +1,11 @@
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test';
 
 import { createChart } from './support/createChart';
+import { expectSelectedChart } from './support/expectSelectedChart';
 import { getChartTitles } from './support/getChartTitles';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
-import { triggerFileOpenShortcut } from './support/triggerFileOpenShortcut';
+import { triggerImportMenu } from './support/triggerImportMenu';
 import { waitForLastOpenedChannelFileChanged } from './support/waitForLastOpenedChannelFileChanged';
 
 let electronApp: ElectronApplication;
@@ -88,7 +89,7 @@ async function openAndExpandTest3File(app: ElectronApplication, page: Page): Pro
   await setNextOpenFixturePath(app, 'test3.json');
 
   const parsedPromise = waitForLastOpenedChannelFileChanged(page);
-  await triggerFileOpenShortcut(app, page);
+  await triggerImportMenu(app, page);
   await parsedPromise;
 
   const fileTrigger = page.getByRole('button', { name: 'test3' });
@@ -96,15 +97,13 @@ async function openAndExpandTest3File(app: ElectronApplication, page: Page): Pro
   await fileTrigger.click();
 }
 
-async function selectChartByTitle(page: Page, chartTitle: string): Promise<void> {
-  const chartLocator = page
-    .locator('article')
-    .filter({ has: page.getByRole('button', { name: chartTitle }) })
-    .locator('div.border-2')
-    .first();
+import { chartContainer } from './support/chartContainer';
 
+async function selectChartByTitle(page: Page, chartTitle: string): Promise<void> {
+  const chartLocator = chartContainer(page, chartTitle);
   await chartLocator.waitFor({ state: 'visible' });
   await chartLocator.click();
+  await expectSelectedChart(page, chartTitle);
 }
 
 async function clickSidebarChannel(page: Page, channelLabel: string): Promise<void> {
