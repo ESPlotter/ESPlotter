@@ -25,7 +25,7 @@ interface ChannelChartsState {
   };
 }
 
-const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
+export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
   charts: {},
   chartCounter: 0,
   selectedChartId: null,
@@ -120,4 +120,3 @@ const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
 export const useSelectedChartId = () => useChannelChartsStore((state) => state.selectedChartId);
 export const useCharts = () => useChannelChartsStore((state) => state.charts);
 export const useChannelChartsActions = () => useChannelChartsStore((state) => state.actions);
-export { useChannelChartsStore };

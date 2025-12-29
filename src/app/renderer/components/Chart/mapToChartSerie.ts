@@ -27,12 +27,8 @@ export function mapToChartSerie(
     return null;
   }
 
-  const label = channel.label?.trim() || channel.id;
-  const unit = channel.unit?.trim();
-  const name = unit ? `${label} (${unit})` : label;
-
   return {
-    name,
+    name: channel.label || channel.id,
     type: 'line',
     data: points,
   };
