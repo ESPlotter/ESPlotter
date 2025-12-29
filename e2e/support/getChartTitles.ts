@@ -1,10 +1,12 @@
 import { Page } from '@playwright/test';
 
 export async function getChartTitles(page: Page): Promise<string[]> {
-  return page
-    .locator('button')
-    .filter({ hasText: /^Chart:/ })
-    .evaluateAll((buttons) =>
-      buttons.map((button) => (button.textContent ?? '').trim()).filter((text) => text.length > 0),
-    );
+  const titles = await page
+    .getByRole('main')
+    .getByRole('article')
+    .getByRole('heading', { level: 2 })
+    .allTextContents();
+  return titles
+    .map((title) => title.trim())
+    .filter((title) => title.length > 0 && title !== 'New Chart');
 }

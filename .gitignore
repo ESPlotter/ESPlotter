@@ -93,3 +93,6 @@ out/
 
 # Playwright
 playwright-output/
+
+#Visual Studio Code settings
+.vscode/

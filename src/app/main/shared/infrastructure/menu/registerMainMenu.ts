@@ -45,8 +45,8 @@ export function registerMainMenu(): void {
 }
 
 async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
-  if (process.env.CI && process.env.UNIPLOT_E2E_OPEN_PATH) {
-    return process.env.UNIPLOT_E2E_OPEN_PATH;
+  if (process.env.CI && process.env.ESPLOTTER_E2E_OPEN_PATH) {
+    return process.env.ESPLOTTER_E2E_OPEN_PATH;
   }
 
   const { dialog } = await import('electron');

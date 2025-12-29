@@ -2,6 +2,8 @@ import { create } from 'zustand';
 
 import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
 
+const DEFAULT_CHART_NAME_PATTERN = /^Chart \d+$/;
+
 interface ChannelChartsState {
   charts: {
     [chartId: string]: {
@@ -11,6 +13,7 @@ interface ChannelChartsState {
       };
     };
   };
+  chartCounter: number;
   selectedChartId: string | null;
   actions: {
     toggleSelectedChartId: (chartId: string) => void;
@@ -22,8 +25,9 @@ interface ChannelChartsState {
   };
 }
 
-const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
+export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
   charts: {},
+  chartCounter: 0,
   selectedChartId: null,
   actions: {
     toggleSelectedChartId: (chartId: string) =>
@@ -35,14 +39,16 @@ const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
         if (state.charts[chartId]) {
           throw new Error(`Chart with id ${chartId} already exists.`);
         }
+        const nextCounter = state.chartCounter + 1;
         return {
           charts: {
             ...state.charts,
             [chartId]: {
-              name: `Chart: ${chartId}`,
+              name: `Chart ${nextCounter}`,
               channels: {},
             },
           },
+          chartCounter: nextCounter,
         };
       }),
     removeChart: (chartId: string) =>
@@ -56,11 +62,20 @@ const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
         if (!chart) {
           throw new Error(`Chart with id ${chartId} does not exist.`);
         }
+
+        const channelCount = Object.keys(chart.channels).length;
+        const isFirstChannel = channelCount === 0;
+        const hasDefaultName = DEFAULT_CHART_NAME_PATTERN.test(chart.name);
+
+        const shouldRenameChart = isFirstChannel && hasDefaultName;
+        const newName = shouldRenameChart ? serie.name : chart.name;
+
         return {
           charts: {
             ...state.charts,
             [chartId]: {
               ...chart,
+              name: newName,
               channels: {
                 ...chart.channels,
                 [channelId]: serie,

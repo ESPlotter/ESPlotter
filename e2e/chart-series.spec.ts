@@ -42,68 +42,80 @@ test.describe('Chart channel selection', () => {
   });
 
   test('adds the Voltage serie to the selected chart', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
+    const channelTitle = 'Voltage (V)';
+    const channelChartTitle = 'Voltage';
+    await createAndSelectChart(mainPage);
 
-    await clickSidebarChannel(mainPage, 'Voltage (V)');
-    await expectSelectedChart(mainPage, chartTitle);
+    await clickSidebarChannel(mainPage, channelTitle);
+    await expectSelectedChart(mainPage, channelChartTitle);
 
-    await expectChartSeries(mainPage, chartTitle, [expectedVoltageSummary]);
+    await expectChartSeries(mainPage, channelChartTitle, [expectedVoltageSummary]);
   });
 
   test('adds the Frequency serie to the selected chart', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
+    const channelTitle = 'Frequency (Hz)';
+    const channelChartTitle = 'Frequency';
+    await createAndSelectChart(mainPage);
 
-    await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChart(mainPage, chartTitle);
+    await clickSidebarChannel(mainPage, channelTitle);
+    await expectSelectedChart(mainPage, channelChartTitle);
 
-    await expectChartSeries(mainPage, chartTitle, [expectedFrequencySummary]);
+    await expectChartSeries(mainPage, channelChartTitle, [expectedFrequencySummary]);
   });
 
   test('allows selecting both series on the same chart', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
+    const channelTitle = 'Voltage (V)';
+    const channelChartTitle = 'Voltage';
+    await createAndSelectChart(mainPage);
 
-    await clickSidebarChannel(mainPage, 'Voltage (V)');
-    await expectSelectedChart(mainPage, chartTitle);
-    await expectChartSeries(mainPage, chartTitle, [expectedVoltageSummary]);
+    await clickSidebarChannel(mainPage, channelTitle);
+    await expectSelectedChart(mainPage, channelChartTitle);
+    await expectChartSeries(mainPage, channelChartTitle, [expectedVoltageSummary]);
 
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChart(mainPage, chartTitle);
+    await expectSelectedChart(mainPage, channelChartTitle);
 
-    await expectChartSeries(mainPage, chartTitle, [
+    await expectChartSeries(mainPage, channelChartTitle, [
       expectedVoltageSummary,
       expectedFrequencySummary,
     ]);
   });
 
   test('allows switching the selected serie within a chart', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
+    const channelTitle = 'Voltage (V)';
+    const channelChartTitle = 'Voltage';
+    await createAndSelectChart(mainPage);
 
-    await clickSidebarChannel(mainPage, 'Voltage (V)');
-    await expectChartSeries(mainPage, chartTitle, [expectedVoltageSummary]);
+    await clickSidebarChannel(mainPage, channelTitle);
+    await expectChartSeries(mainPage, channelChartTitle, [expectedVoltageSummary]);
 
-    await clickSidebarChannel(mainPage, 'Voltage (V)');
-    await expectSelectedChart(mainPage, chartTitle);
-    await expectChartSeries(mainPage, chartTitle, []);
-
-    await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChart(mainPage, chartTitle);
-    await expectChartSeries(mainPage, chartTitle, [expectedFrequencySummary]);
+    await clickSidebarChannel(mainPage, channelTitle);
+    await expectSelectedChart(mainPage, channelChartTitle);
+    await expectChartSeries(mainPage, channelChartTitle, []);
 
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChart(mainPage, chartTitle);
-    await expectChartSeries(mainPage, chartTitle, []);
+    await expectSelectedChart(mainPage, channelChartTitle);
+    await expectChartSeries(mainPage, channelChartTitle, [expectedFrequencySummary]);
+
+    await clickSidebarChannel(mainPage, 'Frequency (Hz)');
+    await expectSelectedChart(mainPage, channelChartTitle);
+    await expectChartSeries(mainPage, channelChartTitle, []);
   });
 
   test('keeps channel selections isolated per chart', async () => {
-    const firstChartTitle = await createAndSelectChart(mainPage);
-    await clickSidebarChannel(mainPage, 'Voltage (V)');
-    await expectChartSeries(mainPage, firstChartTitle, [expectedVoltageSummary]);
+    const channelTitleFirstChart = 'Voltage (V)';
+    const channelChartTitleFirstChart = 'Voltage';
+    await createAndSelectChart(mainPage);
+    await clickSidebarChannel(mainPage, channelTitleFirstChart);
+    await expectChartSeries(mainPage, channelChartTitleFirstChart, [expectedVoltageSummary]);
 
-    const secondChartTitle = await createAndSelectChart(mainPage);
-    await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectChartSeries(mainPage, secondChartTitle, [expectedFrequencySummary]);
+    const channelTitleSecondChart = 'Frequency (Hz)';
+    const channelChartTitleSecondChart = 'Frequency';
+    await createAndSelectChart(mainPage);
+    await clickSidebarChannel(mainPage, channelTitleSecondChart);
 
-    await expectChartSeries(mainPage, firstChartTitle, [expectedVoltageSummary]);
+    await expectChartSeries(mainPage, channelChartTitleFirstChart, [expectedVoltageSummary]);
+    await expectChartSeries(mainPage, channelChartTitleSecondChart, [expectedFrequencySummary]);
   });
 
   test('creates new charts from the New Chart button', async () => {
@@ -206,7 +218,11 @@ async function createAndSelectChart(page: Page): Promise<string> {
 }
 
 async function clickSidebarChannel(page: Page, channelLabel: string): Promise<void> {
-  await page.getByRole('button', { name: channelLabel }).click();
+  await page
+    .locator('[data-sidebar="menu-button"]')
+    .filter({ hasText: channelLabel })
+    .first()
+    .click();
 }
 
 async function selectChartByTitle(page: Page, chartTitle: string): Promise<void> {
@@ -363,7 +379,11 @@ async function getRenderedSeriesSummary(
 }
 
 function chartContainer(page: Page, chartTitle: string) {
-  return chartTitleButton(page, chartTitle).locator('..').locator('div.border-2').first();
+  return page
+    .locator('article')
+    .filter({ has: chartTitleButton(page, chartTitle) })
+    .locator('div.border-2')
+    .first();
 }
 
 function chartTitleButton(page: Page, chartTitle: string) {
