@@ -8,9 +8,7 @@ export interface RendererExposureMap {
     electron: () => string;
   };
   files: {
-    getLastOpenedChannelFile: () => Promise<ChannelFilePrimitive | null>;
-    getOpenedChannelFiles: () => Promise<ChannelFilePrimitive[]>;
-    onLastOpenedChannelFileChanged: (listener: (file: ChannelFilePrimitive) => void) => () => void;
+    onChannelFileOpened: (listener: (file: ChannelFilePrimitive) => void) => () => void;
   };
   userPreferences: {
     getChartSeriesPalette: () => Promise<string[]>;
@@ -24,14 +22,12 @@ export interface RendererExposureMap {
 
 export interface IpcChannelMap {
   ping: () => string;
-  getLastOpenedChannelFile: () => Promise<ChannelFilePrimitive | null>;
-  getOpenedChannelFiles: () => Promise<ChannelFilePrimitive[]>;
   getChartSeriesPalette: () => Promise<string[]>;
   updateChartSeriesPalette: (colors: string[]) => Promise<UserPreferencesPrimitive>;
 }
 
 export interface IpcEventMap {
-  lastOpenedChannelFileChanged: (payload: ChannelFilePrimitive) => void;
+  channelFileOpened: (payload: ChannelFilePrimitive) => void;
   userPreferencesChanged: (payload: UserPreferencesPrimitive) => void;
   userPreferencesOpenRequested: () => void;
 }

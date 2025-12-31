@@ -13,10 +13,8 @@ contextBridgeExposeInMainWorld('versions', {
 });
 
 contextBridgeExposeInMainWorld('files', {
-  getLastOpenedChannelFile: () => ipcRendererInvoke('getLastOpenedChannelFile'),
-  getOpenedChannelFiles: () => ipcRendererInvoke('getOpenedChannelFiles'),
-  onLastOpenedChannelFileChanged: (listener: (file: ChannelFilePrimitive) => void) =>
-    ipcRendererOn('lastOpenedChannelFileChanged', listener),
+  onChannelFileOpened: (listener: (file: ChannelFilePrimitive) => void) =>
+    ipcRendererOn('channelFileOpened', listener),
 });
 
 contextBridgeExposeInMainWorld('userPreferences', {

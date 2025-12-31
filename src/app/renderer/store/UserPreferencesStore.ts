@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
-import { generateRandomHexColor } from '@renderer/components/Chart/Chart';
+
+import { generateRandomHexColor } from '@shared/utils/generateRandomHexColor';
 import { DEFAULT_CHART_SERIES_PALETTE } from '@shared/domain/constants/defaultChartSeriesPalette';
 
 interface UserPreferencesState {

@@ -2,6 +2,8 @@ import { app, BrowserWindow, Menu, type MenuItemConstructorOptions } from 'elect
 
 import { webContentsBroadcast } from '@main/shared/infrastructure/ipc/webContentsBroadcast';
 
+import { webContentsSend } from '@main/shared/infrastructure/ipc/webContentsSend';
+
 export function registerMainMenu(): void {
   const isMac = process.platform === 'darwin';
   const template: MenuItemConstructorOptions[] = [
@@ -10,7 +12,21 @@ export function registerMainMenu(): void {
       label: 'File',
       submenu: [
         {
-          label: 'Open File',
+          label: 'Import',
+          click: async () => {
+            const win = BrowserWindow.getFocusedWindow();
+            if (!win) {
+              return;
+            }
+            const selected = await showOpenFileDialog(win);
+            if (!selected) {
+              return;
+            }
+            await openChannelFile(win, selected);
+          },
+        },
+        {
+          label: 'Open File (.out)',
           accelerator: 'CmdOrCtrl+O',
           click: async () => {
             const win = BrowserWindow.getFocusedWindow();
@@ -21,21 +37,7 @@ export function registerMainMenu(): void {
             if (!selected) {
               return;
             }
-            await addNewOpenedFilePath(selected);
-          },
-        },
-        {
-          label: 'Open File (.out)',
-          click: async () => {
-            const win = BrowserWindow.getFocusedWindow();
-            if (!win) {
-              return;
-            }
-            const selected = await showOpenFileDialog(win);
-            if (!selected) {
-              return;
-            }
-            await addPSSESOutFilePath(selected);
+            await openPsseOutFile(win, selected);
           },
         },
         ...(isMac
@@ -77,25 +79,32 @@ async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
   return filePaths[0] ?? null;
 }
 
-async function addNewOpenedFilePath(path: string): Promise<void> {
-  const { stateRepository, channelFileService } = await createChannelFileDependencies();
-  const saveChannelFilePath = new (
-    await import('@main/channel-file/application/use-cases/SaveChannelFilePath')
-  ).SaveChannelFilePath(stateRepository, channelFileService);
+async function openChannelFile(win: BrowserWindow, path: string): Promise<void> {
+  const { channelFileService } = await createChannelFileDependencies();
+  const openChannelFile = new (
+    await import('@main/channel-file/application/use-cases/OpenChannelFile')
+  ).OpenChannelFile(channelFileService);
+
   try {
-    await saveChannelFilePath.run(path);
+    const channelFile = await openChannelFile.run(path);
+    webContentsSend(win, 'channelFileOpened', channelFile);
   } catch {
     // file has invalid structure
   }
 }
 
-async function addPSSESOutFilePath(path: string): Promise<void> {
-  const { stateRepository, psseOutFileService } = await createIngestionDependencies();
-  const savePsseOutFilePath = new (
-    await import('@main/channel-file/application/use-cases/IngestPsseOutFilePath')
-  ).IngestPsseOutFilePath(stateRepository, psseOutFileService);
+async function openPsseOutFile(win: BrowserWindow, path: string): Promise<void> {
+  const { psseOutFileService } = await createIngestionDependencies();
+  const readPsseOutFilePath = new (
+    await import('@main/channel-file/application/use-cases/ReadPsseOutFilePath')
+  ).ReadPsseOutFilePath(psseOutFileService);
 
-  await savePsseOutFilePath.run(path);
+  try {
+    const channelFile = await readPsseOutFilePath.run(path);
+    webContentsSend(win, 'channelFileOpened', channelFile);
+  } catch {
+    // file has invalid structure or parsing failed
+  }
 }
 
 async function createChannelFileDependencies() {
@@ -105,24 +114,19 @@ async function createChannelFileDependencies() {
   const { NodeChannelFileService } = await import(
     '@main/channel-file/infrastructure/services/NodeChannelFileService'
   );
-  const { ElectronStoreChannelFileStateRepository } = await import(
-    '@main/channel-file/infrastructure/repositories/ElectronStoreChannelFileStateRepository'
-  );
 
   const structureChecker = new ChannelFileStructureChecker();
   const channelFileService = new NodeChannelFileService(structureChecker);
-  const stateRepository = new ElectronStoreChannelFileStateRepository(channelFileService);
 
-  return { channelFileService, stateRepository };
+  return { channelFileService };
 }
 
 async function createIngestionDependencies() {
-  const { stateRepository } = await createChannelFileDependencies();
   const { NodePsseOutFileService } = await import(
     '@main/channel-file/infrastructure/services/NodePsseOutFileService'
   );
 
   const psseOutFileService = new NodePsseOutFileService();
 
-  return { psseOutFileService, stateRepository };
+  return { psseOutFileService };
 }

@@ -4,7 +4,7 @@ import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, afterEach, describe, it, expect } from 'vitest';
 
 // Mock the color generator before importing the store
-vi.mock('@renderer/components/Chart/Chart', () => ({
+vi.mock('@shared/utils/generateRandomHexColor', () => ({
   generateRandomHexColor: vi.fn(() => '#deadbe'),
 }));
 import { DEFAULT_CHART_SERIES_PALETTE } from '@shared/domain/constants/defaultChartSeriesPalette';
