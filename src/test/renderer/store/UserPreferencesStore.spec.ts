@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, afterEach, describe, it, expect } from 'vitest';
@@ -11,7 +12,7 @@ import { DEFAULT_CHART_SERIES_PALETTE } from '@shared/domain/constants/defaultCh
 import {
   useUserPreferencesChartSeriesPalette,
   useUserPreferencesActions,
-} from './UserPreferencesStore';
+} from '../../../app/renderer/store/UserPreferencesStore';
 
 describe('UserPreferencesStore - chart series palette', () => {
   beforeEach(() => {
