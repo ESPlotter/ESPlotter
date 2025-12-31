@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 
-
-import { generateRandomHexColor } from '@shared/utils/generateRandomHexColor';
 import { DEFAULT_CHART_SERIES_PALETTE } from '@shared/domain/constants/defaultChartSeriesPalette';
+import { generateRandomHexColor } from '@shared/utils/generateRandomHexColor';
 
 interface UserPreferencesState {
   chartSeriesPalette: string[];
@@ -23,9 +22,9 @@ const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
       set(() => ({
         chartSeriesPalette: [...palette],
       })),
-  replaceColor: async (index: number, value: string) => {
+    replaceColor: async (index: number, value: string) => {
       let nextPalette: string[] = [];
-    
+
       set((state) => {
         if (index < 0 || index >= state.chartSeriesPalette.length) {
           return state;
@@ -43,30 +42,27 @@ const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
       let nextPalette: string[] = [];
 
       set((state) => {
-        nextPalette = [
-          ...state.chartSeriesPalette,
-          (color ?? generateRandomHexColor()).trim(),
-        ];
+        nextPalette = [...state.chartSeriesPalette, (color ?? generateRandomHexColor()).trim()];
         return {
           chartSeriesPalette: nextPalette,
         };
       });
 
       await window.userPreferences.updateChartSeriesPalette(nextPalette);
-      },
+    },
     removeColor: async (index: number) => {
       let nextPalette: string[] = [];
-    
+
       set((state) => {
         if (index < 0 || index >= state.chartSeriesPalette.length) {
           return state;
         }
-      
+
         nextPalette = state.chartSeriesPalette.filter((_, idx) => idx !== index);
-      
+
         return { chartSeriesPalette: nextPalette };
       });
-    
+
       await window.userPreferences.updateChartSeriesPalette(nextPalette);
     },
 
@@ -95,7 +91,7 @@ const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
   },
 }));
 
-export function useUserPreferencesChartSeriesPalette(): string[] {  
+export function useUserPreferencesChartSeriesPalette(): string[] {
   return useUserPreferencesStore((state) => state.chartSeriesPalette);
 }
 

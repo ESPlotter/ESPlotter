@@ -1,9 +1,6 @@
 import { ipcRenderer } from 'electron';
 
-import {
-  type IpcEventKey,
-  type IpcEventListener,
-} from '@shared/domain/repositories/IPCContracts';
+import { type IpcEventKey, type IpcEventListener } from '@shared/domain/repositories/IPCContracts';
 
 export function ipcRendererOn<TKey extends IpcEventKey>(
   channel: TKey,

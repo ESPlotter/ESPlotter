@@ -50,11 +50,9 @@ describe('UserPreferencesStore - chart series palette', () => {
     });
 
     expect(result.current.palette).toEqual(['#111111', '#abcabc', '#333333']);
-    expect((globalThis as any).window.userPreferences.updateChartSeriesPalette).toHaveBeenCalledWith([
-      '#111111',
-      '#abcabc',
-      '#333333',
-    ]);
+    expect(
+      (globalThis as any).window.userPreferences.updateChartSeriesPalette,
+    ).toHaveBeenCalledWith(['#111111', '#abcabc', '#333333']);
   });
 
   it('addColor with explicit color appends and persists', async () => {
@@ -67,9 +65,9 @@ describe('UserPreferencesStore - chart series palette', () => {
 
     expect(result.current.palette).toHaveLength(2);
     expect(result.current.palette[1]).toBe('#123456');
-    expect((globalThis as any).window.userPreferences.updateChartSeriesPalette).toHaveBeenCalledWith(
-      result.current.palette,
-    );
+    expect(
+      (globalThis as any).window.userPreferences.updateChartSeriesPalette,
+    ).toHaveBeenCalledWith(result.current.palette);
   });
 
   it('addColor without color uses generateRandomHexColor and persists', async () => {
@@ -81,9 +79,9 @@ describe('UserPreferencesStore - chart series palette', () => {
     });
 
     expect(result.current.palette[result.current.palette.length - 1]).toBe('#deadbe');
-    expect((globalThis as any).window.userPreferences.updateChartSeriesPalette).toHaveBeenCalledWith(
-      result.current.palette,
-    );
+    expect(
+      (globalThis as any).window.userPreferences.updateChartSeriesPalette,
+    ).toHaveBeenCalledWith(result.current.palette);
   });
 
   it('removeColor removes item and persists', async () => {
@@ -95,13 +93,12 @@ describe('UserPreferencesStore - chart series palette', () => {
     });
 
     expect(result.current.palette).toEqual(['#a1', '#a3']);
-    expect((globalThis as any).window.userPreferences.updateChartSeriesPalette).toHaveBeenCalledWith([
-      '#a1',
-      '#a3',
-    ]);
+    expect(
+      (globalThis as any).window.userPreferences.updateChartSeriesPalette,
+    ).toHaveBeenCalledWith(['#a1', '#a3']);
   });
 
-/*   it('removeColor with invalid index does nothing and does not persist', async () => {
+  /*   it('removeColor with invalid index does nothing and does not persist', async () => {
     const { result } = hook();
 
     await act(async () => {
@@ -122,6 +119,8 @@ describe('UserPreferencesStore - chart series palette', () => {
     });
 
     expect(result.current.palette).toEqual(DEFAULT_CHART_SERIES_PALETTE);
-    expect((globalThis as any).window.userPreferences.updateChartSeriesPalette).not.toHaveBeenCalled();
+    expect(
+      (globalThis as any).window.userPreferences.updateChartSeriesPalette,
+    ).not.toHaveBeenCalled();
   });
 });

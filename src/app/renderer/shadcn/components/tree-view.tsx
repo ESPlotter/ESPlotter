@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { cva } from 'class-variance-authority';
 import { ChevronRight } from 'lucide-react';

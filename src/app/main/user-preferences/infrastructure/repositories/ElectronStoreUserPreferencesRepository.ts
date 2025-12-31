@@ -55,6 +55,8 @@ export class ElectronStoreUserPreferencesRepository
       return UserPreferences.withDefaultChartSeriesPalette();
     }
 
-    return UserPreferences.fromPrimitives({ chartSeriesPalette: rawPreferences.chartSeriesPalette });
+    return UserPreferences.fromPrimitives({
+      chartSeriesPalette: rawPreferences.chartSeriesPalette,
+    });
   }
 }

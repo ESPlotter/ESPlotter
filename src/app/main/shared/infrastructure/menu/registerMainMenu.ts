@@ -1,7 +1,6 @@
 import { app, BrowserWindow, Menu, type MenuItemConstructorOptions } from 'electron';
 
 import { webContentsBroadcast } from '@main/shared/infrastructure/ipc/webContentsBroadcast';
-
 import { webContentsSend } from '@main/shared/infrastructure/ipc/webContentsSend';
 
 export function registerMainMenu(): void {
