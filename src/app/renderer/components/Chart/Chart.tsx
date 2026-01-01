@@ -47,6 +47,12 @@ export function Chart({
   );
   const isDraggingRef = useRef(false);
   const [mode, setMode] = useState<ChartMode>('zoom');
+  const [zoomRect, setZoomRect] = useState<{
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+  } | null>(null);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -108,6 +114,19 @@ export function Chart({
       if (isDraggingRef.current && dragStartRef.current) {
         if ((mode === 'zoom' && e.buttons === 1) || (mode === 'pan' && e.buttons === 1)) {
           e.preventDefault();
+
+          if (mode === 'zoom') {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const endPixelX = e.clientX - rect.left;
+            const endPixelY = e.clientY - rect.top;
+
+            setZoomRect({
+              startX: dragStartRef.current.pixelX,
+              startY: dragStartRef.current.pixelY,
+              endX: endPixelX,
+              endY: endPixelY,
+            });
+          }
         }
       }
     },
@@ -164,6 +183,7 @@ export function Chart({
           }
 
           dragStartRef.current = null;
+          setZoomRect(null);
           setTimeout(() => {
             isDraggingRef.current = false;
           }, 0);
@@ -275,7 +295,7 @@ export function Chart({
         </Button>
       </div>
       <div
-        className={`flex min-h-0 flex-1 rounded-sm border-2 ${isSelected ? 'border-slate-900/35' : 'border-transparent'}`}
+        className={`relative flex min-h-0 flex-1 rounded-sm border-2 ${isSelected ? 'border-slate-900/35' : 'border-transparent'}`}
         onClick={handleClick}
         onContextMenu={handleContextMenu}
         onMouseDown={handleMouseDown}
@@ -292,6 +312,20 @@ export function Chart({
           lazyUpdate={true}
           style={{ height: '100%', width: '100%' }}
         />
+        {zoomRect && mode === 'zoom' && (
+          <div
+            style={{
+              position: 'absolute',
+              left: `${Math.min(zoomRect.startX, zoomRect.endX)}px`,
+              top: `${Math.min(zoomRect.startY, zoomRect.endY)}px`,
+              width: `${Math.abs(zoomRect.endX - zoomRect.startX)}px`,
+              height: `${Math.abs(zoomRect.endY - zoomRect.startY)}px`,
+              border: '1px dashed black',
+              pointerEvents: 'none',
+              backgroundColor: 'transparent',
+            }}
+          />
+        )}
       </div>
     </div>
   );
