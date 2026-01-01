@@ -354,10 +354,79 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
       interval: 0.2,
       axisLabel: {
         fontSize: 10,
+        formatter: (value: number) => {
+          if (value === 0) return '0';
+          
+          const absValue = Math.abs(value);
+          
+          // For very small numbers, use scientific notation
+          if (absValue < 0.0001 && absValue > 0) {
+            return value.toExponential(2);
+          }
+          
+          // For very large numbers, use scientific notation
+          if (absValue >= 1e6) {
+            return value.toExponential(2);
+          }
+          
+          // Determine appropriate decimal places based on magnitude
+          let decimalPlaces;
+          if (absValue >= 100) {
+            decimalPlaces = 1;
+          } else if (absValue >= 10) {
+            decimalPlaces = 2;
+          } else if (absValue >= 1) {
+            decimalPlaces = 3;
+          } else if (absValue >= 0.01) {
+            decimalPlaces = 4;
+          } else {
+            decimalPlaces = 5;
+          }
+          
+          // Format the number and remove trailing zeros
+          const formatted = value.toFixed(decimalPlaces);
+          return formatted.replace(/\.?0+$/, '');
+        },
       },
     },
     yAxis: {
       type: 'value',
+      axisLabel: {
+        fontSize: 10,
+        formatter: (value: number) => {
+          if (value === 0) return '0';
+          
+          const absValue = Math.abs(value);
+          
+          // For very small numbers, use scientific notation
+          if (absValue < 0.0001 && absValue > 0) {
+            return value.toExponential(2);
+          }
+          
+          // For very large numbers, use scientific notation
+          if (absValue >= 1e6) {
+            return value.toExponential(2);
+          }
+          
+          // Determine appropriate decimal places based on magnitude
+          let decimalPlaces;
+          if (absValue >= 100) {
+            decimalPlaces = 1;
+          } else if (absValue >= 10) {
+            decimalPlaces = 2;
+          } else if (absValue >= 1) {
+            decimalPlaces = 3;
+          } else if (absValue >= 0.01) {
+            decimalPlaces = 4;
+          } else {
+            decimalPlaces = 5;
+          }
+          
+          // Format the number and remove trailing zeros
+          const formatted = value.toFixed(decimalPlaces);
+          return formatted.replace(/\.?0+$/, '');
+        },
+      },
     },
     legend: {
       show: true,
