@@ -46,6 +46,7 @@ export function Chart({
     null,
   );
   const isDraggingRef = useRef(false);
+  const hadDragMovementRef = useRef(false);
   const [mode, setMode] = useState<ChartMode>('zoom');
   const [zoomRect, setZoomRect] = useState<{
     startX: number;
@@ -115,11 +116,18 @@ export function Chart({
         if ((mode === 'zoom' && e.buttons === 1) || (mode === 'pan' && e.buttons === 1)) {
           e.preventDefault();
 
-          if (mode === 'zoom') {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const endPixelX = e.clientX - rect.left;
-            const endPixelY = e.clientY - rect.top;
+          const rect = e.currentTarget.getBoundingClientRect();
+          const endPixelX = e.clientX - rect.left;
+          const endPixelY = e.clientY - rect.top;
 
+          const deltaX = Math.abs(endPixelX - dragStartRef.current.pixelX);
+          const deltaY = Math.abs(endPixelY - dragStartRef.current.pixelY);
+
+          if (deltaX > 2 || deltaY > 2) {
+            hadDragMovementRef.current = true;
+          }
+
+          if (mode === 'zoom') {
             setZoomRect({
               startX: dragStartRef.current.pixelX,
               startY: dragStartRef.current.pixelY,
@@ -186,6 +194,7 @@ export function Chart({
           setZoomRect(null);
           setTimeout(() => {
             isDraggingRef.current = false;
+            hadDragMovementRef.current = false;
           }, 0);
         } else if (e.button === 0 && mode === 'pan') {
           e.preventDefault();
@@ -241,6 +250,7 @@ export function Chart({
           dragStartRef.current = null;
           setTimeout(() => {
             isDraggingRef.current = false;
+            hadDragMovementRef.current = false;
           }, 0);
         }
       }
@@ -249,7 +259,7 @@ export function Chart({
   );
 
   const handleClick = useCallback(() => {
-    if (!isDraggingRef.current) {
+    if (!hadDragMovementRef.current) {
       toggleSelectedChartId(id);
     }
   }, [id, toggleSelectedChartId]);
