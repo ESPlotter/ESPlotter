@@ -54,7 +54,7 @@ export function Chart({
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (e.button === 2 && mode === 'zoom') {
+      if (e.button === 0 && mode === 'zoom') {
         e.preventDefault();
         e.stopPropagation();
         const chartInstance = chartRef.current?.getEchartsInstance();
@@ -106,7 +106,7 @@ export function Chart({
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (isDraggingRef.current && dragStartRef.current) {
-        if ((mode === 'zoom' && e.buttons === 2) || (mode === 'pan' && e.buttons === 1)) {
+        if ((mode === 'zoom' && e.buttons === 1) || (mode === 'pan' && e.buttons === 1)) {
           e.preventDefault();
         }
       }
@@ -117,7 +117,7 @@ export function Chart({
   const handleMouseUp = useCallback(
     (e: React.MouseEvent) => {
       if (dragStartRef.current && isDraggingRef.current) {
-        if (e.button === 2 && mode === 'zoom') {
+        if (e.button === 0 && mode === 'zoom') {
           e.preventDefault();
           e.stopPropagation();
 
