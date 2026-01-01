@@ -1,4 +1,4 @@
-import { IconHandMove, IconHome, IconZoomIn } from '@tabler/icons-react';
+import { IconHandGrab, IconHome, IconZoomIn } from '@tabler/icons-react';
 import { EChartsOption } from 'echarts';
 import { LineChart } from 'echarts/charts';
 import {
@@ -47,6 +47,7 @@ export function Chart({
   );
   const isDraggingRef = useRef(false);
   const hadDragMovementRef = useRef(false);
+  const lastPanPositionRef = useRef<{ x: number; y: number } | null>(null);
   const [mode, setMode] = useState<ChartMode>('zoom');
   const [zoomRect, setZoomRect] = useState<{
     startX: number;
@@ -103,6 +104,10 @@ export function Chart({
             pixelX,
             pixelY,
           };
+          lastPanPositionRef.current = {
+            x: pointInGrid[0],
+            y: pointInGrid[1],
+          };
           isDraggingRef.current = true;
         }
       }
@@ -134,6 +139,50 @@ export function Chart({
               endX: endPixelX,
               endY: endPixelY,
             });
+          } else if (mode === 'pan') {
+            const chartInstance = chartRef.current?.getEchartsInstance();
+            if (chartInstance) {
+              const currentPoint = chartInstance.convertFromPixel({ gridIndex: 0 }, [
+                endPixelX,
+                endPixelY,
+              ]);
+
+              if (currentPoint && lastPanPositionRef.current) {
+                const deltaX = lastPanPositionRef.current.x - currentPoint[0];
+                const deltaY = lastPanPositionRef.current.y - currentPoint[1];
+
+                const option = chartInstance.getOption();
+                const xAxis = option.xAxis?.[0];
+                const yAxis = option.yAxis?.[0];
+
+                if (xAxis && yAxis) {
+                  const currentXMin = typeof xAxis.min === 'number' ? xAxis.min : null;
+                  const currentXMax = typeof xAxis.max === 'number' ? xAxis.max : null;
+                  const currentYMin = typeof yAxis.min === 'number' ? yAxis.min : null;
+                  const currentYMax = typeof yAxis.max === 'number' ? yAxis.max : null;
+
+                  if (
+                    currentXMin !== null &&
+                    currentXMax !== null &&
+                    currentYMin !== null &&
+                    currentYMax !== null
+                  ) {
+                    chartInstance.setOption({
+                      xAxis: {
+                        min: currentXMin + deltaX,
+                        max: currentXMax + deltaX,
+                      },
+                      yAxis: {
+                        min: currentYMin + deltaY,
+                        max: currentYMax + deltaY,
+                      },
+                    });
+                  }
+                }
+              }
+
+              lastPanPositionRef.current = currentPoint ? { x: currentPoint[0], y: currentPoint[1] } : null;
+            }
           }
         }
       }
@@ -200,54 +249,8 @@ export function Chart({
           e.preventDefault();
           e.stopPropagation();
 
-          const chartInstance = chartRef.current?.getEchartsInstance();
-          if (!chartInstance) {
-            dragStartRef.current = null;
-            isDraggingRef.current = false;
-            return;
-          }
-
-          const rect = e.currentTarget.getBoundingClientRect();
-          const endPixelX = e.clientX - rect.left;
-          const endPixelY = e.clientY - rect.top;
-
-          const endPoint = chartInstance.convertFromPixel({ gridIndex: 0 }, [endPixelX, endPixelY]);
-
-          if (endPoint) {
-            const deltaX = dragStartRef.current.x - endPoint[0];
-            const deltaY = dragStartRef.current.y - endPoint[1];
-
-            const option = chartInstance.getOption();
-            const xAxis = option.xAxis?.[0];
-            const yAxis = option.yAxis?.[0];
-
-            if (xAxis && yAxis) {
-              const currentXMin = typeof xAxis.min === 'number' ? xAxis.min : null;
-              const currentXMax = typeof xAxis.max === 'number' ? xAxis.max : null;
-              const currentYMin = typeof yAxis.min === 'number' ? yAxis.min : null;
-              const currentYMax = typeof yAxis.max === 'number' ? yAxis.max : null;
-
-              if (
-                currentXMin !== null &&
-                currentXMax !== null &&
-                currentYMin !== null &&
-                currentYMax !== null
-              ) {
-                chartInstance.setOption({
-                  xAxis: {
-                    min: currentXMin + deltaX,
-                    max: currentXMax + deltaX,
-                  },
-                  yAxis: {
-                    min: currentYMin + deltaY,
-                    max: currentYMax + deltaY,
-                  },
-                });
-              }
-            }
-          }
-
           dragStartRef.current = null;
+          lastPanPositionRef.current = null;
           setTimeout(() => {
             isDraggingRef.current = false;
             hadDragMovementRef.current = false;
@@ -298,7 +301,7 @@ export function Chart({
           onClick={handlePanMode}
           title="Pan mode"
         >
-          <IconHandMove className="size-4" />
+          <IconHandGrab className="size-4" />
         </Button>
         <Button variant="outline" size="icon-sm" onClick={handleReset} title="Reset zoom">
           <IconHome className="size-4" />
