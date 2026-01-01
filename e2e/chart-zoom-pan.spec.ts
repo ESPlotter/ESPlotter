@@ -30,11 +30,11 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     // Check for zoom button (should be highlighted by default)
     const zoomButton = container.locator('button[title="Zoom mode"]');
     await expect(zoomButton).toBeVisible();
-    
+
     // Check for pan button
     const panButton = container.locator('button[title="Pan mode"]');
     await expect(panButton).toBeVisible();
-    
+
     // Check for reset button
     const resetButton = container.locator('button[title="Reset zoom"]');
     await expect(resetButton).toBeVisible();
@@ -45,7 +45,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     const container = chartContainer(mainPage, chartTitle);
 
     const zoomButton = container.locator('button[title="Zoom mode"]');
-    
+
     // Zoom button should have default variant (highlighted)
     const classList = await zoomButton.getAttribute('class');
     expect(classList).toContain('bg-primary'); // Default variant has primary background
@@ -69,7 +69,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     // Pan should now be active, zoom inactive
     const panClass = await panButton.getAttribute('class');
     expect(panClass).toContain('bg-primary');
-    
+
     zoomClass = await zoomButton.getAttribute('class');
     expect(zoomClass).not.toContain('bg-primary');
 
@@ -85,7 +85,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
   test('can perform zoom in by dragging right', async () => {
     const chartTitle = await createAndSelectChart(mainPage);
     await addVoltageChannelToChart(mainPage);
-    
+
     const container = chartContainer(mainPage, chartTitle);
     const chartElement = container.locator('.echarts-for-react').first();
 
@@ -122,7 +122,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
   test('shows visual rectangle while dragging in zoom mode', async () => {
     const chartTitle = await createAndSelectChart(mainPage);
     await addVoltageChannelToChart(mainPage);
-    
+
     const container = chartContainer(mainPage, chartTitle);
     const chartElement = container.locator('.echarts-for-react').first();
 
@@ -154,7 +154,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
   test('can reset zoom by dragging left', async () => {
     const chartTitle = await createAndSelectChart(mainPage);
     await addVoltageChannelToChart(mainPage);
-    
+
     const container = chartContainer(mainPage, chartTitle);
     const chartElement = container.locator('.echarts-for-react').first();
 
@@ -193,7 +193,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
   test('can reset zoom using reset button', async () => {
     const chartTitle = await createAndSelectChart(mainPage);
     await addVoltageChannelToChart(mainPage);
-    
+
     const container = chartContainer(mainPage, chartTitle);
     const chartElement = container.locator('.echarts-for-react').first();
     const resetButton = container.locator('button[title="Reset zoom"]');
@@ -230,7 +230,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
   test('can pan chart in pan mode', async () => {
     const chartTitle = await createAndSelectChart(mainPage);
     await addVoltageChannelToChart(mainPage);
-    
+
     const container = chartContainer(mainPage, chartTitle);
     const chartElement = container.locator('.echarts-for-react').first();
     const panButton = container.locator('button[title="Pan mode"]');
@@ -265,10 +265,10 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     // Verify that the view has shifted (different min/max but same range)
     const zoomedRangeX = zoomedRanges.xAxis.max - zoomedRanges.xAxis.min;
     const pannedRangeX = pannedRanges.xAxis.max - pannedRanges.xAxis.min;
-    
+
     // Range should remain the same
     expect(Math.abs(pannedRangeX - zoomedRangeX)).toBeLessThan(0.1);
-    
+
     // But min/max should have changed
     expect(pannedRanges.xAxis.min).not.toBe(zoomedRanges.xAxis.min);
     expect(pannedRanges.xAxis.max).not.toBe(zoomedRanges.xAxis.max);
@@ -276,7 +276,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
 
   test('chart activation still works after zoom/pan implementation', async () => {
     const chartTitle = await createChart(mainPage);
-    
+
     // Chart should not be selected initially
     await expectSelectedChart(mainPage, null);
 
@@ -318,7 +318,7 @@ async function openAndExpandTest3File(electronApp: ElectronApplication, page: Pa
   const fixtureAbsolutePath = await setNextOpenFixturePath(electronApp, 'test3.json');
   await triggerImportMenu(page);
   await waitForLastOpenedChannelFileChanged(page, fixtureAbsolutePath);
-  
+
   // Expand the tree
   const expandButton = page.locator('button[aria-label="Expand all"]');
   await expandButton.click();
@@ -349,12 +349,15 @@ async function addVoltageChannelToChart(page: Page) {
   await clickSidebarChannel(page, 'Voltage (V)');
 }
 
-async function getChartAxisRanges(page: Page, chartTitle: string): Promise<{
+async function getChartAxisRanges(
+  page: Page,
+  chartTitle: string,
+): Promise<{
   xAxis: { min: number; max: number };
   yAxis: { min: number; max: number };
 }> {
   const chartIndex = await getChartIndex(page, chartTitle);
-  
+
   return page.evaluate(
     async ({ chartIndex: idx }) => {
       const containers = Array.from(
@@ -371,7 +374,7 @@ async function getChartAxisRanges(page: Page, chartTitle: string): Promise<{
       );
       const host = target as unknown as Record<string, unknown>;
       const rootFiber = fiberKey ? (host[fiberKey] as FiberNode | null) : null;
-      
+
       let current: FiberNode | null = rootFiber;
       let echartsInstance: ReactEChartsComponent | null = null;
 
