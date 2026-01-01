@@ -70,12 +70,14 @@ export function ChartTitle({ chartId, name }: ChartTitleProps) {
   }
 
   return (
-    <button
-      type="button"
-      className="text-2xl font-bold cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      onClick={() => setIsEditing(true)}
-    >
-      {name}
-    </button>
+    <h2 className="text-2xl font-bold">
+      <button
+        type="button"
+        className="cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        onClick={() => setIsEditing(true)}
+      >
+        {name}
+      </button>
+    </h2>
   );
 }

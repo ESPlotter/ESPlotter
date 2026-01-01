@@ -79,16 +79,11 @@ jobs:
         run: npm run test:components
 
   e2e:
-    name: E2E test on ${{ matrix.os }}
+    name: E2E test
     needs:
       - unit
       - components
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-22.04, macos-14, windows-2022]
+    runs-on: windows-2022
 
     env:
       CI: true
@@ -110,17 +105,7 @@ jobs:
         shell: bash
         run: |
           ROLLUP_VERSION=$(node -p "require('./package.json').devDependencies.rollup")
-          case "$RUNNER_OS" in
-            macOS)
-              ROLLUP_ARCH=$(uname -m | sed 's/x86_64/x64/')
-              npm install --package-lock-only --ignore-scripts --platform=darwin --arch="$ROLLUP_ARCH" "@rollup/rollup-darwin-${ROLLUP_ARCH}@${ROLLUP_VERSION}"
-              ;;
-            Windows)
-              npm install --package-lock-only --ignore-scripts --platform=win32 --arch=x64 "@rollup/rollup-win32-x64-msvc@${ROLLUP_VERSION}"
-              ;;
-            *)
-              ;;
-          esac
+          npm install --package-lock-only --ignore-scripts --platform=win32 --arch=x64 "@rollup/rollup-win32-x64-msvc@${ROLLUP_VERSION}"
 
       - name: Ensure Lightning CSS native bindings in lockfile
         shell: bash
@@ -129,21 +114,9 @@ jobs:
           if [ -z "$LIGHTNINGCSS_VERSIONS" ]; then
             exit 0
           fi
-          case "$RUNNER_OS" in
-            macOS)
-              LIGHTNING_ARCH=$(uname -m | sed 's/x86_64/x64/')
-              for VERSION in $LIGHTNINGCSS_VERSIONS; do
-                npm install --package-lock-only --ignore-scripts --platform=darwin --arch="$LIGHTNING_ARCH" "lightningcss-darwin-${LIGHTNING_ARCH}@${VERSION}"
-              done
-              ;;
-            Windows)
-              for VERSION in $LIGHTNINGCSS_VERSIONS; do
-                npm install --package-lock-only --ignore-scripts --platform=win32 --arch=x64 "lightningcss-win32-x64-msvc@${VERSION}"
-              done
-              ;;
-            *)
-              ;;
-          esac
+          for VERSION in $LIGHTNINGCSS_VERSIONS; do
+              npm install --package-lock-only --ignore-scripts --platform=win32 --arch=x64 "lightningcss-win32-x64-msvc@${VERSION}"
+          done
 
       - name: Install dependencies
         run: npm ci
@@ -155,31 +128,21 @@ jobs:
             ~/.cache/ms-playwright
             ~/Library/Caches/ms-playwright
             C:\Users\runneradmin\AppData\Local\ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json', 'playwright.config.ts') }}
+          key: windows-playwright-${{ hashFiles('package-lock.json', 'playwright.config.ts') }}
           restore-keys: |
-            ${{ runner.os }}-playwright-
+            windows-playwright-
 
-      - name: Install Playwright browsers (Linux)
-        if: runner.os == 'Linux'
-        run: npx playwright install --with-deps
-
-      - name: Install Playwright browsers (macOS & Windows)
-        if: runner.os != 'Linux'
+      - name: Install Playwright browsers
         run: npx playwright install
 
-      - name: Run Playwright tests (Linux)
-        if: runner.os == 'Linux'
-        run: xvfb-run npm run test:e2e
-
-      - name: Run Playwright tests (macOS & Windows)
-        if: runner.os != 'Linux'
+      - name: Run Playwright tests
         run: npm run test:e2e
 
       - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-output-${{ matrix.os }}
+          name: playwright-output-windows
           path: |
             playwright-output/report
             playwright-output/test-results

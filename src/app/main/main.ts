@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url';
 
 import { app, BrowserWindow, globalShortcut } from 'electron';
 
-import { registerChannelFileObservers } from '@main/channel-file/infrastructure/observers/registerChannelFileObservers';
 import { registerMainIpcHandlers } from '@main/shared/infrastructure/ipc/registerMainIpcHandlers';
 import { registerMainMenu } from '@main/shared/infrastructure/menu/registerMainMenu';
 
@@ -65,7 +64,6 @@ const createWindow = () => {
 
 app.whenReady().then(() => {
   registerMainIpcHandlers();
-  registerChannelFileObservers();
   registerMainMenu();
   createWindow();
 });
