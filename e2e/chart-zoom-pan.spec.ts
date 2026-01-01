@@ -1,15 +1,14 @@
 import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
 
-import test3Fixture from '../fixtures/test3.json';
-
 import { chartContainer } from './support/chartContainer';
-import { chartTitleButton } from './support/chartTitleButton';
 import { createChart } from './support/createChart';
 import { expectSelectedChart } from './support/expectSelectedChart';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 import { triggerImportMenu } from './support/triggerImportMenu';
 import { waitForLastOpenedChannelFileChanged } from './support/waitForLastOpenedChannelFileChanged';
+
+import type { FiberNode, ReactEChartsComponent } from './support/chartHelpers';
 
 let electronApp: ElectronApplication;
 let mainPage: Page;
@@ -371,25 +370,33 @@ async function getChartAxisRanges(page: Page, chartTitle: string): Promise<{
         key.startsWith('__reactFiber'),
       );
       const host = target as unknown as Record<string, unknown>;
-      const rootFiber = fiberKey ? (host[fiberKey] as any) : null;
+      const rootFiber = fiberKey ? (host[fiberKey] as FiberNode | null) : null;
       
-      let current: any = rootFiber;
-      let echartsInstance: any = null;
+      let current: FiberNode | null = rootFiber;
+      let echartsInstance: ReactEChartsComponent | null = null;
 
       while (current && !echartsInstance) {
-        const component = current.stateNode;
+        const component = current.stateNode as ReactEChartsComponent | null | undefined;
         if (component?.getEchartsInstance) {
-          echartsInstance = component.getEchartsInstance();
-          if (echartsInstance) break;
+          const instance = component.getEchartsInstance();
+          if (instance) {
+            echartsInstance = component;
+            break;
+          }
         }
-        current = current.return;
+        current = current.return ?? null;
       }
 
       if (!echartsInstance) {
         throw new Error('ECharts instance not found');
       }
 
-      const option = echartsInstance.getOption();
+      const instance = echartsInstance.getEchartsInstance();
+      if (!instance) {
+        throw new Error('ECharts instance not available');
+      }
+
+      const option = instance.getOption();
       const xAxis = option.xAxis?.[0] || {};
       const yAxis = option.yAxis?.[0] || {};
 
