@@ -48,6 +48,8 @@ export function Chart({
   const isDraggingRef = useRef(false);
   const hadDragMovementRef = useRef(false);
   const lastPanPositionRef = useRef<{ x: number; y: number } | null>(null);
+  const panUpdateScheduledRef = useRef(false);
+  const pendingPanUpdateRef = useRef<{ pixelX: number; pixelY: number } | null>(null);
   const [mode, setMode] = useState<ChartMode>('zoom');
   const [zoomRect, setZoomRect] = useState<{
     startX: number;
@@ -58,6 +60,60 @@ export function Chart({
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
+  }, []);
+
+  const applyPanUpdate = useCallback(() => {
+    const chartInstance = chartRef.current?.getEchartsInstance();
+    const pending = pendingPanUpdateRef.current;
+
+    if (!chartInstance || !pending) {
+      panUpdateScheduledRef.current = false;
+      return;
+    }
+
+    const currentPoint = chartInstance.convertFromPixel({ gridIndex: 0 }, [
+      pending.pixelX,
+      pending.pixelY,
+    ]);
+
+    if (currentPoint && lastPanPositionRef.current) {
+      const deltaX = lastPanPositionRef.current.x - currentPoint[0];
+      const deltaY = lastPanPositionRef.current.y - currentPoint[1];
+
+      const option = chartInstance.getOption();
+      const xAxis = option.xAxis?.[0];
+      const yAxis = option.yAxis?.[0];
+
+      if (xAxis && yAxis) {
+        const currentXMin = typeof xAxis.min === 'number' ? xAxis.min : null;
+        const currentXMax = typeof xAxis.max === 'number' ? xAxis.max : null;
+        const currentYMin = typeof yAxis.min === 'number' ? yAxis.min : null;
+        const currentYMax = typeof yAxis.max === 'number' ? yAxis.max : null;
+
+        if (
+          currentXMin !== null &&
+          currentXMax !== null &&
+          currentYMin !== null &&
+          currentYMax !== null
+        ) {
+          chartInstance.setOption({
+            xAxis: {
+              min: currentXMin + deltaX,
+              max: currentXMax + deltaX,
+            },
+            yAxis: {
+              min: currentYMin + deltaY,
+              max: currentYMax + deltaY,
+            },
+          });
+        }
+      }
+
+      lastPanPositionRef.current = { x: currentPoint[0], y: currentPoint[1] };
+    }
+
+    panUpdateScheduledRef.current = false;
+    pendingPanUpdateRef.current = null;
   }, []);
 
   const handleMouseDown = useCallback(
@@ -140,54 +196,21 @@ export function Chart({
               endY: endPixelY,
             });
           } else if (mode === 'pan') {
-            const chartInstance = chartRef.current?.getEchartsInstance();
-            if (chartInstance) {
-              const currentPoint = chartInstance.convertFromPixel({ gridIndex: 0 }, [
-                endPixelX,
-                endPixelY,
-              ]);
+            // Store the pending update and schedule it with requestAnimationFrame
+            pendingPanUpdateRef.current = {
+              pixelX: endPixelX,
+              pixelY: endPixelY,
+            };
 
-              if (currentPoint && lastPanPositionRef.current) {
-                const deltaX = lastPanPositionRef.current.x - currentPoint[0];
-                const deltaY = lastPanPositionRef.current.y - currentPoint[1];
-
-                const option = chartInstance.getOption();
-                const xAxis = option.xAxis?.[0];
-                const yAxis = option.yAxis?.[0];
-
-                if (xAxis && yAxis) {
-                  const currentXMin = typeof xAxis.min === 'number' ? xAxis.min : null;
-                  const currentXMax = typeof xAxis.max === 'number' ? xAxis.max : null;
-                  const currentYMin = typeof yAxis.min === 'number' ? yAxis.min : null;
-                  const currentYMax = typeof yAxis.max === 'number' ? yAxis.max : null;
-
-                  if (
-                    currentXMin !== null &&
-                    currentXMax !== null &&
-                    currentYMin !== null &&
-                    currentYMax !== null
-                  ) {
-                    chartInstance.setOption({
-                      xAxis: {
-                        min: currentXMin + deltaX,
-                        max: currentXMax + deltaX,
-                      },
-                      yAxis: {
-                        min: currentYMin + deltaY,
-                        max: currentYMax + deltaY,
-                      },
-                    });
-                  }
-                }
-              }
-
-              lastPanPositionRef.current = currentPoint ? { x: currentPoint[0], y: currentPoint[1] } : null;
+            if (!panUpdateScheduledRef.current) {
+              panUpdateScheduledRef.current = true;
+              requestAnimationFrame(applyPanUpdate);
             }
           }
         }
       }
     },
-    [mode],
+    [mode, applyPanUpdate],
   );
 
   const handleMouseUp = useCallback(
@@ -251,6 +274,8 @@ export function Chart({
 
           dragStartRef.current = null;
           lastPanPositionRef.current = null;
+          pendingPanUpdateRef.current = null;
+          panUpdateScheduledRef.current = false;
           setTimeout(() => {
             isDraggingRef.current = false;
             hadDragMovementRef.current = false;
