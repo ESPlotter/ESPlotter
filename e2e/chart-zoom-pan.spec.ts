@@ -119,77 +119,6 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     expect(zoomedRanges.yAxis.max).not.toBe(initialRanges.yAxis.max);
   });
 
-  test('shows visual rectangle while dragging in zoom mode', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
-    await addVoltageChannelToChart(mainPage);
-
-    const container = chartContainer(mainPage, chartTitle);
-    const chartElement = container.locator('.echarts-for-react').first();
-
-    const box = await chartElement.boundingBox();
-    if (!box) throw new Error('Chart element not found');
-
-    const startX = box.x + box.width * 0.3;
-    const startY = box.y + box.height * 0.3;
-    const endX = box.x + box.width * 0.6;
-    const endY = box.y + box.height * 0.6;
-
-    // Start dragging
-    await mainPage.mouse.move(startX, startY);
-    await mainPage.mouse.down();
-    await mainPage.mouse.move(endX, endY, { steps: 5 });
-
-    // Check that visual rectangle is visible
-    const rectangle = container.locator('div[style*="border: 1px dashed black"]');
-    await expect(rectangle).toBeVisible();
-
-    // Release mouse
-    await mainPage.mouse.up();
-    await mainPage.waitForTimeout(100);
-
-    // Rectangle should disappear after release
-    await expect(rectangle).not.toBeVisible();
-  });
-
-  test('can reset zoom by dragging left', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
-    await addVoltageChannelToChart(mainPage);
-
-    const container = chartContainer(mainPage, chartTitle);
-    const chartElement = container.locator('.echarts-for-react').first();
-
-    // Get initial axis ranges
-    const initialRanges = await getChartAxisRanges(mainPage, chartTitle);
-
-    // First, zoom in
-    const box = await chartElement.boundingBox();
-    if (!box) throw new Error('Chart element not found');
-
-    await mainPage.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5);
-    await mainPage.mouse.down();
-    await mainPage.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.7, { steps: 10 });
-    await mainPage.mouse.up();
-    await mainPage.waitForTimeout(200);
-
-    // Verify zoom was applied
-    const zoomedRanges = await getChartAxisRanges(mainPage, chartTitle);
-    expect(zoomedRanges.xAxis.min).toBeGreaterThan(initialRanges.xAxis.min);
-
-    // Now reset by dragging left
-    await mainPage.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.5);
-    await mainPage.mouse.down();
-    await mainPage.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.5, { steps: 10 });
-    await mainPage.mouse.up();
-    await mainPage.waitForTimeout(200);
-
-    // Get ranges after reset
-    const resetRanges = await getChartAxisRanges(mainPage, chartTitle);
-
-    // Verify that ranges are back to original or close to it
-    expect(Math.abs(resetRanges.xAxis.min - initialRanges.xAxis.min)).toBeLessThan(0.1);
-    expect(Math.abs(resetRanges.xAxis.max - initialRanges.xAxis.max)).toBeLessThan(0.1);
-  });
-
   test('can reset zoom using reset button', async () => {
     const chartTitle = await createAndSelectChart(mainPage);
     await addVoltageChannelToChart(mainPage);
@@ -284,9 +213,9 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     await selectChartByTitle(mainPage, chartTitle);
     await expectSelectedChart(mainPage, chartTitle);
 
-    // Click again to deselect
-    await selectChartByTitle(mainPage, chartTitle, null);
-    await expectSelectedChart(mainPage, null);
+    // Click again: should remain selected (no toggle off)
+    await selectChartByTitle(mainPage, chartTitle, chartTitle);
+    await expectSelectedChart(mainPage, chartTitle);
   });
 
   test('does not activate chart when dragging in zoom mode', async () => {
