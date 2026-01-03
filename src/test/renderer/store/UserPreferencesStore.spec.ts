@@ -98,17 +98,30 @@ describe('UserPreferencesStore - chart series palette', () => {
     ).toHaveBeenCalledWith(['#a1', '#a3']);
   });
 
-  /*   it('removeColor with invalid index does nothing and does not persist', async () => {
+  it('removeColor with invalid index does nothing and does not persist', async () => {
     const { result } = hook();
-
+  
+    // Arrange: establecer el estado inicial (esto sí persiste)
     await act(async () => {
       result.current.actions.setChartSeriesPalette(['#f1', '#f2']);
+    });
+  
+    // Limpiamos las llamadas previas para aislar el comportamiento de removeColor
+    vi.clearAllMocks();
+  
+    // Act: intentar eliminar un índice inválido
+    await act(async () => {
       await result.current.actions.removeColor(10);
     });
-
+  
+    // Assert: el estado no cambia
     expect(result.current.palette).toEqual(['#f1', '#f2']);
-    expect((globalThis as any).window.userPreferences.updateChartSeriesPalette).not.toHaveBeenCalled();
-  }); */
+  
+    // Assert: no se persiste nada
+    expect(
+      (globalThis as any).window.userPreferences.updateChartSeriesPalette,
+    ).not.toHaveBeenCalled();
+  });
 
   it('resetToDefaults restores DEFAULT_CHART_SERIES_PALETTE and does not persist', () => {
     const { result } = hook();
