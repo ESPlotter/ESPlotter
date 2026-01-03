@@ -71,7 +71,9 @@ test.describe('Color palette', () => {
       const edit = edits[idx];
       if (!edit) throw new Error('Edit button not found');
       const container = edit.closest('div');
-      const remove = container?.querySelector('button[aria-label="Remove colour"]') as HTMLElement | null;
+      const remove = container?.querySelector(
+        'button[aria-label="Remove colour"]',
+      ) as HTMLElement | null;
       if (!remove) throw new Error('Remove button not found');
       remove.click();
     }, index);

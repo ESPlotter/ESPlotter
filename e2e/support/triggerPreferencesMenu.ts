@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ElectronApplication, Page } from '@playwright/test';
 
-export async function triggerPreferencesMenu(app: ElectronApplication, mainPage: Page): Promise<void> {
+export async function triggerPreferencesMenu(
+  app: ElectronApplication,
+  mainPage: Page,
+): Promise<void> {
   await mainPage.bringToFront();
   await app.evaluate(({ Menu, BrowserWindow }) => {
     const menu = Menu.getApplicationMenu();

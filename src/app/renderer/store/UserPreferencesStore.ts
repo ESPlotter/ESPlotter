@@ -50,20 +50,19 @@ const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
 
       await window.userPreferences.updateChartSeriesPalette(nextPalette);
     },
-  removeColor: async (index: number) => {
-    const current = useUserPreferencesStore.getState().chartSeriesPalette;
-  
-    if (index < 0 || index >= current.length) {
-      return; // ⬅️ no set, no persist
-    }
-  
-    const nextPalette = current.filter((_, idx) => idx !== index);
-  
-    set({ chartSeriesPalette: nextPalette });
-  
-    await window.userPreferences.updateChartSeriesPalette(nextPalette);
-  },
+    removeColor: async (index: number) => {
+      const current = useUserPreferencesStore.getState().chartSeriesPalette;
 
+      if (index < 0 || index >= current.length) {
+        return; // ⬅️ no set, no persist
+      }
+
+      const nextPalette = current.filter((_, idx) => idx !== index);
+
+      set({ chartSeriesPalette: nextPalette });
+
+      await window.userPreferences.updateChartSeriesPalette(nextPalette);
+    },
 
     reorder: (sourceIndex: number, targetIndex: number) =>
       set((state) => {
