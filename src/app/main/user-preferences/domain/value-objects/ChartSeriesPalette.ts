@@ -1,7 +1,8 @@
+import { DEFAULT_CHART_SERIES_PALETTE } from '../../../../shared/domain/constants/defaultChartSeriesPalette';
 import { InvalidChartSeriesColorFormatError } from '../errors/InvalidChartSeriesColorFormatError';
 
 export class ChartSeriesPalette {
-  static DEFAULT_VALUE: readonly string[] = ['#3a82f4', '#ef4343', '#10b981', '#f59e0b', '#6366f1'];
+  static DEFAULT_VALUE: readonly string[] = DEFAULT_CHART_SERIES_PALETTE;
 
   private constructor(private colors: string[]) {}
 
