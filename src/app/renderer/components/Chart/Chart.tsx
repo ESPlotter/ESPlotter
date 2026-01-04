@@ -58,38 +58,56 @@ export function Chart({
     return chart;
   }
 
-  function applyMode(chart: EChartsType | null, nextMode: ChartMode) {
-    if (!chart) return;
-    setMode(nextMode);
-    chart.dispatchAction({
-      type: 'takeGlobalCursor',
-      key: 'dataZoomSelect',
-      dataZoomSelectActive: nextMode === 'zoom',
-    });
-    chart.getZr().setCursorStyle(nextMode === 'pan' ? 'grab' : 'crosshair');
-  }
-
-  function setInitZoomMode(chart: EChartsType) {
+  function initChart(chart: EChartsType) {
     chartInstanceRef.current = chart;
-    applyMode(chart, 'zoom');
+    enableZoomSelect();
   }
 
   function restore() {
     const chart = getChart();
     if (!chart) return;
 
-    chart.dispatchAction({ type: 'restore' });
-    applyMode(chart, mode);
+    chart.dispatchAction({
+      type: 'dataZoom',
+      dataZoomId: 'datazoom-inside-x',
+      start: 0,
+      end: 100,
+    });
+
+    chart.dispatchAction({
+      type: 'dataZoom',
+      dataZoomId: 'datazoom-inside-y',
+      start: 0,
+      end: 100,
+    });
   }
 
   function enableZoomSelect() {
     const chart = getChart();
-    applyMode(chart, 'zoom');
+    if (!chart) return;
+
+    const mode = 'zoom';
+    setMode(mode);
+    chart.dispatchAction({
+      type: 'takeGlobalCursor',
+      key: 'dataZoomSelect',
+      dataZoomSelectActive: true,
+    });
+    chart.getZr().setCursorStyle('crosshair');
   }
 
   function enablePan() {
     const chart = getChart();
-    applyMode(chart, 'pan');
+    if (!chart) return;
+
+    const mode = 'pan';
+    setMode(mode);
+    chart.dispatchAction({
+      type: 'takeGlobalCursor',
+      key: 'dataZoomSelect',
+      dataZoomSelectActive: false,
+    });
+    chart.getZr().setCursorStyle('grab');
   }
 
   function handleSelectChart() {
@@ -131,7 +149,7 @@ export function Chart({
           echarts={echarts}
           option={options}
           lazyUpdate={true}
-          onChartReady={setInitZoomMode}
+          onChartReady={initChart}
           style={{ height: '100%', width: '100%' }}
         />
       </div>
@@ -155,6 +173,9 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
     },
     yAxis: {
       type: 'value',
+      scale: true,
+      min: 0,
+      max: (v: { min: number; max: number }) => v.max + (v.max - v.min) * 0.5,
       axisLabel: {
         fontSize: 10,
       },
@@ -163,7 +184,9 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
       show: true,
     },
     toolbox: {
-      show: false,
+      show: true,
+      left: -9999, // Hide default toolbox UI
+      top: -9999, // Hide default toolbox UI
       feature: {
         dataZoom: {
           xAxisIndex: 0,
@@ -178,26 +201,14 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
         type: 'inside',
         xAxisIndex: 0,
         zoomOnMouseWheel: true,
-        moveOnMouseWheel: false,
-        moveOnMouseMove: false,
-        disabled: false,
+        moveOnMouseMove: true,
       },
       {
         id: 'datazoom-inside-y',
         type: 'inside',
         yAxisIndex: 0,
         zoomOnMouseWheel: true,
-        moveOnMouseWheel: false,
-        moveOnMouseMove: false,
-        disabled: false,
-      },
-      {
-        id: 'datazoom-select',
-        type: 'select',
-        xAxisIndex: 0,
-        yAxisIndex: 0,
-        filterMode: 'filter',
-        disabled: false,
+        moveOnMouseMove: true,
       },
     ],
     tooltip: {
