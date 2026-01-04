@@ -49,6 +49,7 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
             },
           },
           chartCounter: nextCounter,
+          selectedChartId: chartId,
         };
       }),
     removeChart: (chartId: string) =>

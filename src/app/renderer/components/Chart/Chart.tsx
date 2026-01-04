@@ -8,18 +8,19 @@ import {
   LegendComponent,
   DataZoomComponent,
   ToolboxComponent,
+  BrushComponent,
 } from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import ReactEChartsCore from 'echarts-for-react/lib/core';
-import { useMemo, useRef, useCallback, useState, useEffect } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { useChannelChartsActions } from '@renderer/store/ChannelChartsStore';
 import { Button } from '@shadcn/components/ui/button';
 
 import { ChartSerie } from './ChartSerie';
 
-import type { EChartsType } from 'echarts/core';
+import type { EChartsType } from 'echarts';
 
 echarts.use([
   TitleComponent,
@@ -30,6 +31,7 @@ echarts.use([
   LegendComponent,
   DataZoomComponent,
   ToolboxComponent,
+  BrushComponent,
 ]);
 
 type ChartMode = 'zoom' | 'pan';
@@ -43,91 +45,68 @@ export function Chart({
   isSelected: boolean;
   series: ChartSerie[];
 }) {
+  const [mode, setMode] = useState<ChartMode>('zoom');
   const options = useMemo(() => mergeSeriesWithDefaultParams(series), [series]);
   const { setSelectedChartId } = useChannelChartsActions();
-  const chartRef = useRef<ReactEChartsCore>(null);
-  const [mode, setMode] = useState<ChartMode>('zoom');
-  const pointerDownRef = useRef<{ x: number; y: number } | null>(null);
-  const pointerMovedRef = useRef(false);
+  const chartInstanceRef = useRef<EChartsType | null>(null);
 
-  const applyInteractionMode = useCallback((nextMode: ChartMode, instance?: EChartsType | null) => {
-    const chartInstance = instance ?? chartRef.current?.getEchartsInstance();
-    if (!chartInstance) {
-      return;
+  function getChart(): EChartsType | null {
+    const chart = chartInstanceRef.current;
+    if (!chart || chart.isDisposed()) {
+      return null;
     }
+    return chart;
+  }
 
-    chartInstance.dispatchAction({
+  function applyMode(chart: EChartsType | null, nextMode: ChartMode) {
+    if (!chart) return;
+    setMode(nextMode);
+    chart.dispatchAction({
       type: 'takeGlobalCursor',
       key: 'dataZoomSelect',
       dataZoomSelectActive: nextMode === 'zoom',
     });
-  }, []);
+    chart.getZr().setCursorStyle(nextMode === 'pan' ? 'grab' : 'crosshair');
+  }
 
-  useEffect(() => {
-    applyInteractionMode(mode);
-  }, [applyInteractionMode, mode]);
+  function setInitZoomMode(chart: EChartsType) {
+    chartInstanceRef.current = chart;
+    applyMode(chart, 'zoom');
+  }
 
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-  }, []);
+  function restore() {
+    const chart = getChart();
+    if (!chart) return;
 
-  const handleChartReady = useCallback(
-    (instance: EChartsType) => {
-      applyInteractionMode(mode, instance);
-    },
-    [applyInteractionMode, mode],
-  );
+    chart.dispatchAction({ type: 'restore' });
+    applyMode(chart, mode);
+  }
 
-  const handleClick = useCallback(() => {
+  function enableZoomSelect() {
+    const chart = getChart();
+    applyMode(chart, 'zoom');
+  }
+
+  function enablePan() {
+    const chart = getChart();
+    applyMode(chart, 'pan');
+  }
+
+  function handleSelectChart() {
     setSelectedChartId(id);
-  }, [id, setSelectedChartId]);
-
-  const handleMouseDownSelection = useCallback((e: React.MouseEvent) => {
-    pointerDownRef.current = { x: e.clientX, y: e.clientY };
-    pointerMovedRef.current = false;
-  }, []);
-
-  const handleMouseMoveSelection = useCallback((e: React.MouseEvent) => {
-    if (!pointerDownRef.current) return;
-    const dx = Math.abs(e.clientX - pointerDownRef.current.x);
-    const dy = Math.abs(e.clientY - pointerDownRef.current.y);
-    if (dx > 3 || dy > 3) {
-      pointerMovedRef.current = true;
-    }
-  }, []);
-
-  const handleMouseUpSelection = useCallback(() => {
-    if (pointerDownRef.current && !pointerMovedRef.current) {
-      handleClick();
-    }
-    pointerDownRef.current = null;
-    pointerMovedRef.current = false;
-  }, [handleClick]);
-
-  const handleReset = useCallback(() => {
-    const chartInstance = chartRef.current?.getEchartsInstance();
-    if (chartInstance) {
-      chartInstance.dispatchAction({
-        type: 'restore',
-      });
-    }
-  }, []);
-
-  const handleZoomMode = useCallback(() => {
-    setMode('zoom');
-  }, []);
-
-  const handlePanMode = useCallback(() => {
-    setMode('pan');
-  }, []);
+  }
 
   return (
-    <div className="flex h-full w-full flex-col gap-1">
+    <div
+      className="flex h-full w-full flex-col gap-1"
+      onPointerDownCapture={handleSelectChart}
+      onFocus={handleSelectChart}
+    >
       <div className="flex gap-1">
         <Button
           variant={mode === 'zoom' ? 'default' : 'outline'}
           size="icon-sm"
-          onClick={handleZoomMode}
+          onClick={enableZoomSelect}
           title="Zoom mode"
         >
           <IconZoomIn className="size-4" />
@@ -135,31 +114,24 @@ export function Chart({
         <Button
           variant={mode === 'pan' ? 'default' : 'outline'}
           size="icon-sm"
-          onClick={handlePanMode}
+          onClick={enablePan}
           title="Pan mode"
         >
           <IconHandGrab className="size-4" />
         </Button>
-        <Button variant="outline" size="icon-sm" onClick={handleReset} title="Reset zoom">
+        <Button variant="outline" size="icon-sm" onClick={restore} title="Reset zoom">
           <IconHome className="size-4" />
         </Button>
       </div>
       <div
         className={`relative flex min-h-0 flex-1 rounded-sm border-2 ${isSelected ? 'border-slate-900/35' : 'border-transparent'}`}
-        onContextMenu={handleContextMenu}
-        onMouseDown={handleMouseDownSelection}
-        onMouseMove={handleMouseMoveSelection}
-        onMouseUp={handleMouseUpSelection}
-        style={{ cursor: mode === 'pan' ? 'grab' : 'crosshair' }}
       >
         <ReactEChartsCore
-          ref={chartRef}
           className="h-full w-full"
           echarts={echarts}
           option={options}
-          notMerge={true}
           lazyUpdate={true}
-          onChartReady={handleChartReady}
+          onChartReady={setInitZoomMode}
           style={{ height: '100%', width: '100%' }}
         />
       </div>
@@ -191,7 +163,7 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
       show: true,
     },
     toolbox: {
-      show: true,
+      show: false,
       feature: {
         dataZoom: {
           xAxisIndex: 0,
@@ -202,16 +174,30 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
     },
     dataZoom: [
       {
+        id: 'datazoom-inside-x',
         type: 'inside',
         xAxisIndex: 0,
         zoomOnMouseWheel: true,
-        moveOnMouseMove: true,
+        moveOnMouseWheel: false,
+        moveOnMouseMove: false,
+        disabled: false,
       },
       {
+        id: 'datazoom-inside-y',
         type: 'inside',
         yAxisIndex: 0,
         zoomOnMouseWheel: true,
-        moveOnMouseMove: true,
+        moveOnMouseWheel: false,
+        moveOnMouseMove: false,
+        disabled: false,
+      },
+      {
+        id: 'datazoom-select',
+        type: 'select',
+        xAxisIndex: 0,
+        yAxisIndex: 0,
+        filterMode: 'filter',
+        disabled: false,
       },
     ],
     tooltip: {
