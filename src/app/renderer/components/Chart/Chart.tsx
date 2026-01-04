@@ -196,6 +196,12 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
         dataZoom: {
           xAxisIndex: 0,
           yAxisIndex: 0,
+          brushStyle: {
+            color: 'rgba(0,0,0,0)',
+            borderColor: '#000',
+            borderWidth: 2,
+            borderType: 'dashed',
+          },
         },
         restore: {},
       },
