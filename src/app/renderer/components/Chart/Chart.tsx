@@ -19,6 +19,7 @@ import { useChannelChartsActions } from '@renderer/store/ChannelChartsStore';
 import { Button } from '@shadcn/components/ui/button';
 
 import { ChartSerie } from './ChartSerie';
+import { useChartsHotkey } from './useChartHotKey';
 
 import type { EChartsType } from 'echarts';
 
@@ -50,6 +51,17 @@ export function Chart({
   const { setSelectedChartId } = useChannelChartsActions();
   const chartInstanceRef = useRef<EChartsType | null>(null);
 
+  useChartsHotkey(getChart, { key: 'Escape' }, () => resetZoom(), { active: isSelected });
+
+  useChartsHotkey(
+    getChart,
+    (e) => e.code === 'Space',
+    () => enablePan(),
+    { active: isSelected },
+  );
+
+  useChartsHotkey(getChart, { key: 'z' }, () => enableZoomSelect(), { active: isSelected });
+
   function getChart(): EChartsType | null {
     const chart = chartInstanceRef.current;
     if (!chart || chart.isDisposed()) {
@@ -63,7 +75,7 @@ export function Chart({
     enableZoomSelect();
   }
 
-  function restore() {
+  function resetZoom() {
     const chart = getChart();
     if (!chart) return;
 
@@ -83,31 +95,24 @@ export function Chart({
   }
 
   function enableZoomSelect() {
-    const chart = getChart();
-    if (!chart) return;
-
-    const mode = 'zoom';
-    setMode(mode);
-    chart.dispatchAction({
-      type: 'takeGlobalCursor',
-      key: 'dataZoomSelect',
-      dataZoomSelectActive: true,
-    });
-    chart.getZr().setCursorStyle('crosshair');
+    applyMode('zoom');
   }
 
   function enablePan() {
+    applyMode('pan');
+  }
+
+  function applyMode(nextMode: ChartMode) {
     const chart = getChart();
     if (!chart) return;
 
-    const mode = 'pan';
-    setMode(mode);
+    setMode(nextMode);
     chart.dispatchAction({
       type: 'takeGlobalCursor',
       key: 'dataZoomSelect',
-      dataZoomSelectActive: false,
+      dataZoomSelectActive: nextMode === 'zoom',
     });
-    chart.getZr().setCursorStyle('grab');
+    chart.getZr().setCursorStyle(nextMode === 'pan' ? 'grab' : 'crosshair');
   }
 
   function handleSelectChart() {
@@ -125,7 +130,7 @@ export function Chart({
           variant={mode === 'zoom' ? 'default' : 'outline'}
           size="icon-sm"
           onClick={enableZoomSelect}
-          title="Zoom mode"
+          title="Zoom mode (Z key)"
         >
           <IconZoomIn className="size-4" />
         </Button>
@@ -133,11 +138,11 @@ export function Chart({
           variant={mode === 'pan' ? 'default' : 'outline'}
           size="icon-sm"
           onClick={enablePan}
-          title="Pan mode"
+          title="Pan mode (Space)"
         >
           <IconHandGrab className="size-4" />
         </Button>
-        <Button variant="outline" size="icon-sm" onClick={restore} title="Reset zoom">
+        <Button variant="outline" size="icon-sm" onClick={resetZoom} title="Reset zoom (Escape)">
           <IconHome className="size-4" />
         </Button>
       </div>
