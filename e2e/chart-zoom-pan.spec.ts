@@ -2,14 +2,15 @@ import { test, expect, type ElectronApplication, type Page } from '@playwright/t
 
 import { chartContainer } from './support/chartContainer';
 import { chartTitleButton } from './support/chartTitleButton';
+import { clickSidebarChannel } from './support/clickSidebarChannel';
+import { createAndSelectChart } from './support/createAndSelectChart';
 import { createChart } from './support/createChart';
 import { expectSelectedChart } from './support/expectSelectedChart';
-import { getChartTitles } from './support/getChartTitles';
+import { getChartIndex } from './support/getChartIndex';
 import { getRenderedSeriesSummary } from './support/getRenderedSeriesSummary';
-import { getSelectedChartTitle } from './support/getSelectedChartTitle';
+import { openFixtureAndExpandInSidebar } from './support/openFixtureAndExpandInSidebar';
+import { selectChartByTitle } from './support/selectChartByTitle';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
-import { triggerImportMenu } from './support/triggerImportMenu';
-import { waitForLastOpenedChannelFileChanged } from './support/waitForLastOpenedChannelFileChanged';
 
 import type { FiberNode, ReactEChartsComponent } from './support/chartHelpers';
 
@@ -19,7 +20,7 @@ let mainPage: Page;
 test.describe('Chart zoom, pan, and reset controls', () => {
   test.beforeEach(async () => {
     ({ electronApp, mainPage } = await setupE2eTestEnvironment());
-    await openAndExpandTest3File(electronApp, mainPage);
+    await openFixtureAndExpandInSidebar(electronApp, mainPage, 'test3.json', 'test3');
   });
 
   test.afterEach(async () => {
@@ -265,54 +266,6 @@ test.describe('Chart zoom, pan, and reset controls', () => {
 });
 
 // Helper functions
-
-async function openAndExpandTest3File(electronApp: ElectronApplication, page: Page) {
-  // const fixtureAbsolutePath = await setNextOpenFixturePath(electronApp, 'test3.json');
-  await triggerImportMenu(electronApp, page);
-  await waitForLastOpenedChannelFileChanged(page);
-
-  // Expand the file accordion by clicking the file trigger
-  const fileTrigger = page.getByRole('button', { name: 'test3' });
-  await fileTrigger.waitFor({ state: 'visible', timeout: 10000 });
-  await fileTrigger.click();
-  await page
-    .locator('[data-sidebar="menu-button"]')
-    .filter({ hasText: 'Voltage (V)' })
-    .first()
-    .waitFor({ state: 'visible', timeout: 5000 });
-}
-
-async function createAndSelectChart(page: Page): Promise<string> {
-  const chartTitle = await createChart(page);
-  await selectChartByTitle(page, chartTitle);
-  return chartTitle;
-}
-
-async function selectChartByTitle(
-  page: Page,
-  chartTitle: string,
-  expectedSelectedTitle: string | null = chartTitle,
-): Promise<void> {
-  // Check if the chart is already selected
-  const currentSelection = await getSelectedChartTitle(page);
-
-  // Only click if the chart isn't already selected
-  if (currentSelection !== expectedSelectedTitle) {
-    await chartContainer(page, chartTitle).click();
-  }
-
-  await expectSelectedChart(page, expectedSelectedTitle);
-}
-
-async function clickSidebarChannel(page: Page, channelLabel: string) {
-  const channelButton = page
-    .locator('[data-sidebar="menu-button"]')
-    .filter({ hasText: channelLabel })
-    .first();
-  await channelButton.waitFor({ state: 'visible', timeout: 5000 });
-  await channelButton.click();
-}
-
 async function addVoltageChannelToChart(page: Page) {
   await clickSidebarChannel(page, 'Voltage (V)');
 }
@@ -401,15 +354,6 @@ async function getChartZoomRanges(page: Page, chartTitle: string): Promise<ZoomR
     },
     { chartIndex },
   );
-}
-
-async function getChartIndex(page: Page, chartTitle: string): Promise<number> {
-  const chartTitles = await getChartTitles(page);
-  const index = chartTitles.indexOf(chartTitle);
-  if (index === -1) {
-    throw new Error(`Chart with title "${chartTitle}" was not found.`);
-  }
-  return index;
 }
 
 function getChartRoot(page: Page, chartTitle: string) {

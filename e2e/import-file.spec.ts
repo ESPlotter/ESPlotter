@@ -2,10 +2,10 @@ import { test, expect, type ElectronApplication, type Page } from '@playwright/t
 import { Menu as ElectronMenu, MenuItem as ElectronMenuItem } from 'electron';
 
 import { ensureMenuItemWithAccelerator } from './support/ensureMenuItemWithAccelerator';
+import { openFixtureViaImportMenu } from './support/openFixtureViaImportMenu';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 import { triggerImportMenu } from './support/triggerImportMenu';
-import { waitForLastOpenedChannelFileChanged } from './support/waitForLastOpenedChannelFileChanged';
 
 let electronApp: ElectronApplication;
 let mainPage: Page;
@@ -20,11 +20,7 @@ test.describe('Import flow', () => {
   });
 
   test('imports a valid file (test3.json) and renders the chart', async () => {
-    await setNextOpenFixturePath(electronApp, 'test3.json');
-
-    const parsedPromise = waitForLastOpenedChannelFileChanged(mainPage);
-    await triggerImportMenu(electronApp, mainPage);
-    await parsedPromise;
+    await openFixtureViaImportMenu(electronApp, mainPage, 'test3.json');
 
     await expectChannelVisible(mainPage);
   });

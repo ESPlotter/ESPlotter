@@ -6,14 +6,14 @@ import test3Fixture from '../fixtures/test3.json';
 
 import { chartContainer } from './support/chartContainer';
 import { chartTitleButton } from './support/chartTitleButton';
+import { clickSidebarChannel } from './support/clickSidebarChannel';
+import { createAndSelectChart } from './support/createAndSelectChart';
 import { createChart } from './support/createChart';
 import { expectSelectedChart } from './support/expectSelectedChart';
 import { getRenderedSeriesSummary } from './support/getRenderedSeriesSummary';
-import { getSelectedChartTitle } from './support/getSelectedChartTitle';
-import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
+import { openFixtureAndExpandInSidebar } from './support/openFixtureAndExpandInSidebar';
+import { selectChartByTitle } from './support/selectChartByTitle';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
-import { triggerImportMenu } from './support/triggerImportMenu';
-import { waitForLastOpenedChannelFileChanged } from './support/waitForLastOpenedChannelFileChanged';
 
 import type { ChartSerie } from '@renderer/components/Chart/ChartSerie';
 import type { ChannelFileContentSeriePrimitive } from '@shared/domain/primitives/ChannelFileContentSeriePrimitive';
@@ -38,7 +38,7 @@ let mainPage: Page;
 test.describe('Chart channel selection', () => {
   test.beforeEach(async () => {
     ({ electronApp, mainPage } = await setupE2eTestEnvironment());
-    await openAndExpandTest3File(electronApp, mainPage);
+    await openFixtureAndExpandInSidebar(electronApp, mainPage, 'test3.json', 'test3');
   });
 
   test.afterEach(async () => {
@@ -161,54 +161,6 @@ function buildSerieSummary(serie: ChartSerie): RenderedSerieSummary {
     firstPoint: serie.data[0] ?? null,
     lastPoint: serie.data.at(-1) ?? null,
   };
-}
-
-async function openAndExpandTest3File(app: ElectronApplication, page: Page): Promise<void> {
-  await setNextOpenFixturePath(app, 'test3.json');
-
-  const parsedPromise = waitForLastOpenedChannelFileChanged(page);
-  await triggerImportMenu(app, page);
-  await parsedPromise;
-
-  const fileTrigger = page.getByRole('button', { name: 'test3' });
-  await fileTrigger.waitFor({ state: 'visible' });
-  await fileTrigger.click();
-}
-
-async function createAndSelectChart(page: Page): Promise<string> {
-  const chartTitle = await createChart(page);
-  await selectChartByTitle(page, chartTitle);
-  return chartTitle;
-}
-
-async function clickSidebarChannel(page: Page, channelLabel: string): Promise<void> {
-  const channelButton = page
-    .locator('[data-sidebar="menu-button"]')
-    .filter({ hasText: channelLabel })
-    .first();
-
-  // Wait for the button to be ready
-  await channelButton.waitFor({ state: 'visible', timeout: 5000 });
-  await channelButton.click();
-}
-
-async function selectChartByTitle(
-  page: Page,
-  chartTitle: string,
-  expectedSelection: string | null = chartTitle,
-): Promise<void> {
-  const chartLocator = chartContainer(page, chartTitle);
-  await chartLocator.waitFor({ state: 'visible' });
-
-  // Check if the chart is already selected
-  const currentSelection = await getSelectedChartTitle(page);
-
-  // Only click if the chart isn't already selected
-  if (currentSelection !== expectedSelection) {
-    await chartLocator.click();
-  }
-
-  await expectSelectedChart(page, expectedSelection);
 }
 
 async function expectChartSeries(

@@ -13,3 +13,7 @@ This document outlines the testing strategy for our project, including best prac
 ## E2E tests
 
 ### Best Practices
+
+- Check `e2e/support` for existing helpers before adding new ones.
+- If a helper is reusable, add it to `e2e/support` with one named export per file (one function per file).
+- Keep test files focused on intent and compose helpers for setup and interactions.
