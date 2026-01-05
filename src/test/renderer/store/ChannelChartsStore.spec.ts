@@ -47,7 +47,7 @@ describe('ChannelChartsStore', () => {
       expect(charts['chart-id-3'].name).toBe('Chart 3');
     });
 
-    test('should select the newly created chart', () => {
+    test('should auto-select the newly created chart', () => {
       const { addChart } = useChannelChartsStore.getState().actions;
 
       addChart('chart-id-1');

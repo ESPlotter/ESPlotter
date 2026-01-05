@@ -153,6 +153,7 @@ export function Chart({
           className="h-full w-full"
           echarts={echarts}
           option={options}
+          replaceMerge={['series']}
           lazyUpdate={true}
           onChartReady={initChart}
           style={{ height: '100%', width: '100%' }}
