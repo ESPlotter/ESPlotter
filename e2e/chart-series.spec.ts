@@ -190,8 +190,6 @@ async function clickSidebarChannel(page: Page, channelLabel: string): Promise<vo
   // Wait for the button to be ready
   await channelButton.waitFor({ state: 'visible', timeout: 5000 });
   await channelButton.click();
-  // Wait for the channel to be added/removed
-  await page.waitForTimeout(500);
 }
 
 async function selectChartByTitle(

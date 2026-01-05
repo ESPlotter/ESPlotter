@@ -7,7 +7,6 @@ import { expectSelectedChart } from './support/expectSelectedChart';
 import { getChartTitles } from './support/getChartTitles';
 import { getRenderedSeriesSummary } from './support/getRenderedSeriesSummary';
 import { getSelectedChartTitle } from './support/getSelectedChartTitle';
-import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 import { triggerImportMenu } from './support/triggerImportMenu';
 import { waitForLastOpenedChannelFileChanged } from './support/waitForLastOpenedChannelFileChanged';
@@ -268,22 +267,24 @@ test.describe('Chart zoom, pan, and reset controls', () => {
 // Helper functions
 
 async function openAndExpandTest3File(electronApp: ElectronApplication, page: Page) {
-  const fixtureAbsolutePath = await setNextOpenFixturePath(electronApp, 'test3.json');
+  // const fixtureAbsolutePath = await setNextOpenFixturePath(electronApp, 'test3.json');
   await triggerImportMenu(electronApp, page);
-  await waitForLastOpenedChannelFileChanged(page, fixtureAbsolutePath);
+  await waitForLastOpenedChannelFileChanged(page);
 
   // Expand the file accordion by clicking the file trigger
   const fileTrigger = page.getByRole('button', { name: 'test3' });
   await fileTrigger.waitFor({ state: 'visible', timeout: 10000 });
   await fileTrigger.click();
-  await page.waitForTimeout(100);
+  await page
+    .locator('[data-sidebar="menu-button"]')
+    .filter({ hasText: 'Voltage (V)' })
+    .first()
+    .waitFor({ state: 'visible', timeout: 5000 });
 }
 
 async function createAndSelectChart(page: Page): Promise<string> {
   const chartTitle = await createChart(page);
   await selectChartByTitle(page, chartTitle);
-  // Wait for UI to stabilize after selection
-  await page.waitForTimeout(200);
   return chartTitle;
 }
 
@@ -310,7 +311,6 @@ async function clickSidebarChannel(page: Page, channelLabel: string) {
     .first();
   await channelButton.waitFor({ state: 'visible', timeout: 5000 });
   await channelButton.click();
-  await page.waitForTimeout(500);
 }
 
 async function addVoltageChannelToChart(page: Page) {
