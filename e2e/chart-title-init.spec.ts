@@ -3,6 +3,7 @@ import { expect, test, type ElectronApplication, type Page } from '@playwright/t
 import { createChart } from './support/createChart';
 import { expectSelectedChart } from './support/expectSelectedChart';
 import { getChartTitles } from './support/getChartTitles';
+import { getSelectedChartTitle } from './support/getSelectedChartTitle';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 import { triggerImportMenu } from './support/triggerImportMenu';
@@ -102,7 +103,15 @@ import { chartContainer } from './support/chartContainer';
 async function selectChartByTitle(page: Page, chartTitle: string): Promise<void> {
   const chartLocator = chartContainer(page, chartTitle);
   await chartLocator.waitFor({ state: 'visible' });
-  await chartLocator.click();
+
+  // Check if the chart is already selected
+  const currentSelection = await getSelectedChartTitle(page);
+
+  // Only click if the chart isn't already selected
+  if (currentSelection !== chartTitle) {
+    await chartLocator.click();
+  }
+
   await expectSelectedChart(page, chartTitle);
 }
 

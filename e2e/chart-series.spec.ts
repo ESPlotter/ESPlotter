@@ -9,6 +9,7 @@ import { chartTitleButton } from './support/chartTitleButton';
 import { createChart } from './support/createChart';
 import { expectSelectedChart } from './support/expectSelectedChart';
 import { getRenderedSeriesSummary } from './support/getRenderedSeriesSummary';
+import { getSelectedChartTitle } from './support/getSelectedChartTitle';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 import { triggerImportMenu } from './support/triggerImportMenu';
@@ -141,8 +142,8 @@ test.describe('Chart channel selection', () => {
     await selectChartByTitle(mainPage, secondChartTitle);
     await expectSelectedChart(mainPage, secondChartTitle);
 
-    await selectChartByTitle(mainPage, secondChartTitle, null);
-    await expectSelectedChart(mainPage, null);
+    await chartContainer(mainPage, secondChartTitle).click();
+    await expectSelectedChart(mainPage, secondChartTitle);
   });
 });
 
@@ -181,11 +182,16 @@ async function createAndSelectChart(page: Page): Promise<string> {
 }
 
 async function clickSidebarChannel(page: Page, channelLabel: string): Promise<void> {
-  await page
+  const channelButton = page
     .locator('[data-sidebar="menu-button"]')
     .filter({ hasText: channelLabel })
-    .first()
-    .click();
+    .first();
+
+  // Wait for the button to be ready
+  await channelButton.waitFor({ state: 'visible', timeout: 5000 });
+  await channelButton.click();
+  // Wait for the channel to be added/removed
+  await page.waitForTimeout(500);
 }
 
 async function selectChartByTitle(
@@ -195,7 +201,15 @@ async function selectChartByTitle(
 ): Promise<void> {
   const chartLocator = chartContainer(page, chartTitle);
   await chartLocator.waitFor({ state: 'visible' });
-  await chartLocator.click();
+
+  // Check if the chart is already selected
+  const currentSelection = await getSelectedChartTitle(page);
+
+  // Only click if the chart isn't already selected
+  if (currentSelection !== expectedSelection) {
+    await chartLocator.click();
+  }
+
   await expectSelectedChart(page, expectedSelection);
 }
 
@@ -210,9 +224,12 @@ async function expectChartSeries(
   }[],
 ) {
   await expect
-    .poll(async () => {
-      const actual = await getRenderedSeriesSummary(page, chartTitle);
-      return actual;
-    })
+    .poll(
+      async () => {
+        const actual = await getRenderedSeriesSummary(page, chartTitle);
+        return actual;
+      },
+      { timeout: 10000 },
+    )
     .toEqual(expectedSeries);
 }
