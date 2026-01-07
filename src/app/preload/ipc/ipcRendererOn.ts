@@ -1,16 +1,13 @@
 import { ipcRenderer } from 'electron';
 
-import { IpcEventKey, IpcEventListener } from '@shared/domain/repositories/IPCContracts';
+import { type IpcEventKey, type IpcEventListener } from '@shared/domain/repositories/IPCContracts';
 
 export function ipcRendererOn<TKey extends IpcEventKey>(
   channel: TKey,
   listener: IpcEventListener<TKey>,
 ): () => void {
-  const wrapped = (_event: Electron.IpcRendererEvent, payload: unknown) => {
-    listener(payload as Parameters<IpcEventListener<TKey>>[0]);
-  };
-  ipcRenderer.on(channel, wrapped);
+  ipcRenderer.on(channel, (_event, value) => listener(value));
   return () => {
-    ipcRenderer.off(channel, wrapped);
+    ipcRenderer.off(channel, (_event, value) => listener(value));
   };
 }

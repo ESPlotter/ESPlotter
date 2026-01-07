@@ -16,7 +16,9 @@ import ReactEChartsCore from 'echarts-for-react/lib/core';
 import { useMemo, useRef, useState } from 'react';
 
 import { useChannelChartsActions } from '@renderer/store/ChannelChartsStore';
+import { useUserPreferencesChartSeriesPalette } from '@renderer/store/UserPreferencesStore';
 import { Button } from '@shadcn/components/ui/button';
+import { generateRandomHexColor } from '@shared/utils/generateRandomHexColor';
 
 import { ChartSerie } from './ChartSerie';
 import { useChartsHotkey } from './useChartHotKey';
@@ -47,7 +49,11 @@ export function Chart({
   series: ChartSerie[];
 }) {
   const [mode, setMode] = useState<ChartMode>('zoom');
-  const options = useMemo(() => mergeSeriesWithDefaultParams(series), [series]);
+  const chartSeriesPalette = useUserPreferencesChartSeriesPalette();
+  const options = useMemo(
+    () => mergeSeriesWithDefaultParams(series, chartSeriesPalette),
+    [series, chartSeriesPalette],
+  );
   const { setSelectedChartId } = useChannelChartsActions();
   const chartInstanceRef = useRef<EChartsType | null>(null);
 
@@ -163,7 +169,8 @@ export function Chart({
   );
 }
 
-function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
+function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): EChartsOption {
+  const colors = resolveSeriesColors(series, palette);
   return {
     animation: false,
     grid: {
@@ -234,9 +241,20 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
         animation: false,
       },
     },
+    color: colors,
     series: series.map((s) => ({
       ...s,
       showSymbol: false,
     })),
   };
+}
+
+function resolveSeriesColors(series: ChartSerie[], palette: string[]): string[] {
+  return series.map((serie, index) => {
+    const existing = palette[index];
+    if (existing) {
+      return existing;
+    }
+    return generateRandomHexColor();
+  });
 }
