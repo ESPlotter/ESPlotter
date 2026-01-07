@@ -180,7 +180,7 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
     yAxis: {
       type: 'value',
       scale: true,
-      min: 0,
+      min: (v: { min: number; max: number }) => v.min - (v.max - v.min) * 0.5,
       max: (v: { min: number; max: number }) => v.max + (v.max - v.min) * 0.5,
       axisLabel: {
         fontSize: 10,
