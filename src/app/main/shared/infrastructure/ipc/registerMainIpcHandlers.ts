@@ -1,3 +1,5 @@
+import { registerUserPreferencesIpcHandlers } from '@main/user-preferences/infrastructure/ipc/registerUserPreferencesIpcHandlers';
+
 export function registerMainIpcHandlers(): void {
-  // No IPC handlers needed - data is now pushed to renderer via webContentsSend
+  registerUserPreferencesIpcHandlers();
 }

@@ -6,6 +6,7 @@ import { app, BrowserWindow, globalShortcut } from 'electron';
 
 import { registerMainIpcHandlers } from '@main/shared/infrastructure/ipc/registerMainIpcHandlers';
 import { registerMainMenu } from '@main/shared/infrastructure/menu/registerMainMenu';
+import { registerUserPreferencesObservers } from '@main/user-preferences/infrastructure/observers/registerUserPreferencesObservers';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -64,6 +65,7 @@ const createWindow = () => {
 
 app.whenReady().then(() => {
   registerMainIpcHandlers();
+  registerUserPreferencesObservers();
   registerMainMenu();
   createWindow();
 });

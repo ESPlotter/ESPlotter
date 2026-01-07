@@ -12,6 +12,8 @@ import ReactEChartsCore from 'echarts-for-react/lib/core';
 import { useMemo } from 'react';
 
 import { useChannelChartsActions } from '@renderer/store/ChannelChartsStore';
+import { useUserPreferencesChartSeriesPalette } from '@renderer/store/UserPreferencesStore';
+import { generateRandomHexColor } from '@shared/utils/generateRandomHexColor';
 
 import { ChartSerie } from './ChartSerie';
 
@@ -33,7 +35,11 @@ export function Chart({
   isSelected: boolean;
   series: ChartSerie[];
 }) {
-  const options = useMemo(() => mergeSeriesWithDefaultParams(series), [series]);
+  const chartSeriesPalette = useUserPreferencesChartSeriesPalette();
+  const options = useMemo(
+    () => mergeSeriesWithDefaultParams(series, chartSeriesPalette),
+    [series, chartSeriesPalette],
+  );
   const { toggleSelectedChartId } = useChannelChartsActions();
 
   return (
@@ -53,7 +59,8 @@ export function Chart({
   );
 }
 
-function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
+function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): EChartsOption {
+  const colors = resolveSeriesColors(series, palette);
   return {
     animation: false,
     grid: {
@@ -85,9 +92,20 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
         animation: false,
       },
     },
+    color: colors,
     series: series.map((s) => ({
       ...s,
       showSymbol: false,
     })),
   };
+}
+
+function resolveSeriesColors(series: ChartSerie[], palette: string[]): string[] {
+  return series.map((serie, index) => {
+    const existing = palette[index];
+    if (existing) {
+      return existing;
+    }
+    return generateRandomHexColor();
+  });
 }

@@ -1,10 +1,10 @@
 import { ChannelChartGrid } from '@renderer/components/ChannelChartGrid/ChannelChartGrid';
-import { Layout } from '@renderer/components/Layout/layout';
+import { MainLayout } from '@renderer/components/Layout/MainLayout';
 
 export function HomePage() {
   return (
-    <Layout>
+    <MainLayout>
       <ChannelChartGrid />
-    </Layout>
+    </MainLayout>
   );
 }

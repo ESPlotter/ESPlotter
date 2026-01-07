@@ -6,7 +6,7 @@ import { Button } from '@renderer/shadcn/components/ui/button';
 import { useChannelChartsActions } from '@renderer/store/ChannelChartsStore';
 import { SidebarProvider } from '@shadcn/components/ui/sidebar';
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function MainLayout({ children }: { children: React.ReactNode }) {
   const { addChart } = useChannelChartsActions();
 
   return (
