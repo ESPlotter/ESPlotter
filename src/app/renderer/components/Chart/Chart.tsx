@@ -122,7 +122,7 @@ export function Chart({
   return (
     <div
       className="flex h-full w-full flex-col gap-1"
-      onPointerDown={handleSelectChart}
+      onPointerDownCapture={handleSelectChart}
       onFocus={handleSelectChart}
     >
       <div className="flex gap-1">
@@ -131,7 +131,6 @@ export function Chart({
           size="icon-sm"
           onClick={enableZoomSelect}
           title="Zoom mode (Z key)"
-          aria-label="Zoom mode"
         >
           <IconZoomIn className="size-4" />
         </Button>
@@ -140,17 +139,10 @@ export function Chart({
           size="icon-sm"
           onClick={enablePan}
           title="Pan mode (Space)"
-          aria-label="Pan mode"
         >
           <IconHandGrab className="size-4" />
         </Button>
-        <Button
-          variant="outline"
-          size="icon-sm"
-          onClick={resetZoom}
-          title="Reset zoom (Escape)"
-          aria-label="Reset zoom"
-        >
+        <Button variant="outline" size="icon-sm" onClick={resetZoom} title="Reset zoom (Escape)">
           <IconHome className="size-4" />
         </Button>
       </div>
@@ -188,13 +180,7 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
     yAxis: {
       type: 'value',
       scale: true,
-      min: (v: { min: number; max: number }) => {
-        if (v.min >= 0) {
-          return 0;
-        }
-        const padding = (v.max - v.min) * 0.5;
-        return v.min - padding;
-      },
+      min: 0,
       max: (v: { min: number; max: number }) => v.max + (v.max - v.min) * 0.5,
       axisLabel: {
         fontSize: 10,
@@ -227,14 +213,14 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[]): EChartsOption {
         type: 'inside',
         xAxisIndex: 0,
         zoomOnMouseWheel: true,
-        moveOnMouseMove: false,
+        moveOnMouseMove: true,
       },
       {
         id: 'datazoom-inside-y',
         type: 'inside',
         yAxisIndex: 0,
         zoomOnMouseWheel: true,
-        moveOnMouseMove: false,
+        moveOnMouseMove: true,
       },
     ],
     tooltip: {

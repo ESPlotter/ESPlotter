@@ -66,6 +66,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
 
     // Click pan button
     await panButton.click();
+    await expect(panButton).toHaveClass(/bg-primary/);
 
     // Pan should now be active, zoom inactive
     await expect(panButton).toHaveClass(/bg-primary/);
@@ -73,6 +74,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
 
     // Click zoom button again
     await zoomButton.click();
+    await expect(zoomButton).toHaveClass(/bg-primary/);
 
     // Zoom should be active again
     await expect(zoomButton).toHaveClass(/bg-primary/);
@@ -109,16 +111,13 @@ test.describe('Chart zoom, pan, and reset controls', () => {
 
     // Wait for zoom to be applied
     await expect
-      .poll(
-        async () => {
-          const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
-          return (
-            zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
-            zoomedRanges.xAxis.end < initialRanges.xAxis.end
-          );
-        },
-        { timeout: 10000 },
-      )
+      .poll(async () => {
+        const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
+        return (
+          zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
+          zoomedRanges.xAxis.end < initialRanges.xAxis.end
+        );
+      })
       .toBe(true);
   });
 
@@ -147,31 +146,25 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     await mainPage.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.7, { steps: 10 });
     await mainPage.mouse.up();
     await expect
-      .poll(
-        async () => {
-          const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
-          return (
-            zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
-            zoomedRanges.xAxis.end < initialRanges.xAxis.end
-          );
-        },
-        { timeout: 10000 },
-      )
+      .poll(async () => {
+        const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
+        return (
+          zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
+          zoomedRanges.xAxis.end < initialRanges.xAxis.end
+        );
+      })
       .toBe(true);
 
     // Click reset button
     await resetButton.click();
     await expect
-      .poll(
-        async () => {
-          const resetRanges = await getChartZoomRanges(mainPage, chartTitle);
-          return (
-            Math.abs(resetRanges.xAxis.start - initialRanges.xAxis.start) < 0.1 &&
-            Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) < 0.1
-          );
-        },
-        { timeout: 10000 },
-      )
+      .poll(async () => {
+        const resetRanges = await getChartZoomRanges(mainPage, chartTitle);
+        return (
+          Math.abs(resetRanges.xAxis.start - initialRanges.xAxis.start) < 0.1 &&
+          Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) < 0.1
+        );
+      })
       .toBe(true);
   });
 
@@ -198,16 +191,13 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     await mainPage.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.7, { steps: 10 });
     await mainPage.mouse.up();
     await expect
-      .poll(
-        async () => {
-          const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
-          return (
-            zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
-            zoomedRanges.xAxis.end < initialRanges.xAxis.end
-          );
-        },
-        { timeout: 10000 },
-      )
+      .poll(async () => {
+        const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
+        return (
+          zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
+          zoomedRanges.xAxis.end < initialRanges.xAxis.end
+        );
+      })
       .toBe(true);
     const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
 
@@ -223,17 +213,14 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     const zoomedRangeX = zoomedRanges.xAxis.end - zoomedRanges.xAxis.start;
 
     await expect
-      .poll(
-        async () => {
-          const pannedRanges = await getChartZoomRanges(mainPage, chartTitle);
-          const pannedRangeX = pannedRanges.xAxis.end - pannedRanges.xAxis.start;
-          return (
-            Math.abs(pannedRangeX - zoomedRangeX) < 0.5 &&
-            Math.abs(pannedRanges.xAxis.start - zoomedRanges.xAxis.start) > 0.1
-          );
-        },
-        { timeout: 10000 },
-      )
+      .poll(async () => {
+        const pannedRanges = await getChartZoomRanges(mainPage, chartTitle);
+        const pannedRangeX = pannedRanges.xAxis.end - pannedRanges.xAxis.start;
+        return (
+          Math.abs(pannedRangeX - zoomedRangeX) < 0.5 &&
+          Math.abs(pannedRanges.xAxis.start - zoomedRanges.xAxis.start) > 0.1
+        );
+      })
       .toBe(true);
   });
 
@@ -318,7 +305,7 @@ async function getChartZoomRanges(page: Page, chartTitle: string): Promise<ZoomR
       let current: FiberNode | null = rootFiber;
       let echartsInstance: ReactEChartsComponent | null = null;
 
-      while (current) {
+      while (current && !echartsInstance) {
         const component = current.stateNode as ReactEChartsComponent | null | undefined;
         if (component?.getEchartsInstance) {
           const instance = component.getEchartsInstance();
