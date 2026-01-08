@@ -17,7 +17,7 @@ describe('NodeCsvTxtFileService', () => {
     expect(primitives.path).toBe(fixturePath);
     expect(primitives.content.metadata.shortTitle).toBe('test1');
     expect(primitives.content.x.label).toBe('Time');
-    expect(primitives.content.x.values).toHaveLength(10);
+    expect(primitives.content.x.values).toHaveLength(10000);
     expect(primitives.content.series).toHaveLength(3);
 
     const seriesLabels = primitives.content.series.map((s) => s.label);
@@ -27,6 +27,9 @@ describe('NodeCsvTxtFileService', () => {
     expect(primitives.content.series[0].values[0]).toBe(1.070666);
     expect(primitives.content.series[1].values[0]).toBe(10.0);
     expect(primitives.content.series[2].values[0]).toBe(-10.0);
+
+    expect(primitives.content.x.values[9999]).toBe(10.0);
+    expect(primitives.content.series[0].values[9999]).toBe(1.07093);
   });
 
   it('handles CSV format with comma-separated values', async () => {
