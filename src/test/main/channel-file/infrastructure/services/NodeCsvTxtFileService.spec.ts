@@ -1,6 +1,8 @@
-import { describe, expect, it } from 'vitest';
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
+
+import { describe, expect, it } from 'vitest';
 
 import { NodeCsvTxtFileService } from '@main/channel-file/infrastructure/services/NodeCsvTxtFileService';
 
@@ -17,7 +19,7 @@ describe('NodeCsvTxtFileService', () => {
     expect(primitives.content.x.label).toBe('Time');
     expect(primitives.content.x.values).toHaveLength(10);
     expect(primitives.content.series).toHaveLength(3);
-    
+
     const seriesLabels = primitives.content.series.map((s) => s.label);
     expect(seriesLabels).toEqual(['Voltage', 'Active Power', 'Reactive Power']);
 
@@ -29,8 +31,8 @@ describe('NodeCsvTxtFileService', () => {
 
   it('handles CSV format with comma-separated values', async () => {
     const service = new NodeCsvTxtFileService();
-    const tmpPath = path.join('/tmp', `test-${Date.now()}.csv`);
-    
+    const tmpPath = path.join(os.tmpdir(), `test-${Date.now()}.csv`);
+
     const csvContent = `Domain, Value1, Value2
 1.0, 100.0, 200.0
 2.0, 101.0, 201.0
@@ -55,8 +57,8 @@ describe('NodeCsvTxtFileService', () => {
 
   it('throws error for file with insufficient columns', async () => {
     const service = new NodeCsvTxtFileService();
-    const tmpPath = path.join('/tmp', `test-${Date.now()}.csv`);
-    
+    const tmpPath = path.join(os.tmpdir(), `test-${Date.now()}.csv`);
+
     const csvContent = `Time
 1.0
 2.0`;
@@ -65,7 +67,7 @@ describe('NodeCsvTxtFileService', () => {
 
     try {
       await expect(service.transformToChannelFile(tmpPath)).rejects.toThrow(
-        'CSV/TXT file must have at least 2 columns'
+        'CSV/TXT file must have at least 2 columns',
       );
     } finally {
       await fs.unlink(tmpPath).catch(() => {});
@@ -74,15 +76,15 @@ describe('NodeCsvTxtFileService', () => {
 
   it('throws error for file with insufficient rows', async () => {
     const service = new NodeCsvTxtFileService();
-    const tmpPath = path.join('/tmp', `test-${Date.now()}.csv`);
-    
+    const tmpPath = path.join(os.tmpdir(), `test-${Date.now()}.csv`);
+
     const csvContent = `Time, Value1`;
 
     await fs.writeFile(tmpPath, csvContent, 'utf-8');
 
     try {
       await expect(service.transformToChannelFile(tmpPath)).rejects.toThrow(
-        'CSV/TXT file must have at least a header row and one data row'
+        'CSV/TXT file must have at least a header row and one data row',
       );
     } finally {
       await fs.unlink(tmpPath).catch(() => {});
