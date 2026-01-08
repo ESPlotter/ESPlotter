@@ -16,7 +16,7 @@ interface ChannelChartsState {
   chartCounter: number;
   selectedChartId: string | null;
   actions: {
-    toggleSelectedChartId: (chartId: string) => void;
+    setSelectedChartId: (chartId: string | null) => void;
     addChart: (chartId: string) => void;
     removeChart: (chartId: string) => void;
     addChannelToChart: (chartId: string, channelId: string, serie: ChartSerie) => void;
@@ -30,9 +30,9 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
   chartCounter: 0,
   selectedChartId: null,
   actions: {
-    toggleSelectedChartId: (chartId: string) =>
-      set((state) => ({
-        selectedChartId: state.selectedChartId === chartId ? null : chartId,
+    setSelectedChartId: (chartId: string | null) =>
+      set(() => ({
+        selectedChartId: chartId,
       })),
     addChart: (chartId: string) =>
       set((state) => {
@@ -49,6 +49,7 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
             },
           },
           chartCounter: nextCounter,
+          selectedChartId: chartId,
         };
       }),
     removeChart: (chartId: string) =>

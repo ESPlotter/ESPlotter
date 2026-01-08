@@ -1,10 +1,10 @@
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test';
 
-import { chartContainer } from './support/chartContainer';
 import { clickMenuItem } from './support/clickMenuItem';
 import { createChart } from './support/createChart';
 import { expectSelectedChart } from './support/expectSelectedChart';
 import { getRenderedSeriesSummary } from './support/getRenderedSeriesSummary';
+import { selectChartByTitle } from './support/selectChartByTitle';
 import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 import { waitForLastOpenedChannelFileChanged } from './support/waitForLastOpenedChannelFileChanged';
@@ -62,11 +62,4 @@ async function getFirstChannelButton(page: Page) {
   const channelButtons = page.locator('[data-sidebar="menu-button"]');
   await expect.poll(async () => channelButtons.count()).toBeGreaterThan(0);
   return channelButtons.first();
-}
-
-async function selectChartByTitle(page: Page, chartTitle: string): Promise<void> {
-  const chartLocator = chartContainer(page, chartTitle);
-  await chartLocator.waitFor({ state: 'visible' });
-  await chartLocator.click();
-  await expectSelectedChart(page, chartTitle);
 }

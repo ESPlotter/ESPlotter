@@ -46,6 +46,16 @@ describe('ChannelChartsStore', () => {
       expect(charts['chart-id-2'].name).toBe('Chart 2');
       expect(charts['chart-id-3'].name).toBe('Chart 3');
     });
+
+    test('should auto-select the newly created chart', () => {
+      const { addChart } = useChannelChartsStore.getState().actions;
+
+      addChart('chart-id-1');
+      expect(useChannelChartsStore.getState().selectedChartId).toBe('chart-id-1');
+
+      addChart('chart-id-2');
+      expect(useChannelChartsStore.getState().selectedChartId).toBe('chart-id-2');
+    });
   });
 
   describe('addChannelToChart', () => {

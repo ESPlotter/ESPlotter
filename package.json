@@ -92,6 +92,7 @@
     "echarts-for-react": "3.0.4",
     "electron-squirrel-startup": "1.0.1",
     "electron-store": "^11.0.2",
+    "lightningcss": "^1.30.2",
     "nanoid": "^5.1.6",
     "python-shell": "^5.0.0",
     "radix-ui": "^1.4.3",
@@ -99,5 +100,9 @@
     "react-dom": "19.2.0",
     "react-router": "7.9.4",
     "zustand": "^5.0.8"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-win32-x64-msvc": "^4.1.18",
+    "lightningcss-win32-x64-msvc": "^1.30.2"
   }
 }
