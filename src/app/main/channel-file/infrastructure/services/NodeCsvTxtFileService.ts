@@ -43,11 +43,27 @@ export class NodeCsvTxtFileService implements CsvTxtFileService {
         continue;
       }
 
+      // Parse all values in the row first and ensure they are all valid numbers.
+      const numericRow: number[] = [];
+      let rowIsValid = true;
+
       for (let i = 0; i < headers.length; i++) {
         const numValue = parseFloat(values[i]);
-        if (!isNaN(numValue)) {
-          columns[i].push(numValue);
+        if (isNaN(numValue)) {
+          rowIsValid = false;
+          break;
         }
+        numericRow.push(numValue);
+      }
+
+      if (!rowIsValid) {
+        // Skip the entire row if any column contains an invalid numeric value.
+        continue;
+      }
+
+      // All values are valid; push them into their respective columns.
+      for (let i = 0; i < headers.length; i++) {
+        columns[i].push(numericRow[i]);
       }
     }
 
