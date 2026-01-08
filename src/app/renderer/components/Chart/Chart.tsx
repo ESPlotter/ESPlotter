@@ -221,6 +221,7 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): 
         xAxisIndex: 0,
         zoomOnMouseWheel: true,
         moveOnMouseMove: true,
+        filterMode: 'none',
       },
       {
         id: 'datazoom-inside-y',
@@ -228,6 +229,7 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): 
         yAxisIndex: 0,
         zoomOnMouseWheel: true,
         moveOnMouseMove: true,
+        filterMode: 'none',
       },
     ],
     tooltip: {
