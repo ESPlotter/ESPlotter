@@ -1,12 +1,11 @@
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test';
 
+import { clickSidebarChannel } from './support/clickSidebarChannel';
 import { createChart } from './support/createChart';
-import { expectSelectedChart } from './support/expectSelectedChart';
 import { getChartTitles } from './support/getChartTitles';
-import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
+import { openFixtureAndExpandInSidebar } from './support/openFixtureAndExpandInSidebar';
+import { selectChartByTitle } from './support/selectChartByTitle';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
-import { triggerImportMenu } from './support/triggerImportMenu';
-import { waitForLastOpenedChannelFileChanged } from './support/waitForLastOpenedChannelFileChanged';
 
 let electronApp: ElectronApplication;
 let mainPage: Page;
@@ -32,7 +31,7 @@ test.describe('Chart title initialization', () => {
   });
 
   test('renames chart to channel name when adding first channel', async () => {
-    await openAndExpandTest3File(electronApp, mainPage);
+    await openFixtureAndExpandInSidebar(electronApp, mainPage, 'test3.json', 'test3');
 
     const chartTitle = await createChart(mainPage);
     expect(chartTitle).toBe('Chart 1');
@@ -46,7 +45,7 @@ test.describe('Chart title initialization', () => {
   });
 
   test('does not rename chart when adding second channel', async () => {
-    await openAndExpandTest3File(electronApp, mainPage);
+    await openFixtureAndExpandInSidebar(electronApp, mainPage, 'test3.json', 'test3');
 
     const chartTitle = await createChart(mainPage);
     await selectChartByTitle(mainPage, chartTitle);
@@ -64,7 +63,7 @@ test.describe('Chart title initialization', () => {
   });
 
   test('does not rename chart if user has manually changed the title', async () => {
-    await openAndExpandTest3File(electronApp, mainPage);
+    await openFixtureAndExpandInSidebar(electronApp, mainPage, 'test3.json', 'test3');
 
     const chartTitle = await createChart(mainPage);
     const customTitle = 'My Custom Chart';
@@ -84,32 +83,3 @@ test.describe('Chart title initialization', () => {
     expect(updatedTitles).not.toContain('Voltage');
   });
 });
-
-async function openAndExpandTest3File(app: ElectronApplication, page: Page): Promise<void> {
-  await setNextOpenFixturePath(app, 'test3.json');
-
-  const parsedPromise = waitForLastOpenedChannelFileChanged(page);
-  await triggerImportMenu(app, page);
-  await parsedPromise;
-
-  const fileTrigger = page.getByRole('button', { name: 'test3' });
-  await fileTrigger.waitFor({ state: 'visible' });
-  await fileTrigger.click();
-}
-
-import { chartContainer } from './support/chartContainer';
-
-async function selectChartByTitle(page: Page, chartTitle: string): Promise<void> {
-  const chartLocator = chartContainer(page, chartTitle);
-  await chartLocator.waitFor({ state: 'visible' });
-  await chartLocator.click();
-  await expectSelectedChart(page, chartTitle);
-}
-
-async function clickSidebarChannel(page: Page, channelLabel: string): Promise<void> {
-  await page
-    .locator('[data-sidebar="menu-button"]')
-    .filter({ hasText: channelLabel })
-    .first()
-    .click();
-}

@@ -28,6 +28,12 @@ This document defines where and how we test new functionality across the project
 - Drive the Electron application via Playwright. Confirm that menu actions, dialogs, and chart updates behave correctly with real user flows.
 - Ensure the happy path is always covered for new features. Add regression scenarios when the feature involves persistence or asynchronous updates.
 
+#### Best Practices
+
+- Check `e2e/support` for existing helpers before adding new ones.
+- If a helper is reusable, add it to `e2e/support` with one named export per file (one function per file).
+- Keep test files focused on intent and compose helpers for setup and interactions.
+
 ## Optional Test Suites
 
 ### Component Tests
