@@ -87,8 +87,8 @@ def create_txt_sample():
     
     # Create data values
     voltage = 0.98 + 0.10 * np.sin(2 * np.pi * 1 * time + 2.0)
-    active_power = 10 - 10 * time * np.sin(2 * np.pi * 0.5 + 0.0)
-    reactive_power = -10 + 10 * time * np.sin(2 * np.pi * 0.5 + 0.0)
+    active_power = 10 - 10 * time * np.sin(2 * np.pi * time* 0.5 + 0.0)
+    reactive_power = -10 + 10 * time * np.sin(2 * np.pi * time * 0.5 + 0.0)
     
     # Create the output directory if it doesn't exist
     os.makedirs("fixtures", exist_ok=True)
