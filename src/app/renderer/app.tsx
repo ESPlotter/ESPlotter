@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { createHashRouter, RouterProvider } from 'react-router';
 
+import { useDataTableFormat } from './hooks/useDataTableFormat';
 import { useOpenPreferencesOnRequest } from './hooks/useOpenPreferencesOnRequest';
 import { HomePage } from './pages/home/page';
 import { UserPreferencesPage } from './pages/preferences/page';
@@ -24,6 +25,7 @@ export function App() {
   );
 
   useOpenPreferencesOnRequest(router);
+  useDataTableFormat();
 
   return <RouterProvider router={router} />;
 }

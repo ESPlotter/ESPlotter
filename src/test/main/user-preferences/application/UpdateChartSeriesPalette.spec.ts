@@ -41,6 +41,12 @@ describe('UpdateChartSeriesPalette', () => {
     expect(result.chartSeriesPalette).toEqual([]);
     repository.expectSaveCalledTimes(1);
     const persisted = await repository.get();
-    expect(persisted.toPrimitives()).toEqual({ chartSeriesPalette: [] });
+    expect(persisted.toPrimitives()).toEqual({
+      chartSeriesPalette: [],
+      dataTableFormat: {
+        decimals: 6,
+        fixed: true,
+      },
+    });
   });
 });

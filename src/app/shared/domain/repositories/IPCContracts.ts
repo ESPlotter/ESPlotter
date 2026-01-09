@@ -13,6 +13,8 @@ export interface RendererExposureMap {
   userPreferences: {
     getChartSeriesPalette: () => Promise<string[]>;
     updateChartSeriesPalette: (colors: string[]) => Promise<UserPreferencesPrimitive>;
+    getDataTableFormat: () => Promise<{ decimals: number; fixed: boolean }>;
+    updateDataTableFormat: (decimals: number, fixed: boolean) => Promise<UserPreferencesPrimitive>;
     onChangedChartSeriesPalette: (
       listener: (preferences: UserPreferencesPrimitive) => void,
     ) => () => void;
@@ -24,6 +26,8 @@ export interface IpcChannelMap {
   ping: () => string;
   getChartSeriesPalette: () => Promise<string[]>;
   updateChartSeriesPalette: (colors: string[]) => Promise<UserPreferencesPrimitive>;
+  getDataTableFormat: () => Promise<{ decimals: number; fixed: boolean }>;
+  updateDataTableFormat: (decimals: number, fixed: boolean) => Promise<UserPreferencesPrimitive>;
 }
 
 export interface IpcEventMap {

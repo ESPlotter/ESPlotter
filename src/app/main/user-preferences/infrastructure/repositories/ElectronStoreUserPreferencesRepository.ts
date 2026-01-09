@@ -7,12 +7,23 @@ import { UserPreferencesRepository } from '../../domain/repositories/UserPrefere
 
 type UserPreferencesStore = {
   chartSeriesPalette?: string[];
+  dataTableFormat?: {
+    decimals?: number;
+    fixed?: boolean;
+  };
 };
 
 const schema: Schema<UserPreferencesStore> = {
   chartSeriesPalette: {
     type: 'array',
     items: { type: 'string' },
+  },
+  dataTableFormat: {
+    type: 'object',
+    properties: {
+      decimals: { type: 'number' },
+      fixed: { type: 'boolean' },
+    },
   },
 };
 
@@ -26,10 +37,14 @@ export class ElectronStoreUserPreferencesRepository
 
   public async get(): Promise<UserPreferences> {
     const storedPalette = this.store.get('chartSeriesPalette');
+    const storedDataTableFormat = this.store.get('dataTableFormat');
 
-    const preferences = this.mapToUserPreferences({ chartSeriesPalette: storedPalette });
+    const preferences = this.mapToUserPreferences({
+      chartSeriesPalette: storedPalette,
+      dataTableFormat: storedDataTableFormat,
+    });
 
-    if (!Array.isArray(storedPalette)) {
+    if (!Array.isArray(storedPalette) || !storedDataTableFormat) {
       await this.save(preferences);
     }
 
@@ -55,8 +70,19 @@ export class ElectronStoreUserPreferencesRepository
       return UserPreferences.withDefaultChartSeriesPalette();
     }
 
+    const dataTableFormat: { decimals: number; fixed: boolean } =
+      rawPreferences.dataTableFormat &&
+      typeof rawPreferences.dataTableFormat.decimals === 'number' &&
+      typeof rawPreferences.dataTableFormat.fixed === 'boolean'
+        ? {
+            decimals: rawPreferences.dataTableFormat.decimals,
+            fixed: rawPreferences.dataTableFormat.fixed,
+          }
+        : { decimals: 6, fixed: true };
+
     return UserPreferences.fromPrimitives({
       chartSeriesPalette: rawPreferences.chartSeriesPalette,
+      dataTableFormat: dataTableFormat,
     });
   }
 }
