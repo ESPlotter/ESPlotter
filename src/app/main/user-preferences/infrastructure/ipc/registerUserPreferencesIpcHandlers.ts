@@ -19,6 +19,22 @@ export function registerUserPreferencesIpcHandlers(): void {
     ).UpdateChartSeriesPalette(repository);
     return updateChartSeriesPalette.run(colors);
   });
+
+  ipcMainHandle('getDataTableFormat', async () => {
+    const repository = createRepository();
+    const getDataTableFormat = new (
+      await import('@main/user-preferences/application/use-cases/GetDataTableFormat')
+    ).GetDataTableFormat(repository);
+    return getDataTableFormat.execute();
+  });
+
+  ipcMainHandle('updateDataTableFormat', async (decimals: number, fixed: boolean) => {
+    const repository = createRepository();
+    const updateDataTableFormat = new (
+      await import('@main/user-preferences/application/use-cases/UpdateDataTableFormat')
+    ).UpdateDataTableFormat(repository);
+    return updateDataTableFormat.execute(decimals, fixed);
+  });
 }
 
 function createRepository(): ElectronStoreUserPreferencesRepository {

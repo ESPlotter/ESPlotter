@@ -21,6 +21,9 @@ contextBridgeExposeInMainWorld('userPreferences', {
   getChartSeriesPalette: () => ipcRendererInvoke('getChartSeriesPalette'),
   updateChartSeriesPalette: (colors: string[]) =>
     ipcRendererInvoke('updateChartSeriesPalette', colors),
+  getDataTableFormat: () => ipcRendererInvoke('getDataTableFormat'),
+  updateDataTableFormat: (decimals: number, fixed: boolean) =>
+    ipcRendererInvoke('updateDataTableFormat', decimals, fixed),
   onChangedChartSeriesPalette: (listener: (preferences: UserPreferencesPrimitive) => void) =>
     ipcRendererOn('userPreferencesChanged', listener),
   onOpenRequested: (listener: () => void) =>

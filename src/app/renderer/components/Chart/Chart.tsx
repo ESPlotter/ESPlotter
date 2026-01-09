@@ -16,11 +16,13 @@ import ReactEChartsCore from 'echarts-for-react/lib/core';
 import { useMemo, useRef, useState } from 'react';
 
 import { useChannelChartsActions } from '@renderer/store/ChannelChartsStore';
+import { useDataTableFormat } from '@renderer/store/DataTableFormatStore';
 import { useUserPreferencesChartSeriesPalette } from '@renderer/store/UserPreferencesStore';
 import { Button } from '@shadcn/components/ui/button';
 import { generateRandomHexColor } from '@shared/utils/generateRandomHexColor';
 
 import { ChartSerie } from './ChartSerie';
+import { DataTableDialog } from './DataTableDialog';
 import { useChartsHotkey } from './useChartHotKey';
 
 import type { EChartsType } from 'echarts';
@@ -49,7 +51,9 @@ export function Chart({
   series: ChartSerie[];
 }) {
   const [mode, setMode] = useState<ChartMode>('zoom');
+  const [dataTableOpen, setDataTableOpen] = useState(false);
   const chartSeriesPalette = useUserPreferencesChartSeriesPalette();
+  const dataTableFormat = useDataTableFormat();
   const options = useMemo(
     () => mergeSeriesWithDefaultParams(series, chartSeriesPalette),
     [series, chartSeriesPalette],
@@ -125,11 +129,17 @@ export function Chart({
     setSelectedChartId(id);
   }
 
+  function handleContextMenu(e: React.MouseEvent) {
+    e.preventDefault();
+    setDataTableOpen(true);
+  }
+
   return (
     <div
       className="flex h-full w-full flex-col gap-1"
       onPointerDownCapture={handleSelectChart}
       onFocus={handleSelectChart}
+      onContextMenu={handleContextMenu}
     >
       <div className="flex gap-1">
         <Button
@@ -165,6 +175,14 @@ export function Chart({
           style={{ height: '100%', width: '100%' }}
         />
       </div>
+
+      <DataTableDialog
+        open={dataTableOpen}
+        onOpenChange={setDataTableOpen}
+        series={series}
+        initialDecimals={dataTableFormat.decimals}
+        initialFixed={dataTableFormat.fixed}
+      />
     </div>
   );
 }
