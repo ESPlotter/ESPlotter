@@ -70,19 +70,19 @@ export class ElectronStoreUserPreferencesRepository
       return UserPreferences.withDefaultChartSeriesPalette();
     }
 
-    const dataTableFormat =
+    const dataTableFormat: { decimals: number; fixed: boolean } =
       rawPreferences.dataTableFormat &&
       typeof rawPreferences.dataTableFormat.decimals === 'number' &&
       typeof rawPreferences.dataTableFormat.fixed === 'boolean'
-        ? rawPreferences.dataTableFormat
+        ? {
+            decimals: rawPreferences.dataTableFormat.decimals,
+            fixed: rawPreferences.dataTableFormat.fixed,
+          }
         : { decimals: 6, fixed: true };
 
     return UserPreferences.fromPrimitives({
       chartSeriesPalette: rawPreferences.chartSeriesPalette,
-      dataTableFormat: {
-        decimals: dataTableFormat.decimals,
-        fixed: dataTableFormat.fixed,
-      },
+      dataTableFormat: dataTableFormat,
     });
   }
 }

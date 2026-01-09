@@ -9,6 +9,10 @@ export class UserPreferencesPrimitiveMother {
       chartSeriesPalette:
         data.chartSeriesPalette?.map((value) => value as string) ??
         UserPreferencesPrimitiveMother.randomPalette(),
+      dataTableFormat: {
+        decimals: (data.dataTableFormat?.decimals as number) ?? 6,
+        fixed: (data.dataTableFormat?.fixed as boolean) ?? true,
+      },
     };
   }
 
