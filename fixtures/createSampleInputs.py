@@ -105,6 +105,32 @@ def create_txt_sample():
     print("File test1.txt successfully created in 'fixtures' folder.")
 
 
+def create_csv_sample():
+    """Create a CSV file with sample time series data: Time, Voltage, Active Power, Reactive Power."""
+    # Create time vector
+    time = np.arange(0.001, 10.001, 0.001)
+    
+    # Create data values
+    voltage = 0.98 + 0.05 * np.sin(2 * np.pi * 0.5 * time + 0.0)
+    active_power = 10 - 0.1 * time * np.sin(2 * np.pi * time* 2.0 + 0.0)
+    reactive_power = -10 + 0.1 * time * np.sin(2 * np.pi * time * 2.0 + 0.0)
+    
+    # Create the output directory if it doesn't exist
+    os.makedirs("fixtures", exist_ok=True)
+    
+    # Write to CSV file
+    with open(os.path.join("fixtures", "test4.csv"), "w") as f:
+        # Write header
+        f.write("Time,Voltage,Active Power,Reactive Power\n")
+        
+        # Write data rows
+        for t, v, ap, rp in zip(time, voltage, active_power, reactive_power):
+            f.write(f"{t:.3f},{v:.5f},{ap:.5f},{rp:.5f}\n")
+    
+    print("File test4.csv successfully created in 'fixtures' folder.")
+
+
 if __name__ == "__main__":
     create_json_sample()
     create_txt_sample()
+    create_csv_sample()

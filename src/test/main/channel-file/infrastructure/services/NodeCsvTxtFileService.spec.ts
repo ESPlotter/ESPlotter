@@ -32,6 +32,31 @@ describe('NodeCsvTxtFileService', () => {
     expect(primitives.content.series[0].values[9999]).toBeCloseTo(1.07093, 3);
   });
 
+  it('parses test4.csv fixture correctly', async () => {
+    const service = new NodeCsvTxtFileService();
+    const fixturePath = path.join(process.cwd(), 'fixtures', 'test4.csv');
+
+    const channelFile = await service.transformToChannelFile(fixturePath);
+    const primitives = channelFile.toPrimitives();
+
+    expect(primitives.path).toBe(fixturePath);
+    expect(primitives.content.metadata.shortTitle).toBe('test4');
+    expect(primitives.content.x.label).toBe('Time');
+    expect(primitives.content.x.values).toHaveLength(10000);
+    expect(primitives.content.series).toHaveLength(3);
+
+    const seriesLabels = primitives.content.series.map((s) => s.label);
+    expect(seriesLabels).toEqual(['Voltage', 'Active Power', 'Reactive Power']);
+
+    expect(primitives.content.x.values[0]).toBeCloseTo(0.001, 3);
+    expect(primitives.content.series[0].values[0]).toBeCloseTo(1.07067, 3);
+    expect(primitives.content.series[1].values[0]).toBeCloseTo(9.99997, 3);
+    expect(primitives.content.series[2].values[0]).toBeCloseTo(-9.99997, 3);
+
+    expect(primitives.content.x.values[9999]).toBeCloseTo(10.0, 3);
+    expect(primitives.content.series[0].values[9999]).toBeCloseTo(1.07093, 3);
+  });
+
   it('handles CSV format with comma-separated values', async () => {
     const service = new NodeCsvTxtFileService();
     const tmpPath = path.join(os.tmpdir(), `test-${Date.now()}.csv`);

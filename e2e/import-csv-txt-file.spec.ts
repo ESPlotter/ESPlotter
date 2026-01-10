@@ -13,7 +13,9 @@ test.describe('Import CSV/TXT files', () => {
   });
 
   test.afterEach(async () => {
-    await electronApp.close();
+    if (electronApp) {
+      await electronApp.close();
+    }
   });
 
   test('imports a valid TXT file (test1.txt) and renders channels', async () => {
@@ -21,6 +23,14 @@ test.describe('Import CSV/TXT files', () => {
 
     await expectChannelVisible(mainPage, 'test1');
     await expandFileInSidebar(mainPage, 'test1');
+    await expectChannelsInSidebar(mainPage, ['Voltage ()', 'Active Power ()', 'Reactive Power ()']);
+  });
+
+  test('imports a valid CSV file (test4.csv) and renders channels', async () => {
+    await openFixtureViaImportMenu(electronApp, mainPage, 'test4.csv');
+
+    await expectChannelVisible(mainPage, 'test4');
+    await expandFileInSidebar(mainPage, 'test4');
     await expectChannelsInSidebar(mainPage, ['Voltage ()', 'Active Power ()', 'Reactive Power ()']);
   });
 });
