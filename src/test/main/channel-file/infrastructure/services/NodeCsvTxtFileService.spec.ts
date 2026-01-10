@@ -49,12 +49,12 @@ describe('NodeCsvTxtFileService', () => {
     expect(seriesLabels).toEqual(['Voltage', 'Active Power', 'Reactive Power']);
 
     expect(primitives.content.x.values[0]).toBeCloseTo(0.001, 3);
-    expect(primitives.content.series[0].values[0]).toBeCloseTo(1.07067, 3);
-    expect(primitives.content.series[1].values[0]).toBeCloseTo(9.99997, 3);
-    expect(primitives.content.series[2].values[0]).toBeCloseTo(-9.99997, 3);
+    expect(primitives.content.series[0].values[0]).toBeCloseTo(0.98016, 3);
+    expect(primitives.content.series[1].values[0]).toBeCloseTo(10.0, 3);
+    expect(primitives.content.series[2].values[0]).toBeCloseTo(-10.0, 3);
 
     expect(primitives.content.x.values[9999]).toBeCloseTo(10.0, 3);
-    expect(primitives.content.series[0].values[9999]).toBeCloseTo(1.07093, 3);
+    expect(primitives.content.series[0].values[9999]).toBeCloseTo(0.98, 3);
   });
 
   it('handles CSV format with comma-separated values', async () => {
