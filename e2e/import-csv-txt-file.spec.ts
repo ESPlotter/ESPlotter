@@ -1,5 +1,6 @@
 import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
 
+import { expandFileInSidebar } from './support/expandFileInSidebar';
 import { openFixtureViaImportMenu } from './support/openFixtureViaImportMenu';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
@@ -19,7 +20,8 @@ test.describe('Import CSV/TXT files', () => {
     await openFixtureViaImportMenu(electronApp, mainPage, 'test1.txt');
 
     await expectChannelVisible(mainPage, 'test1');
-    await expectChannelsInSidebar(mainPage, ['Voltage', 'Active Power', 'Reactive Power']);
+    await expandFileInSidebar(mainPage, 'test1');
+    await expectChannelsInSidebar(mainPage, ['Voltage ()', 'Active Power ()', 'Reactive Power ()']);
   });
 });
 
@@ -30,7 +32,7 @@ async function expectChannelVisible(page: Page, fileName: string): Promise<void>
 async function expectChannelsInSidebar(page: Page, channelNames: string[]): Promise<void> {
   for (const channelName of channelNames) {
     await expect(
-      page.locator('[data-sidebar="menu-button"]', { hasText: channelName }),
+      page.getByRole('button', { name: channelName, exact: true }),
     ).toBeVisible();
   }
 }
