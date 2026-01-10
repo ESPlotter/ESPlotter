@@ -100,7 +100,7 @@ def create_txt_sample():
         
         # Write data rows
         for t, v, ap, rp in zip(time, voltage, active_power, reactive_power):
-            f.write(f"{t:.3f}, {v:.6f}, {ap:.6f}, {rp:.6f}\n")
+            f.write(f"{t:.3f}, {v:.5f}, {ap:.5f}, {rp:.5f}\n")
     
     print("File test1.txt successfully created in 'fixtures' folder.")
 
