@@ -31,8 +31,6 @@ async function expectChannelVisible(page: Page, fileName: string): Promise<void>
 
 async function expectChannelsInSidebar(page: Page, channelNames: string[]): Promise<void> {
   for (const channelName of channelNames) {
-    await expect(
-      page.getByRole('button', { name: channelName, exact: true }),
-    ).toBeVisible();
+    await expect(page.getByRole('button', { name: channelName, exact: true })).toBeVisible();
   }
 }
