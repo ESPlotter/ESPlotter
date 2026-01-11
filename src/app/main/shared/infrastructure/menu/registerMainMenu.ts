@@ -79,6 +79,13 @@ async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
 }
 
 async function openChannelFile(win: BrowserWindow, path: string): Promise<void> {
+  const fileExtension = path.toLowerCase().split('.').pop();
+
+  if (fileExtension === 'csv' || fileExtension === 'txt') {
+    await openCsvTxtFile(win, path);
+    return;
+  }
+
   const { channelFileService } = await createChannelFileDependencies();
   const openChannelFile = new (
     await import('@main/channel-file/application/use-cases/OpenChannelFile')
@@ -100,6 +107,20 @@ async function openPsseOutFile(win: BrowserWindow, path: string): Promise<void> 
 
   try {
     const channelFile = await readPsseOutFilePath.run(path);
+    webContentsSend(win, 'channelFileOpened', channelFile);
+  } catch {
+    // file has invalid structure or parsing failed
+  }
+}
+
+async function openCsvTxtFile(win: BrowserWindow, path: string): Promise<void> {
+  const { csvTxtFileService } = await createCsvTxtDependencies();
+  const readCsvTxtFilePath = new (
+    await import('@main/channel-file/application/use-cases/ReadCsvTxtFilePath')
+  ).ReadCsvTxtFilePath(csvTxtFileService);
+
+  try {
+    const channelFile = await readCsvTxtFilePath.run(path);
     webContentsSend(win, 'channelFileOpened', channelFile);
   } catch {
     // file has invalid structure or parsing failed
@@ -128,4 +149,14 @@ async function createIngestionDependencies() {
   const psseOutFileService = new NodePsseOutFileService();
 
   return { psseOutFileService };
+}
+
+async function createCsvTxtDependencies() {
+  const { NodeCsvTxtFileService } = await import(
+    '@main/channel-file/infrastructure/services/NodeCsvTxtFileService'
+  );
+
+  const csvTxtFileService = new NodeCsvTxtFileService();
+
+  return { csvTxtFileService };
 }
