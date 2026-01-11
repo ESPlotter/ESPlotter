@@ -5,8 +5,8 @@ import { ChartSerie } from '../Chart/ChartSerie';
  *
  * Logic:
  * - When there are no channel name conflicts: show just the channel name (e.g., "Voltage")
- * - When there are conflicts (same channel name from different tests):
- *   append test name to ALL conflicting series (e.g., "Voltage (test2)", "Voltage (test3)")
+ * - When ANY conflict exists (same channel name from different tests):
+ *   append test name to ALL series in the chart (e.g., "Voltage (test2)", "Frequency (test2)", "Voltage (test3)")
  *
  * @param channels - Record of channelKey (format: "filePath::channelId") to ChartSerie
  * @returns Array of ChartSerie with potentially modified names
@@ -30,27 +30,28 @@ export function resolveSeriesDisplayNames(channels: Record<string, ChartSerie>):
     nameGroups.get(baseName)!.push(metadata);
   }
 
-  // Identify which names have conflicts
-  const conflictingNames = new Set<string>();
-  for (const [baseName, group] of nameGroups) {
+  // Check if ANY name has conflicts
+  let hasAnyConflict = false;
+  for (const group of nameGroups.values()) {
     if (group.length > 1) {
-      conflictingNames.add(baseName);
+      hasAnyConflict = true;
+      break;
     }
   }
 
-  // Build the result with modified names for conflicting series
+  // Build the result with modified names
   return channelMetadata.map(({ serie, testName }) => {
     const baseName = serie.name;
 
-    if (conflictingNames.has(baseName)) {
-      // This serie name conflicts with others, append test name
+    if (hasAnyConflict) {
+      // ANY conflict detected, append test name to ALL series
       return {
         ...serie,
         name: `${baseName} (${testName})`,
       };
     }
 
-    // No conflict, use the base name
+    // No conflicts at all, use the base name
     return serie;
   });
 }

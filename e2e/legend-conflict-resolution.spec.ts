@@ -61,7 +61,7 @@ test.describe('Legend names with conflicts from different tests', () => {
     expect(series.map((s) => s.name).sort()).toEqual(['Voltage (test2)', 'Voltage (test3)']);
   });
 
-  test('handles mixed scenario: some conflicts, some unique channels', async () => {
+  test('appends test names to ALL series when ANY conflict exists', async () => {
     // Open test2
     await openFixtureAndExpandInSidebar(electronApp, mainPage, 'test2.json', 'test2');
 
@@ -76,16 +76,15 @@ test.describe('Legend names with conflicts from different tests', () => {
     // Add Voltage from test3 - creates conflict
     await clickSidebarChannel(mainPage, 'Voltage (V)');
 
-    // Add Frequency from test2 - no conflict (only one Frequency)
+    // Add Frequency from test2
     await clickSidebarChannel(mainPage, 'Frequency (Hz)');
 
     const series = await getRenderedSeriesSummary(mainPage, 'Voltage');
     expect(series).toHaveLength(3);
 
     const names = series.map((s) => s.name).sort();
-    // Voltage channels have conflicts, so they get test names
-    // Frequency is unique, so it doesn't get test name
-    expect(names).toEqual(['Frequency', 'Voltage (test2)', 'Voltage (test3)']);
+    // Once ANY conflict exists (Voltage conflict), ALL series get test names
+    expect(names).toEqual(['Frequency (test2)', 'Voltage (test2)', 'Voltage (test3)']);
   });
 
   test('handles conflicts with both Voltage and Frequency from two tests', async () => {

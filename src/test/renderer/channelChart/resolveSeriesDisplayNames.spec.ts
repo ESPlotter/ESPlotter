@@ -46,7 +46,7 @@ describe('resolveSeriesDisplayNames', () => {
     expect(result[1].name).toBe('Voltage (test3)');
   });
 
-  it('should handle mixed scenarios: some conflicts, some unique names', () => {
+  it('should append test names to ALL series when ANY conflict exists', () => {
     const channels: Record<string, ChartSerie> = {
       '/path/to/test2.json::V': {
         name: 'Voltage',
@@ -69,15 +69,9 @@ describe('resolveSeriesDisplayNames', () => {
 
     expect(result).toHaveLength(3);
 
-    // Voltage has conflicts, should have test names
-    const voltages = result.filter((s) => s.name.startsWith('Voltage'));
-    expect(voltages).toHaveLength(2);
-    expect(voltages.map((v) => v.name).sort()).toEqual(['Voltage (test2)', 'Voltage (test3)']);
-
-    // Frequency is unique, should not have test name
-    const frequency = result.find((s) => s.name === 'Frequency');
-    expect(frequency).toBeDefined();
-    expect(frequency!.name).toBe('Frequency');
+    // When ANY conflict exists (Voltage has conflict), ALL series should get test names
+    const names = result.map((s) => s.name).sort();
+    expect(names).toEqual(['Frequency (test2)', 'Voltage (test2)', 'Voltage (test3)']);
   });
 
   it('should handle conflicts with more than two tests', () => {
