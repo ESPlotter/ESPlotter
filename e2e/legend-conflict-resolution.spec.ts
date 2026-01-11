@@ -45,7 +45,7 @@ test.describe('Legend names with conflicts from different tests', () => {
     await createAndSelectChart(mainPage);
 
     // Add Voltage from test2
-    await clickSidebarChannel(mainPage, 'Voltage (V)');
+    await clickSidebarChannel(mainPage, 'Voltage (V)', 'test2');
 
     // At this point, only one Voltage, should not have test name
     let series = await getRenderedSeriesSummary(mainPage, 'Voltage');
@@ -53,7 +53,7 @@ test.describe('Legend names with conflicts from different tests', () => {
     expect(series[0].name).toBe('Voltage');
 
     // Add Voltage from test3 - this creates a conflict
-    await clickSidebarChannel(mainPage, 'Voltage (V)');
+    await clickSidebarChannel(mainPage, 'Voltage (V)', 'test3');
 
     // Now both Voltage series should have test names appended
     series = await getRenderedSeriesSummary(mainPage, 'Voltage');
@@ -71,13 +71,13 @@ test.describe('Legend names with conflicts from different tests', () => {
     await createAndSelectChart(mainPage);
 
     // Add Voltage from test2
-    await clickSidebarChannel(mainPage, 'Voltage (V)');
+    await clickSidebarChannel(mainPage, 'Voltage (V)', 'test2');
 
     // Add Voltage from test3 - creates conflict
-    await clickSidebarChannel(mainPage, 'Voltage (V)');
+    await clickSidebarChannel(mainPage, 'Voltage (V)', 'test3');
 
     // Add Frequency from test2
-    await clickSidebarChannel(mainPage, 'Frequency (Hz)');
+    await clickSidebarChannel(mainPage, 'Frequency (Hz)', 'test2');
 
     const series = await getRenderedSeriesSummary(mainPage, 'Voltage');
     expect(series).toHaveLength(3);
@@ -97,10 +97,10 @@ test.describe('Legend names with conflicts from different tests', () => {
     await createAndSelectChart(mainPage);
 
     // Add all channels from both tests
-    await clickSidebarChannel(mainPage, 'Voltage (V)'); // test2
-    await clickSidebarChannel(mainPage, 'Frequency (Hz)'); // test2
-    await clickSidebarChannel(mainPage, 'Voltage (V)'); // test3
-    await clickSidebarChannel(mainPage, 'Frequency (Hz)'); // test3
+    await clickSidebarChannel(mainPage, 'Voltage (V)', 'test2');
+    await clickSidebarChannel(mainPage, 'Frequency (Hz)', 'test2');
+    await clickSidebarChannel(mainPage, 'Voltage (V)', 'test3');
+    await clickSidebarChannel(mainPage, 'Frequency (Hz)', 'test3');
 
     const series = await getRenderedSeriesSummary(mainPage, 'Voltage');
     expect(series).toHaveLength(4);
@@ -123,15 +123,15 @@ test.describe('Legend names with conflicts from different tests', () => {
     await createAndSelectChart(mainPage);
 
     // Add Voltage from both tests - creates conflict
-    await clickSidebarChannel(mainPage, 'Voltage (V)'); // test2
-    await clickSidebarChannel(mainPage, 'Voltage (V)'); // test3
+    await clickSidebarChannel(mainPage, 'Voltage (V)', 'test2');
+    await clickSidebarChannel(mainPage, 'Voltage (V)', 'test3');
 
     let series = await getRenderedSeriesSummary(mainPage, 'Voltage');
     expect(series).toHaveLength(2);
     expect(series.map((s) => s.name).sort()).toEqual(['Voltage (test2)', 'Voltage (test3)']);
 
     // Remove one Voltage - should remove conflict
-    await clickSidebarChannel(mainPage, 'Voltage (V)'); // Remove test3 Voltage
+    await clickSidebarChannel(mainPage, 'Voltage (V)', 'test3');
 
     series = await getRenderedSeriesSummary(mainPage, 'Voltage');
     expect(series).toHaveLength(1);
