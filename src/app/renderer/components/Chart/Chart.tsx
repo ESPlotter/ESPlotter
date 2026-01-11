@@ -1,4 +1,4 @@
-import { IconHandGrab, IconHome, IconZoomIn } from '@tabler/icons-react';
+import { IconHandGrab, IconHome, IconZoomIn, IconTrash } from '@tabler/icons-react';
 import { EChartsOption } from 'echarts';
 import { LineChart } from 'echarts/charts';
 import {
@@ -54,7 +54,7 @@ export function Chart({
     () => mergeSeriesWithDefaultParams(series, chartSeriesPalette),
     [series, chartSeriesPalette],
   );
-  const { setSelectedChartId } = useChannelChartsActions();
+  const { setSelectedChartId, removeChart } = useChannelChartsActions();
   const chartInstanceRef = useRef<EChartsType | null>(null);
 
   useChartsHotkey(getChart, { key: 'Escape' }, () => resetZoom(), { active: isSelected });
@@ -125,6 +125,10 @@ export function Chart({
     setSelectedChartId(id);
   }
 
+  function handleDeleteChart() {
+    removeChart(id);
+  }
+
   return (
     <div
       className="flex h-full w-full flex-col gap-1"
@@ -150,6 +154,9 @@ export function Chart({
         </Button>
         <Button variant="outline" size="icon-sm" onClick={resetZoom} title="Reset zoom (Escape)">
           <IconHome className="size-4" />
+        </Button>
+        <Button variant="outline" size="icon-sm" onClick={handleDeleteChart} title="Delete chart">
+          <IconTrash className="size-4 text-red-600" />
         </Button>
       </div>
       <div

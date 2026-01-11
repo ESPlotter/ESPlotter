@@ -55,8 +55,18 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
     removeChart: (chartId: string) =>
       set((state) => {
         const { [chartId]: _removedChart, ...remainingCharts } = state.charts;
-        return { charts: remainingCharts };
+      
+        const nextSelectedChartId =
+          state.selectedChartId === chartId
+            ? Object.keys(remainingCharts)[0] ?? null
+            : state.selectedChartId;
+      
+        return {
+          charts: remainingCharts,
+          selectedChartId: nextSelectedChartId,
+        };
       }),
+
     addChannelToChart: (chartId: string, channelId: string, serie: ChartSerie) =>
       set((state) => {
         const chart = state.charts[chartId];
