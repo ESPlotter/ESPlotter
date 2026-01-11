@@ -39,16 +39,15 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
         if (state.charts[chartId]) {
           throw new Error(`Chart with id ${chartId} already exists.`);
         }
-        const nextCounter = state.chartCounter + 1;
+        const name = getNextChartName(state.charts);
         return {
           charts: {
             ...state.charts,
             [chartId]: {
-              name: `Chart ${nextCounter}`,
+              name: name,
               channels: {},
             },
           },
-          chartCounter: nextCounter,
           selectedChartId: chartId,
         };
       }),
@@ -131,3 +130,18 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
 export const useSelectedChartId = () => useChannelChartsStore((state) => state.selectedChartId);
 export const useCharts = () => useChannelChartsStore((state) => state.charts);
 export const useChannelChartsActions = () => useChannelChartsStore((state) => state.actions);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getNextChartName(charts: Record<string, any>): string {
+  const existingNumbers = Object.values(charts)
+    .map((c) => {
+      const match = c.name.match(/^Chart (\d+)$/);
+      return match ? Number(match[1]) : null;
+    })
+    .filter(Boolean) as number[];
+
+  let i = 1;
+  while (existingNumbers.includes(i)) i++;
+  return `Chart ${i}`;
+}
+
