@@ -16,7 +16,11 @@ export function ChannelChart({ chartId, name, channels, isSelected }: ChannelCha
   const series = useMemo(() => Object.values(channels), [channels]);
 
   return (
-    <article className="flex min-h-2/4 flex-col gap-2 h-full">
+    <article
+      className="flex min-h-2/4 flex-col gap-2 h-full"
+      data-testid="chart-card"
+      data-chart-id={chartId}
+    >
       <ChartTitle chartId={chartId} name={name} />
       <div className="flex min-h-0 flex-1">
         <Chart id={chartId} isSelected={isSelected} series={series} title={name} />

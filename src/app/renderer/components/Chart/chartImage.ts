@@ -9,15 +9,31 @@ export interface ChartTitleStyle {
   backgroundColor: string;
 }
 
-interface ChartTitleStyleOptions {
+export interface ChartTitleStyleOptions {
   backgroundColor: string;
   paddingX: number;
   paddingY: number;
 }
 
+export const CHART_IMAGE_BACKGROUND = '#ffffff';
+export const CHART_TITLE_PADDING_X = 12;
+export const CHART_TITLE_PADDING_Y = 2;
+const DEFAULT_CHART_TITLE_TEXT = 'Chart';
+
+export const DEFAULT_CHART_TITLE_STYLE: ChartTitleStyle = {
+  fontFamily: 'system-ui, -apple-system, Segoe UI, sans-serif',
+  fontSize: 50,
+  fontWeight: 700,
+  color: '#0f172a',
+  paddingX: CHART_TITLE_PADDING_X,
+  paddingY: CHART_TITLE_PADDING_Y,
+  height: 50 + CHART_TITLE_PADDING_Y * 2,
+  backgroundColor: CHART_IMAGE_BACKGROUND,
+};
+
 export function resolveChartTitle(title: string): string {
   const trimmed = title.trim();
-  return trimmed.length > 0 ? trimmed : 'Chart';
+  return trimmed.length > 0 ? trimmed : DEFAULT_CHART_TITLE_TEXT;
 }
 
 export function createChartTitleStyleFromElement(
@@ -30,10 +46,10 @@ export function createChartTitleStyleFromElement(
   const height = element.getBoundingClientRect().height;
 
   return {
-    fontFamily: computedStyle.fontFamily || 'system-ui, -apple-system, Segoe UI, sans-serif',
+    fontFamily: computedStyle.fontFamily || DEFAULT_CHART_TITLE_STYLE.fontFamily,
     fontSize,
     fontWeight,
-    color: computedStyle.color || '#0f172a',
+    color: computedStyle.color || DEFAULT_CHART_TITLE_STYLE.color,
     paddingX: options.paddingX,
     paddingY: options.paddingY,
     height: Math.max(height, fontSize + options.paddingY * 2),
@@ -85,7 +101,7 @@ function parseFontWeight(fontWeight: string): number {
   return 500;
 }
 
-function loadImage(dataUrl: string): Promise<HTMLImageElement> {
+export function loadImage(dataUrl: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.onload = () => resolve(image);

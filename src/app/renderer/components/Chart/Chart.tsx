@@ -1,4 +1,4 @@
-import { IconCamera, IconCheck, IconHandGrab, IconHome, IconZoomIn } from '@tabler/icons-react';
+import { IconCamera, IconHandGrab, IconHome, IconZoomIn } from '@tabler/icons-react';
 import { EChartsOption } from 'echarts';
 import { LineChart } from 'echarts/charts';
 import {
@@ -14,15 +14,15 @@ import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import ReactEChartsCore from 'echarts-for-react/lib/core';
 import { useMemo, useRef, useState } from 'react';
-import { toast } from 'sonner';
 
 import { useChannelChartsActions } from '@renderer/store/ChannelChartsStore';
 import { useUserPreferencesChartSeriesPalette } from '@renderer/store/UserPreferencesStore';
 import { Button } from '@shadcn/components/ui/button';
 import { generateRandomHexColor } from '@shared/utils/generateRandomHexColor';
 
-import { buildChartImageWithTitle, resolveChartTitle, type ChartTitleStyle } from './chartImage';
+import { buildChartClipboardImage } from './chartCapture';
 import { ChartSerie } from './ChartSerie';
+import { notifyClipboardSuccess } from './clipboardToast';
 import { useChartsHotkey } from './useChartHotKey';
 
 import type { EChartsType } from 'echarts';
@@ -41,24 +41,7 @@ echarts.use([
 
 type ChartMode = 'zoom' | 'pan';
 
-const CHART_IMAGE_BACKGROUND = '#ffffff';
-const CHART_TITLE_COLOR = '#0f172a';
-const CHART_TITLE_FONT_FAMILY = 'system-ui, -apple-system, Segoe UI, sans-serif';
-const CHART_TITLE_FONT_SIZE = 50;
-const CHART_TITLE_FONT_WEIGHT = 700;
-const CHART_TITLE_PADDING_X = 12;
-const CHART_TITLE_PADDING_Y = 2;
-const CLIPBOARD_MESSAGE_SUCCESS = 'Captura copiada al portapapeles.';
-const DEFAULT_TITLE_STYLE: ChartTitleStyle = {
-  fontFamily: CHART_TITLE_FONT_FAMILY,
-  fontSize: CHART_TITLE_FONT_SIZE,
-  fontWeight: CHART_TITLE_FONT_WEIGHT,
-  color: CHART_TITLE_COLOR,
-  paddingX: CHART_TITLE_PADDING_X,
-  paddingY: CHART_TITLE_PADDING_Y,
-  height: CHART_TITLE_FONT_SIZE + CHART_TITLE_PADDING_Y * 2,
-  backgroundColor: CHART_IMAGE_BACKGROUND,
-};
+const CLIPBOARD_MESSAGE_SUCCESS = 'Chart copied to clipboard.';
 
 interface ChartProps {
   id: string;
@@ -146,21 +129,9 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
     if (!chart) return;
 
     try {
-      const chartDataUrl = chart.getDataURL({
-        type: 'png',
-        pixelRatio: 2,
-        backgroundColor: CHART_IMAGE_BACKGROUND,
-      });
-      const resolvedTitle = resolveChartTitle(title);
-      const dataUrlWithTitle = await buildChartImageWithTitle(
-        chartDataUrl,
-        resolvedTitle,
-        DEFAULT_TITLE_STYLE,
-      );
+      const dataUrlWithTitle = await buildChartClipboardImage(chart, title);
       await window.clipboard.writeImage(dataUrlWithTitle);
-      toast.success(CLIPBOARD_MESSAGE_SUCCESS, {
-        icon: <IconCheck className="size-4" />,
-      });
+      notifyClipboardSuccess(CLIPBOARD_MESSAGE_SUCCESS);
     } catch (error) {
       console.error('Failed to copy chart image', error);
     }
@@ -220,6 +191,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
           replaceMerge={['series']}
           lazyUpdate={true}
           onChartReady={initChart}
+          data-testid="chart-plot"
           style={{ height: '100%', width: '100%' }}
         />
       </div>

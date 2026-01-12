@@ -33,7 +33,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             <IconPlus /> New Chart
           </Button>
         </div>
-        <section className="flex-1 overflow-auto p-4">{children}</section>
+        <section className="flex-1 overflow-auto p-4" data-testid="chart-scroll-container">
+          {children}
+        </section>
       </main>
     </SidebarProvider>
   );

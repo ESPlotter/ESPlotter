@@ -3,6 +3,7 @@ import { expect, test, type ElectronApplication, type Page } from '@playwright/t
 import { clickSidebarChannel } from './support/clickSidebarChannel';
 import { createAndSelectChart } from './support/createAndSelectChart';
 import { openFixtureAndExpandInSidebar } from './support/openFixtureAndExpandInSidebar';
+import { readClipboardImageSize } from './support/readClipboardImage';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
 let electronApp: ElectronApplication;
@@ -21,7 +22,7 @@ test.describe('Chart grid copy to clipboard', () => {
   test('copies only visible charts from the grid', async () => {
     await createChartsWithChannel(mainPage, 5);
 
-    const scrollContainer = mainPage.locator('main > section');
+    const scrollContainer = mainPage.getByTestId('chart-scroll-container');
     const sizes = await scrollContainer.evaluate((element) => ({
       clientHeight: element.clientHeight,
       scrollHeight: element.scrollHeight,
@@ -54,22 +55,4 @@ async function createChartsWithChannel(page: Page, count: number): Promise<void>
     await createAndSelectChart(page);
     await clickSidebarChannel(page, 'Voltage (V)');
   }
-}
-
-interface ClipboardImageSize {
-  width: number;
-  height: number;
-}
-
-async function readClipboardImageSize(
-  app: ElectronApplication,
-): Promise<ClipboardImageSize | null> {
-  return app.evaluate(({ clipboard }) => {
-    const image = clipboard.readImage();
-    if (image.isEmpty()) {
-      return null;
-    }
-    const size = image.getSize();
-    return { width: size.width, height: size.height };
-  });
 }

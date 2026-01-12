@@ -64,13 +64,14 @@ export function ChartTitle({ chartId, name }: ChartTitleProps) {
           }
         }}
         aria-label="Chart name"
+        data-chart-title=""
         className="text-2xl font-bold"
       />
     );
   }
 
   return (
-    <h2 className="text-2xl font-bold">
+    <h2 className="text-2xl font-bold" data-chart-title="">
       <button
         type="button"
         className="cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

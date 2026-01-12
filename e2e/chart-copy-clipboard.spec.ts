@@ -6,6 +6,7 @@ import { createAndSelectChart } from './support/createAndSelectChart';
 import { expectSelectedChart } from './support/expectSelectedChart';
 import { getRenderedSeriesSummary } from './support/getRenderedSeriesSummary';
 import { openFixtureAndExpandInSidebar } from './support/openFixtureAndExpandInSidebar';
+import { readClipboardImageDataUrl } from './support/readClipboardImage';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
 let electronApp: ElectronApplication;
@@ -33,13 +34,13 @@ test.describe('Chart copy to clipboard', () => {
     await copyButton.click();
 
     await expect
-      .poll(async () => await readClipboardImage(electronApp), { timeout: 10000 })
+      .poll(async () => await readClipboardImageDataUrl(electronApp), { timeout: 10000 })
       .toMatch(/^data:image\/png;base64,/);
   });
 });
 
 function getChartRoot(page: Page, chartTitle: string) {
-  return page.locator('article').filter({ has: chartTitleButton(page, chartTitle) });
+  return page.getByTestId('chart-card').filter({ has: chartTitleButton(page, chartTitle) });
 }
 
 async function waitForChartData(page: Page, chartTitle: string): Promise<void> {
@@ -52,11 +53,4 @@ async function waitForChartData(page: Page, chartTitle: string): Promise<void> {
       { timeout: 10000 },
     )
     .toBe(true);
-}
-
-async function readClipboardImage(app: ElectronApplication): Promise<string> {
-  return app.evaluate(({ clipboard }) => {
-    const image = clipboard.readImage();
-    return image.isEmpty() ? '' : image.toDataURL();
-  });
 }

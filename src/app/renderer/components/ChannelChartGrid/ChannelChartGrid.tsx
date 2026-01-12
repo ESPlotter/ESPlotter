@@ -11,6 +11,7 @@ export function ChannelChartGrid() {
   return (
     <div
       className={`grid gap-4 h-full ${chartCount <= 2 ? `grid-cols-${Math.max(1, chartCount)} grid-rows-[100%]` : 'grid-cols-2 grid-rows-[repeat(2,50%)] auto-rows-[50%]'}`}
+      data-testid="chart-grid"
     >
       {chartIds.map((chartId) => {
         const chart = charts[chartId];
