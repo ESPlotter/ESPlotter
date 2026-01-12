@@ -145,8 +145,21 @@ async function createIngestionDependencies() {
   const { NodePsseOutFileService } = await import(
     '@main/channel-file/infrastructure/services/NodePsseOutFileService'
   );
+  const { ElectronStoreUserPreferencesRepository } = await import(
+    '@main/user-preferences/infrastructure/repositories/ElectronStoreUserPreferencesRepository'
+  );
+  const { GetUserPreferences } = await import(
+    '@main/user-preferences/application/use-cases/GetUserPreferences'
+  );
 
-  const psseOutFileService = new NodePsseOutFileService();
+  const repository = new ElectronStoreUserPreferencesRepository();
+  const getUserPreferences = new GetUserPreferences(repository);
+  const preferences = await getUserPreferences.run();
+
+  const psseOutFileService = new NodePsseOutFileService({
+    dyntoolsPath: preferences.general.paths.dyntoolsPath,
+    pythonPath: preferences.general.paths.pythonPath,
+  });
 
   return { psseOutFileService };
 }

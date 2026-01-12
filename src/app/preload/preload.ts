@@ -21,6 +21,12 @@ contextBridgeExposeInMainWorld('userPreferences', {
   getChartSeriesPalette: () => ipcRendererInvoke('getChartSeriesPalette'),
   updateChartSeriesPalette: (colors: string[]) =>
     ipcRendererInvoke('updateChartSeriesPalette', colors),
+  getDyntoolsPath: () => ipcRendererInvoke('getDyntoolsPath'),
+  updateDyntoolsPath: (path: string) => ipcRendererInvoke('updateDyntoolsPath', path),
+  selectDyntoolsPath: () => ipcRendererInvoke('selectDyntoolsPath'),
+  getPythonPath: () => ipcRendererInvoke('getPythonPath'),
+  updatePythonPath: (path: string) => ipcRendererInvoke('updatePythonPath', path),
+  selectPythonPath: () => ipcRendererInvoke('selectPythonPath'),
   onChangedChartSeriesPalette: (listener: (preferences: UserPreferencesPrimitive) => void) =>
     ipcRendererOn('userPreferencesChanged', listener),
   onOpenRequested: (listener: () => void) =>

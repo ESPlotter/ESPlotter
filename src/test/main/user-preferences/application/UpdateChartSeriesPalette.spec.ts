@@ -41,6 +41,14 @@ describe('UpdateChartSeriesPalette', () => {
     expect(result.chartSeriesPalette).toEqual([]);
     repository.expectSaveCalledTimes(1);
     const persisted = await repository.get();
-    expect(persisted.toPrimitives()).toEqual({ chartSeriesPalette: [] });
+    expect(persisted.toPrimitives()).toEqual({
+      chartSeriesPalette: [],
+      general: {
+        paths: {
+          dyntoolsPath: result.general.paths.dyntoolsPath,
+          pythonPath: result.general.paths.pythonPath,
+        },
+      },
+    });
   });
 });

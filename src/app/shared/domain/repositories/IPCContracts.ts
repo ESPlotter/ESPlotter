@@ -13,6 +13,12 @@ export interface RendererExposureMap {
   userPreferences: {
     getChartSeriesPalette: () => Promise<string[]>;
     updateChartSeriesPalette: (colors: string[]) => Promise<UserPreferencesPrimitive>;
+    getDyntoolsPath: () => Promise<string>;
+    updateDyntoolsPath: (path: string) => Promise<UserPreferencesPrimitive>;
+    selectDyntoolsPath: () => Promise<string | null>;
+    getPythonPath: () => Promise<string>;
+    updatePythonPath: (path: string) => Promise<UserPreferencesPrimitive>;
+    selectPythonPath: () => Promise<string | null>;
     onChangedChartSeriesPalette: (
       listener: (preferences: UserPreferencesPrimitive) => void,
     ) => () => void;
@@ -24,6 +30,12 @@ export interface IpcChannelMap {
   ping: () => string;
   getChartSeriesPalette: () => Promise<string[]>;
   updateChartSeriesPalette: (colors: string[]) => Promise<UserPreferencesPrimitive>;
+  getDyntoolsPath: () => Promise<string>;
+  updateDyntoolsPath: (path: string) => Promise<UserPreferencesPrimitive>;
+  selectDyntoolsPath: () => Promise<string | null>;
+  getPythonPath: () => Promise<string>;
+  updatePythonPath: (path: string) => Promise<UserPreferencesPrimitive>;
+  selectPythonPath: () => Promise<string | null>;
 }
 
 export interface IpcEventMap {

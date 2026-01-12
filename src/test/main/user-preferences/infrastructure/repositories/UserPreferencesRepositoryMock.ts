@@ -4,7 +4,9 @@ import { UserPreferencesRepository } from '@main/user-preferences/domain/reposit
 export class UserPreferencesRepositoryMock implements UserPreferencesRepository {
   private preferences: UserPreferences = UserPreferences.withDefaultChartSeriesPalette();
   private shouldFailOnGet = false;
-  private listeners: Array<(preferences: UserPreferences) => void> = [];
+  private chartPaletteListeners: Array<(preferences: UserPreferences) => void> = [];
+  private dyntoolsPathListeners: Array<(preferences: UserPreferences) => void> = [];
+  private pythonPathListeners: Array<(preferences: UserPreferences) => void> = [];
   private getCallCount = 0;
   private saveCallCount = 0;
 
@@ -19,15 +21,35 @@ export class UserPreferencesRepositoryMock implements UserPreferencesRepository 
   async save(preferences: UserPreferences): Promise<void> {
     this.saveCallCount += 1;
     this.preferences = preferences;
-    for (const listener of this.listeners) {
+    for (const listener of this.chartPaletteListeners) {
+      listener(preferences);
+    }
+    for (const listener of this.dyntoolsPathListeners) {
+      listener(preferences);
+    }
+    for (const listener of this.pythonPathListeners) {
       listener(preferences);
     }
   }
 
   onChangeChartSeriesPalette(listener: (preferences: UserPreferences) => void): () => void {
-    this.listeners.push(listener);
+    this.chartPaletteListeners.push(listener);
     return () => {
-      this.listeners = this.listeners.filter((item) => item !== listener);
+      this.chartPaletteListeners = this.chartPaletteListeners.filter((item) => item !== listener);
+    };
+  }
+
+  onChangeDyntoolsPath(listener: (preferences: UserPreferences) => void): () => void {
+    this.dyntoolsPathListeners.push(listener);
+    return () => {
+      this.dyntoolsPathListeners = this.dyntoolsPathListeners.filter((item) => item !== listener);
+    };
+  }
+
+  onChangePythonPath(listener: (preferences: UserPreferences) => void): () => void {
+    this.pythonPathListeners.push(listener);
+    return () => {
+      this.pythonPathListeners = this.pythonPathListeners.filter((item) => item !== listener);
     };
   }
 
