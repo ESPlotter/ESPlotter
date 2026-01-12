@@ -18,12 +18,16 @@ export interface RendererExposureMap {
     ) => () => void;
     onOpenRequested: (listener: () => void) => () => void;
   };
+  clipboard: {
+    writeImage: (dataUrl: string) => Promise<void>;
+  };
 }
 
 export interface IpcChannelMap {
   ping: () => string;
   getChartSeriesPalette: () => Promise<string[]>;
   updateChartSeriesPalette: (colors: string[]) => Promise<UserPreferencesPrimitive>;
+  writeClipboardImage: (dataUrl: string) => Promise<void>;
 }
 
 export interface IpcEventMap {

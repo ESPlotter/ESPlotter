@@ -19,7 +19,7 @@ export function ChannelChart({ chartId, name, channels, isSelected }: ChannelCha
     <article className="flex min-h-2/4 flex-col gap-2 h-full">
       <ChartTitle chartId={chartId} name={name} />
       <div className="flex min-h-0 flex-1">
-        <Chart id={chartId} isSelected={isSelected} series={series} />
+        <Chart id={chartId} isSelected={isSelected} series={series} title={name} />
       </div>
     </article>
   );

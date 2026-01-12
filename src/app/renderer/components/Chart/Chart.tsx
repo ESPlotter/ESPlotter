@@ -1,4 +1,4 @@
-import { IconHandGrab, IconHome, IconZoomIn } from '@tabler/icons-react';
+import { IconCamera, IconHandGrab, IconHome, IconZoomIn } from '@tabler/icons-react';
 import { EChartsOption } from 'echarts';
 import { LineChart } from 'echarts/charts';
 import {
@@ -14,6 +14,7 @@ import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import ReactEChartsCore from 'echarts-for-react/lib/core';
 import { useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 import { useChannelChartsActions } from '@renderer/store/ChannelChartsStore';
 import { useUserPreferencesChartSeriesPalette } from '@renderer/store/UserPreferencesStore';
@@ -39,15 +40,23 @@ echarts.use([
 
 type ChartMode = 'zoom' | 'pan';
 
-export function Chart({
-  id,
-  isSelected,
-  series,
-}: {
+const CHART_IMAGE_BACKGROUND = '#ffffff';
+const CHART_TITLE_COLOR = '#0f172a';
+const CHART_TITLE_FONT_FAMILY = 'system-ui, -apple-system, Segoe UI, sans-serif';
+const CHART_TITLE_FONT_SIZE = 50;
+const CHART_TITLE_FONT_WEIGHT = 700;
+const CHART_TITLE_PADDING_X = 12;
+const CHART_TITLE_PADDING_Y = 2;
+const CLIPBOARD_MESSAGE_SUCCESS = 'Image copied to clipboard!';
+
+interface ChartProps {
   id: string;
   isSelected: boolean;
   series: ChartSerie[];
-}) {
+  title: string;
+}
+
+export function Chart({ id, isSelected, series, title }: ChartProps) {
   const [mode, setMode] = useState<ChartMode>('zoom');
   const chartSeriesPalette = useUserPreferencesChartSeriesPalette();
   const options = useMemo(
@@ -121,6 +130,29 @@ export function Chart({
     chart.getZr().setCursorStyle(nextMode === 'pan' ? 'grab' : 'crosshair');
   }
 
+  async function copyChartImageToClipboard(): Promise<void> {
+    const chart = getChart();
+    if (!chart) return;
+
+    try {
+      const chartDataUrl = chart.getDataURL({
+        type: 'png',
+        pixelRatio: 2,
+        backgroundColor: CHART_IMAGE_BACKGROUND,
+      });
+      const resolvedTitle = resolveChartTitle(title);
+      const dataUrlWithTitle = await buildChartImageWithTitle(chartDataUrl, resolvedTitle);
+      await window.clipboard.writeImage(dataUrlWithTitle);
+      toast.success(CLIPBOARD_MESSAGE_SUCCESS);
+    } catch (error) {
+      console.error('Failed to copy chart image', error);
+    }
+  }
+
+  function handleCopyChartImage() {
+    void copyChartImageToClipboard();
+  }
+
   function handleSelectChart() {
     setSelectedChartId(id);
   }
@@ -150,6 +182,15 @@ export function Chart({
         </Button>
         <Button variant="outline" size="icon-sm" onClick={resetZoom} title="Reset zoom (Escape)">
           <IconHome className="size-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon-sm"
+          onClick={handleCopyChartImage}
+          title="Copy chart image"
+          aria-label="Copy chart image"
+        >
+          <IconCamera className="size-4" />
         </Button>
       </div>
       <div
@@ -258,5 +299,43 @@ function resolveSeriesColors(series: ChartSerie[], palette: string[]): string[] 
       return existing;
     }
     return generateRandomHexColor();
+  });
+}
+
+function resolveChartTitle(title: string): string {
+  const trimmed = title.trim();
+  return trimmed.length > 0 ? trimmed : 'Chart';
+}
+
+async function buildChartImageWithTitle(chartDataUrl: string, title: string): Promise<string> {
+  const chartImage = await loadImage(chartDataUrl);
+  const titleHeight = CHART_TITLE_FONT_SIZE + CHART_TITLE_PADDING_Y * 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = chartImage.width;
+  canvas.height = chartImage.height + titleHeight;
+
+  const context = canvas.getContext('2d');
+  if (!context) {
+    return chartDataUrl;
+  }
+
+  context.fillStyle = CHART_IMAGE_BACKGROUND;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.textBaseline = 'top';
+  context.fillStyle = CHART_TITLE_COLOR;
+  context.font = `${CHART_TITLE_FONT_WEIGHT} ${CHART_TITLE_FONT_SIZE}px ${CHART_TITLE_FONT_FAMILY}`;
+  const maxTitleWidth = canvas.width - CHART_TITLE_PADDING_X * 2;
+  context.fillText(title, CHART_TITLE_PADDING_X, CHART_TITLE_PADDING_Y, maxTitleWidth);
+  context.drawImage(chartImage, 0, titleHeight);
+
+  return canvas.toDataURL('image/png');
+}
+
+function loadImage(dataUrl: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Failed to load chart image'));
+    image.src = dataUrl;
   });
 }
