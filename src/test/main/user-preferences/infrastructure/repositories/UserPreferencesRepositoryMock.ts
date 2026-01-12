@@ -20,16 +20,39 @@ export class UserPreferencesRepositoryMock implements UserPreferencesRepository 
 
   async save(preferences: UserPreferences): Promise<void> {
     this.saveCallCount += 1;
+    const previousPreferences = this.preferences;
+    const previousPrimitives = previousPreferences.toPrimitives();
+    const nextPrimitives = preferences.toPrimitives();
+
+    const chartSeriesPaletteChanged =
+      previousPrimitives.chartSeriesPalette.length !== nextPrimitives.chartSeriesPalette.length ||
+      previousPrimitives.chartSeriesPalette.some(
+        (color, index) => color !== nextPrimitives.chartSeriesPalette[index],
+      );
+    const dyntoolsPathChanged =
+      previousPrimitives.general.paths.dyntoolsPath !== nextPrimitives.general.paths.dyntoolsPath;
+    const pythonPathChanged =
+      previousPrimitives.general.paths.pythonPath !== nextPrimitives.general.paths.pythonPath;
+
+    if (chartSeriesPaletteChanged) {
+      for (const listener of this.chartPaletteListeners) {
+        listener(preferences);
+      }
+    }
+
+    if (dyntoolsPathChanged) {
+      for (const listener of this.dyntoolsPathListeners) {
+        listener(preferences);
+      }
+    }
+
+    if (pythonPathChanged) {
+      for (const listener of this.pythonPathListeners) {
+        listener(preferences);
+      }
+    }
+
     this.preferences = preferences;
-    for (const listener of this.chartPaletteListeners) {
-      listener(preferences);
-    }
-    for (const listener of this.dyntoolsPathListeners) {
-      listener(preferences);
-    }
-    for (const listener of this.pythonPathListeners) {
-      listener(preferences);
-    }
   }
 
   onChangeChartSeriesPalette(listener: (preferences: UserPreferences) => void): () => void {
