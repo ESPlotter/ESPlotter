@@ -22,6 +22,8 @@ export interface RendererExposureMap {
     onChangedChartSeriesPalette: (
       listener: (preferences: UserPreferencesPrimitive) => void,
     ) => () => void;
+    onChangeDyntoolsPath: (listener: (path: string) => void) => () => void;
+    onChangePythonPath: (listener: (path: string) => void) => () => void;
     onOpenRequested: (listener: () => void) => () => void;
   };
 }

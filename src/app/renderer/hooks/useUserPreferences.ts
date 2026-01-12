@@ -26,14 +26,22 @@ export function useUserPreferences(): void {
   }, [setChartSeriesPalette, setDyntoolsPath, setPythonPath]);
 
   useEffect(() => {
-    const unsubscribe = window.userPreferences.onChangedChartSeriesPalette((preferences) => {
-      setChartSeriesPalette(preferences.chartSeriesPalette);
-      setDyntoolsPath(preferences.general.paths.dyntoolsPath);
-      setPythonPath(preferences.general.paths.pythonPath);
+    const unsubscribeChartSeriesPalette = window.userPreferences.onChangedChartSeriesPalette(
+      (preferences) => {
+        setChartSeriesPalette(preferences.chartSeriesPalette);
+      },
+    );
+    const unsubscribeDyntoolsPath = window.userPreferences.onChangeDyntoolsPath((path) => {
+      setDyntoolsPath(path);
+    });
+    const unsubscribePythonPath = window.userPreferences.onChangePythonPath((path) => {
+      setPythonPath(path);
     });
 
     return () => {
-      unsubscribe();
+      unsubscribeChartSeriesPalette();
+      unsubscribeDyntoolsPath();
+      unsubscribePythonPath();
     };
   }, [setChartSeriesPalette, setDyntoolsPath, setPythonPath]);
 }

@@ -29,6 +29,14 @@ contextBridgeExposeInMainWorld('userPreferences', {
   selectPythonPath: () => ipcRendererInvoke('selectPythonPath'),
   onChangedChartSeriesPalette: (listener: (preferences: UserPreferencesPrimitive) => void) =>
     ipcRendererOn('userPreferencesChanged', listener),
+  onChangeDyntoolsPath: (listener: (path: string) => void) =>
+    ipcRendererOn('userPreferencesChanged', (preferences) => {
+      listener(preferences.general.paths.dyntoolsPath);
+    }),
+  onChangePythonPath: (listener: (path: string) => void) =>
+    ipcRendererOn('userPreferencesChanged', (preferences) => {
+      listener(preferences.general.paths.pythonPath);
+    }),
   onOpenRequested: (listener: () => void) =>
     ipcRendererOn('userPreferencesOpenRequested', listener),
 });
