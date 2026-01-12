@@ -19,6 +19,16 @@ test.describe('Chart grid copy to clipboard', () => {
     await electronApp.close();
   });
 
+  test('shows the copy button when two charts exist', async () => {
+    const copyButton = mainPage.getByRole('button', { name: 'Copy visible charts' });
+
+    await createChartsWithChannel(mainPage, 1);
+    await expect(copyButton).toHaveCount(0);
+
+    await createChartsWithChannel(mainPage, 1);
+    await expect(copyButton).toBeVisible();
+  });
+
   test('copies only visible charts from the grid', async () => {
     await createChartsWithChannel(mainPage, 5);
 
