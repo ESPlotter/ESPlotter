@@ -1,4 +1,4 @@
-import { IconCamera, IconHandGrab, IconHome, IconZoomIn } from '@tabler/icons-react';
+import { IconCamera, IconCheck, IconHandGrab, IconHome, IconZoomIn } from '@tabler/icons-react';
 import { EChartsOption } from 'echarts';
 import { LineChart } from 'echarts/charts';
 import {
@@ -21,6 +21,7 @@ import { useUserPreferencesChartSeriesPalette } from '@renderer/store/UserPrefer
 import { Button } from '@shadcn/components/ui/button';
 import { generateRandomHexColor } from '@shared/utils/generateRandomHexColor';
 
+import { buildChartImageWithTitle, resolveChartTitle, type ChartTitleStyle } from './chartImage';
 import { ChartSerie } from './ChartSerie';
 import { useChartsHotkey } from './useChartHotKey';
 
@@ -47,7 +48,17 @@ const CHART_TITLE_FONT_SIZE = 50;
 const CHART_TITLE_FONT_WEIGHT = 700;
 const CHART_TITLE_PADDING_X = 12;
 const CHART_TITLE_PADDING_Y = 2;
-const CLIPBOARD_MESSAGE_SUCCESS = 'Image copied to clipboard!';
+const CLIPBOARD_MESSAGE_SUCCESS = 'Captura copiada al portapapeles.';
+const DEFAULT_TITLE_STYLE: ChartTitleStyle = {
+  fontFamily: CHART_TITLE_FONT_FAMILY,
+  fontSize: CHART_TITLE_FONT_SIZE,
+  fontWeight: CHART_TITLE_FONT_WEIGHT,
+  color: CHART_TITLE_COLOR,
+  paddingX: CHART_TITLE_PADDING_X,
+  paddingY: CHART_TITLE_PADDING_Y,
+  height: CHART_TITLE_FONT_SIZE + CHART_TITLE_PADDING_Y * 2,
+  backgroundColor: CHART_IMAGE_BACKGROUND,
+};
 
 interface ChartProps {
   id: string;
@@ -141,9 +152,15 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
         backgroundColor: CHART_IMAGE_BACKGROUND,
       });
       const resolvedTitle = resolveChartTitle(title);
-      const dataUrlWithTitle = await buildChartImageWithTitle(chartDataUrl, resolvedTitle);
+      const dataUrlWithTitle = await buildChartImageWithTitle(
+        chartDataUrl,
+        resolvedTitle,
+        DEFAULT_TITLE_STYLE,
+      );
       await window.clipboard.writeImage(dataUrlWithTitle);
-      toast.success(CLIPBOARD_MESSAGE_SUCCESS);
+      toast.success(CLIPBOARD_MESSAGE_SUCCESS, {
+        icon: <IconCheck className="size-4" />,
+      });
     } catch (error) {
       console.error('Failed to copy chart image', error);
     }
@@ -299,43 +316,5 @@ function resolveSeriesColors(series: ChartSerie[], palette: string[]): string[] 
       return existing;
     }
     return generateRandomHexColor();
-  });
-}
-
-function resolveChartTitle(title: string): string {
-  const trimmed = title.trim();
-  return trimmed.length > 0 ? trimmed : 'Chart';
-}
-
-async function buildChartImageWithTitle(chartDataUrl: string, title: string): Promise<string> {
-  const chartImage = await loadImage(chartDataUrl);
-  const titleHeight = CHART_TITLE_FONT_SIZE + CHART_TITLE_PADDING_Y * 2;
-  const canvas = document.createElement('canvas');
-  canvas.width = chartImage.width;
-  canvas.height = chartImage.height + titleHeight;
-
-  const context = canvas.getContext('2d');
-  if (!context) {
-    return chartDataUrl;
-  }
-
-  context.fillStyle = CHART_IMAGE_BACKGROUND;
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.textBaseline = 'top';
-  context.fillStyle = CHART_TITLE_COLOR;
-  context.font = `${CHART_TITLE_FONT_WEIGHT} ${CHART_TITLE_FONT_SIZE}px ${CHART_TITLE_FONT_FAMILY}`;
-  const maxTitleWidth = canvas.width - CHART_TITLE_PADDING_X * 2;
-  context.fillText(title, CHART_TITLE_PADDING_X, CHART_TITLE_PADDING_Y, maxTitleWidth);
-  context.drawImage(chartImage, 0, titleHeight);
-
-  return canvas.toDataURL('image/png');
-}
-
-function loadImage(dataUrl: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error('Failed to load chart image'));
-    image.src = dataUrl;
   });
 }
