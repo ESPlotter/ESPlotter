@@ -3,6 +3,8 @@ import { useMemo } from 'react';
 import { Chart } from '@renderer/components/Chart/Chart';
 import { ChartTitle } from '@renderer/components/Chart/ChartTitle';
 
+import { resolveSeriesDisplayNames } from './resolveSeriesDisplayNames';
+
 import type { ChartSerie } from '../Chart/ChartSerie';
 
 interface ChannelChartProps {
@@ -13,7 +15,7 @@ interface ChannelChartProps {
 }
 
 export function ChannelChart({ chartId, name, channels, isSelected }: ChannelChartProps) {
-  const series = useMemo(() => Object.values(channels), [channels]);
+  const series = useMemo(() => resolveSeriesDisplayNames(channels), [channels]);
 
   return (
     <article className="flex min-h-2/4 flex-col gap-2 h-full">
