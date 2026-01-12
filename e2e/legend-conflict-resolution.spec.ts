@@ -9,7 +9,7 @@ import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 let electronApp: ElectronApplication;
 let mainPage: Page;
 
-test.describe('Legend names with conflicts from different tests', () => {
+test.describe('Legend names with conflicts from different channels file', () => {
   test.beforeEach(async () => {
     ({ electronApp, mainPage } = await setupE2eTestEnvironment());
   });
