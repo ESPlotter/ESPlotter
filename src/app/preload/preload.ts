@@ -4,7 +4,6 @@ import { contextBridgeExposeInMainWorld } from '@preload/ipc/contextBridgeExpose
 import { ipcRendererInvoke } from '@preload/ipc/ipcRendererInvoke';
 import { ipcRendererOn } from '@preload/ipc/ipcRendererOn';
 import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
-import { UserPreferencesPrimitive } from '@shared/domain/primitives/UserPreferencesPrimitive';
 
 contextBridgeExposeInMainWorld('versions', {
   node: () => process.versions.node,
@@ -27,16 +26,12 @@ contextBridgeExposeInMainWorld('userPreferences', {
   getPythonPath: () => ipcRendererInvoke('getPythonPath'),
   updatePythonPath: (path: string) => ipcRendererInvoke('updatePythonPath', path),
   selectPythonPath: () => ipcRendererInvoke('selectPythonPath'),
-  onChangedChartSeriesPalette: (listener: (preferences: UserPreferencesPrimitive) => void) =>
-    ipcRendererOn('userPreferencesChanged', listener),
-  onChangeDyntoolsPath: (listener: (path: string) => void) =>
-    ipcRendererOn('userPreferencesChanged', (preferences) => {
-      listener(preferences.general.paths.dyntoolsPath);
-    }),
-  onChangePythonPath: (listener: (path: string) => void) =>
-    ipcRendererOn('userPreferencesChanged', (preferences) => {
-      listener(preferences.general.paths.pythonPath);
-    }),
+  onChangedChartSeriesPalette: (listener: (colors: string[]) => void) =>
+    ipcRendererOn('chartSeriesPaletteChanged', listener),
+  onChangedDyntoolsPath: (listener: (path: string) => void) =>
+    ipcRendererOn('dyntoolsPathChanged', listener),
+  onChangedPythonPath: (listener: (path: string) => void) =>
+    ipcRendererOn('pythonPathChanged', listener),
   onOpenRequested: (listener: () => void) =>
     ipcRendererOn('userPreferencesOpenRequested', listener),
 });

@@ -19,11 +19,9 @@ export interface RendererExposureMap {
     getPythonPath: () => Promise<string>;
     updatePythonPath: (path: string) => Promise<UserPreferencesPrimitive>;
     selectPythonPath: () => Promise<string | null>;
-    onChangedChartSeriesPalette: (
-      listener: (preferences: UserPreferencesPrimitive) => void,
-    ) => () => void;
-    onChangeDyntoolsPath: (listener: (path: string) => void) => () => void;
-    onChangePythonPath: (listener: (path: string) => void) => () => void;
+    onChangedChartSeriesPalette: (listener: (colors: string[]) => void) => () => void;
+    onChangedDyntoolsPath: (listener: (path: string) => void) => () => void;
+    onChangedPythonPath: (listener: (path: string) => void) => () => void;
     onOpenRequested: (listener: () => void) => () => void;
   };
 }
@@ -42,7 +40,9 @@ export interface IpcChannelMap {
 
 export interface IpcEventMap {
   channelFileOpened: (payload: ChannelFilePrimitive) => void;
-  userPreferencesChanged: (payload: UserPreferencesPrimitive) => void;
+  chartSeriesPaletteChanged: (payload: string[]) => void;
+  dyntoolsPathChanged: (payload: string) => void;
+  pythonPathChanged: (payload: string) => void;
   userPreferencesOpenRequested: () => void;
 }
 

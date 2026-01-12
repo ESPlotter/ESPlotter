@@ -27,14 +27,14 @@ export function useUserPreferences(): void {
 
   useEffect(() => {
     const unsubscribeChartSeriesPalette = window.userPreferences.onChangedChartSeriesPalette(
-      (preferences) => {
-        setChartSeriesPalette(preferences.chartSeriesPalette);
+      (colors) => {
+        setChartSeriesPalette(colors);
       },
     );
-    const unsubscribeDyntoolsPath = window.userPreferences.onChangeDyntoolsPath((path) => {
+    const unsubscribeDyntoolsPath = window.userPreferences.onChangedDyntoolsPath((path) => {
       setDyntoolsPath(path);
     });
-    const unsubscribePythonPath = window.userPreferences.onChangePythonPath((path) => {
+    const unsubscribePythonPath = window.userPreferences.onChangedPythonPath((path) => {
       setPythonPath(path);
     });
 

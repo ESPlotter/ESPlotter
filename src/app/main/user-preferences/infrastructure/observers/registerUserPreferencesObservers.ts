@@ -8,15 +8,18 @@ export async function registerUserPreferencesObservers(): Promise<void> {
   const repository = new ElectronStoreUserPreferencesRepository();
 
   const unsubscribePalette = repository.onChangeChartSeriesPalette((updatedPreferences) => {
-    webContentsBroadcast('userPreferencesChanged', updatedPreferences.toPrimitives());
+    const primitives = updatedPreferences.toPrimitives();
+    webContentsBroadcast('chartSeriesPaletteChanged', primitives.chartSeriesPalette);
   });
 
   const unsubscribeDyntools = repository.onChangeDyntoolsPath((updatedPreferences) => {
-    webContentsBroadcast('userPreferencesChanged', updatedPreferences.toPrimitives());
+    const primitives = updatedPreferences.toPrimitives();
+    webContentsBroadcast('dyntoolsPathChanged', primitives.general.paths.dyntoolsPath);
   });
 
   const unsubscribePython = repository.onChangePythonPath((updatedPreferences) => {
-    webContentsBroadcast('userPreferencesChanged', updatedPreferences.toPrimitives());
+    const primitives = updatedPreferences.toPrimitives();
+    webContentsBroadcast('pythonPathChanged', primitives.general.paths.pythonPath);
   });
 
   app.on('will-quit', () => {
