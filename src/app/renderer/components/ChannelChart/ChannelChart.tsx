@@ -1,11 +1,15 @@
-import { useMemo } from 'react';
+import { Suspense, lazy, useMemo } from 'react';
 
-import { Chart } from '@renderer/components/Chart/Chart';
 import { ChartTitle } from '@renderer/components/Chart/ChartTitle';
 
 import { resolveSeriesDisplayNames } from './resolveSeriesDisplayNames';
 
 import type { ChartSerie } from '../Chart/ChartSerie';
+
+const LazyChart = lazy(async () => {
+  const module = await import('@renderer/components/Chart/Chart');
+  return { default: module.Chart };
+});
 
 interface ChannelChartProps {
   chartId: string;
@@ -21,7 +25,15 @@ export function ChannelChart({ chartId, name, channels, isSelected }: ChannelCha
     <article className="flex min-h-2/4 flex-col gap-2 h-full">
       <ChartTitle chartId={chartId} name={name} />
       <div className="flex min-h-0 flex-1">
-        <Chart id={chartId} isSelected={isSelected} series={series} />
+        <Suspense
+          fallback={
+            <div className="flex h-full w-full items-center justify-center text-sm text-slate-500">
+              Loading chart...
+            </div>
+          }
+        >
+          <LazyChart id={chartId} isSelected={isSelected} series={series} />
+        </Suspense>
       </div>
     </article>
   );

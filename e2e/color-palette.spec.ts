@@ -9,6 +9,7 @@ let mainPage: Page;
 // Use the Preferences menu and the actual component labels (British spelling)
 async function openColorPalette(page: Page, app: ElectronApplication) {
   await triggerPreferencesMenu(app, page);
+  await page.getByText('Colors', { exact: true }).click();
   await expect(page.getByRole('button', { name: 'Add colour' })).toBeVisible();
 }
 

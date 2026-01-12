@@ -9,8 +9,13 @@ import { ChannelFileContent } from '@main/channel-file/domain/vos/ChannelFileCon
 import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFileContentPrimitive';
 import { ChannelFileContentSeriePrimitive } from '@shared/domain/primitives/ChannelFileContentSeriePrimitive';
 
+interface NodePsseOutFileServicePaths {
+  dyntoolsPath: string;
+  pythonPath: string;
+}
+
 export class NodePsseOutFileService implements PsseOutFileService {
-  constructor() {}
+  constructor(private readonly paths: NodePsseOutFileServicePaths) {}
 
   public async transformToChannelFile(filePath: string): Promise<ChannelFile> {
     const parsedOutFile = await this.callDynToolsToParseOutFile(filePath);
@@ -26,11 +31,11 @@ export class NodePsseOutFileService implements PsseOutFileService {
     const options: PythonShellOptions = {
       mode: 'text',
       scriptPath: path.join(app.getAppPath(), 'scripts'),
-      pythonPath: 'py',
+      pythonPath: this.paths.pythonPath,
       args: [path.resolve(outFilePath)],
       env: {
         ...process.env,
-        DYNTOOLS_PATH: 'C:\\Program Files\\PTI\\PSSE36\\36.3\\PSSPY313',
+        DYNTOOLS_PATH: this.paths.dyntoolsPath,
       },
     };
 
