@@ -19,15 +19,16 @@ export const CHART_IMAGE_BACKGROUND = '#ffffff';
 export const CHART_TITLE_PADDING_X = 12;
 export const CHART_TITLE_PADDING_Y = 2;
 const DEFAULT_CHART_TITLE_TEXT = 'Chart';
+const DEFAULT_CHART_TITLE_FONT_SIZE = 50;
 
 export const DEFAULT_CHART_TITLE_STYLE: ChartTitleStyle = {
   fontFamily: 'system-ui, -apple-system, Segoe UI, sans-serif',
-  fontSize: 50,
+  fontSize: DEFAULT_CHART_TITLE_FONT_SIZE,
   fontWeight: 700,
   color: '#0f172a',
   paddingX: CHART_TITLE_PADDING_X,
   paddingY: CHART_TITLE_PADDING_Y,
-  height: 50 + CHART_TITLE_PADDING_Y * 2,
+  height: DEFAULT_CHART_TITLE_FONT_SIZE + CHART_TITLE_PADDING_Y * 2,
   backgroundColor: CHART_IMAGE_BACKGROUND,
 };
 
