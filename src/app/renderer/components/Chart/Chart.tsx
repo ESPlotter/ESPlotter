@@ -1,4 +1,4 @@
-import { IconHandGrab, IconHome, IconZoomIn } from '@tabler/icons-react';
+import { IconCamera, IconHandGrab, IconHome, IconZoomIn } from '@tabler/icons-react';
 import { EChartsOption } from 'echarts';
 import { LineChart } from 'echarts/charts';
 import {
@@ -20,7 +20,9 @@ import { useUserPreferencesChartSeriesPalette } from '@renderer/store/UserPrefer
 import { Button } from '@shadcn/components/ui/button';
 import { generateRandomHexColor } from '@shared/utils/generateRandomHexColor';
 
+import { buildChartClipboardImage } from './chartCapture';
 import { ChartSerie } from './ChartSerie';
+import { notifyClipboardSuccess } from './clipboardToast';
 import { useChartsHotkey } from './useChartHotKey';
 
 import type { EChartsType } from 'echarts';
@@ -39,15 +41,16 @@ echarts.use([
 
 type ChartMode = 'zoom' | 'pan';
 
-export function Chart({
-  id,
-  isSelected,
-  series,
-}: {
+const CLIPBOARD_MESSAGE_SUCCESS = 'Chart copied to clipboard.';
+
+interface ChartProps {
   id: string;
   isSelected: boolean;
   series: ChartSerie[];
-}) {
+  title: string;
+}
+
+export function Chart({ id, isSelected, series, title }: ChartProps) {
   const [mode, setMode] = useState<ChartMode>('zoom');
   const chartSeriesPalette = useUserPreferencesChartSeriesPalette();
   const options = useMemo(
@@ -121,6 +124,23 @@ export function Chart({
     chart.getZr().setCursorStyle(nextMode === 'pan' ? 'grab' : 'crosshair');
   }
 
+  async function copyChartImageToClipboard(): Promise<void> {
+    const chart = getChart();
+    if (!chart) return;
+
+    try {
+      const dataUrlWithTitle = await buildChartClipboardImage(chart, title);
+      await window.clipboard.writeImage(dataUrlWithTitle);
+      notifyClipboardSuccess(CLIPBOARD_MESSAGE_SUCCESS);
+    } catch (error) {
+      console.error('Failed to copy chart image', error);
+    }
+  }
+
+  function handleCopyChartImage() {
+    void copyChartImageToClipboard();
+  }
+
   function handleSelectChart() {
     setSelectedChartId(id);
   }
@@ -151,9 +171,19 @@ export function Chart({
         <Button variant="outline" size="icon-sm" onClick={resetZoom} title="Reset zoom (Escape)">
           <IconHome className="size-4" />
         </Button>
+        <Button
+          variant="outline"
+          size="icon-sm"
+          onClick={handleCopyChartImage}
+          title="Copy chart image"
+          aria-label="Copy chart image"
+        >
+          <IconCamera className="size-4" />
+        </Button>
       </div>
       <div
         className={`relative flex min-h-0 flex-1 rounded-sm border-2 ${isSelected ? 'border-slate-900/35' : 'border-transparent'}`}
+        data-testid="chart-plot"
       >
         <ReactEChartsCore
           className="h-full w-full"
