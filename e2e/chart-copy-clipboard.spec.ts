@@ -7,6 +7,7 @@ import { expectSelectedChart } from './support/expectSelectedChart';
 import { getRenderedSeriesSummary } from './support/getRenderedSeriesSummary';
 import { openFixtureAndExpandInSidebar } from './support/openFixtureAndExpandInSidebar';
 import { readClipboardImageDataUrl } from './support/readClipboardImage';
+import { readClipboardImageHasContent } from './support/readClipboardImageHasContent';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
 let electronApp: ElectronApplication;
@@ -36,6 +37,10 @@ test.describe('Chart copy to clipboard', () => {
     await expect
       .poll(async () => await readClipboardImageDataUrl(electronApp), { timeout: 10000 })
       .toMatch(/^data:image\/png;base64,/);
+
+    await expect
+      .poll(async () => await readClipboardImageHasContent(electronApp), { timeout: 10000 })
+      .toBe(true);
   });
 });
 

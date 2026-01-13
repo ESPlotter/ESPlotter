@@ -4,6 +4,7 @@ import { clickSidebarChannel } from './support/clickSidebarChannel';
 import { createAndSelectChart } from './support/createAndSelectChart';
 import { openFixtureAndExpandInSidebar } from './support/openFixtureAndExpandInSidebar';
 import { readClipboardImageSize } from './support/readClipboardImage';
+import { readClipboardImageHasContent } from './support/readClipboardImageHasContent';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
 let electronApp: ElectronApplication;
@@ -57,6 +58,10 @@ test.describe('Chart grid copy to clipboard', () => {
     await expect
       .poll(async () => await readClipboardImageSize(electronApp), { timeout: 10000 })
       .toEqual(expectedSize);
+
+    await expect
+      .poll(async () => await readClipboardImageHasContent(electronApp), { timeout: 10000 })
+      .toBe(true);
   });
 });
 
