@@ -183,6 +183,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
       </div>
       <div
         className={`relative flex min-h-0 flex-1 rounded-sm border-2 ${isSelected ? 'border-slate-900/35' : 'border-transparent'}`}
+        data-testid="chart-plot"
       >
         <ReactEChartsCore
           className="h-full w-full"
@@ -191,7 +192,6 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
           replaceMerge={['series']}
           lazyUpdate={true}
           onChartReady={initChart}
-          data-testid="chart-plot"
           style={{ height: '100%', width: '100%' }}
         />
       </div>

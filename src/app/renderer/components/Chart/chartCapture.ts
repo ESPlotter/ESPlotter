@@ -22,7 +22,17 @@ const TITLE_STYLE_OPTIONS: ChartTitleStyleOptions = {
 };
 
 export function getChartInstanceFromElement(element: HTMLElement): EChartsType | null {
-  return (echarts.getInstanceByDom(element) as unknown as EChartsType | null) ?? null;
+  const directInstance = echarts.getInstanceByDom(element) as EChartsType | undefined;
+  if (directInstance) {
+    return directInstance;
+  }
+
+  const chartElement = element.querySelector<HTMLElement>('.echarts-for-react');
+  if (!chartElement) {
+    return null;
+  }
+
+  return (echarts.getInstanceByDom(chartElement) as EChartsType | undefined) ?? null;
 }
 
 export function getChartTitleElement(container: HTMLElement): HTMLElement | null {
