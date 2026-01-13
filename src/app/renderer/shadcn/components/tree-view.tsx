@@ -10,7 +10,7 @@ const treeVariants = cva(
   'group hover:before:opacity-100 before:absolute before:rounded-lg before:left-0 px-2 before:w-full before:opacity-0 before:bg-accent/70 before:h-[2rem] before:-z-10',
 );
 
-const selectedTreeVariants = cva('before:opacity-100 before:bg-accent/70 text-accent-foreground');
+const selectedTreeVariants = cva('before:opacity-0 bg-foreground text-background font-semibold');
 
 const dragOverVariants = cva('before:opacity-100 before:bg-primary/20 text-primary-foreground');
 
@@ -56,6 +56,10 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
     const [selectedItemId, setSelectedItemId] = React.useState<string | undefined>(
       initialSelectedItemId,
     );
+
+    React.useEffect(() => {
+      setSelectedItemId(initialSelectedItemId);
+    }, [initialSelectedItemId]);
 
     const [draggedItem, setDraggedItem] = React.useState<TreeDataItem | null>(null);
 

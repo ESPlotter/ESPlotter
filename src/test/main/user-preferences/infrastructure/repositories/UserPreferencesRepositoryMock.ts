@@ -4,7 +4,9 @@ import { UserPreferencesRepository } from '@main/user-preferences/domain/reposit
 export class UserPreferencesRepositoryMock implements UserPreferencesRepository {
   private preferences: UserPreferences = UserPreferences.withDefaultChartSeriesPalette();
   private shouldFailOnGet = false;
-  private listeners: Array<(preferences: UserPreferences) => void> = [];
+  private chartPaletteListeners: Array<(preferences: UserPreferences) => void> = [];
+  private dyntoolsPathListeners: Array<(preferences: UserPreferences) => void> = [];
+  private pythonPathListeners: Array<(preferences: UserPreferences) => void> = [];
   private getCallCount = 0;
   private saveCallCount = 0;
 
@@ -18,16 +20,59 @@ export class UserPreferencesRepositoryMock implements UserPreferencesRepository 
 
   async save(preferences: UserPreferences): Promise<void> {
     this.saveCallCount += 1;
-    this.preferences = preferences;
-    for (const listener of this.listeners) {
-      listener(preferences);
+    const previousPreferences = this.preferences;
+    const previousPrimitives = previousPreferences.toPrimitives();
+    const nextPrimitives = preferences.toPrimitives();
+
+    const chartSeriesPaletteChanged =
+      previousPrimitives.chartSeriesPalette.length !== nextPrimitives.chartSeriesPalette.length ||
+      previousPrimitives.chartSeriesPalette.some(
+        (color, index) => color !== nextPrimitives.chartSeriesPalette[index],
+      );
+    const dyntoolsPathChanged =
+      previousPrimitives.general.paths.dyntoolsPath !== nextPrimitives.general.paths.dyntoolsPath;
+    const pythonPathChanged =
+      previousPrimitives.general.paths.pythonPath !== nextPrimitives.general.paths.pythonPath;
+
+    if (chartSeriesPaletteChanged) {
+      for (const listener of this.chartPaletteListeners) {
+        listener(preferences);
+      }
     }
+
+    if (dyntoolsPathChanged) {
+      for (const listener of this.dyntoolsPathListeners) {
+        listener(preferences);
+      }
+    }
+
+    if (pythonPathChanged) {
+      for (const listener of this.pythonPathListeners) {
+        listener(preferences);
+      }
+    }
+
+    this.preferences = preferences;
   }
 
   onChangeChartSeriesPalette(listener: (preferences: UserPreferences) => void): () => void {
-    this.listeners.push(listener);
+    this.chartPaletteListeners.push(listener);
     return () => {
-      this.listeners = this.listeners.filter((item) => item !== listener);
+      this.chartPaletteListeners = this.chartPaletteListeners.filter((item) => item !== listener);
+    };
+  }
+
+  onChangeDyntoolsPath(listener: (preferences: UserPreferences) => void): () => void {
+    this.dyntoolsPathListeners.push(listener);
+    return () => {
+      this.dyntoolsPathListeners = this.dyntoolsPathListeners.filter((item) => item !== listener);
+    };
+  }
+
+  onChangePythonPath(listener: (preferences: UserPreferences) => void): () => void {
+    this.pythonPathListeners.push(listener);
+    return () => {
+      this.pythonPathListeners = this.pythonPathListeners.filter((item) => item !== listener);
     };
   }
 

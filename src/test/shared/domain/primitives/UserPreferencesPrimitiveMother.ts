@@ -1,6 +1,8 @@
 import { PartialDeep } from 'type-fest';
 
 import { DEFAULT_CHART_SERIES_PALETTE } from '@shared/domain/constants/defaultChartSeriesPalette';
+import { DEFAULT_DYNTOOLS_PATH } from '@shared/domain/constants/defaultDyntoolsPath';
+import { DEFAULT_PYTHON_PATH } from '@shared/domain/constants/defaultPythonPath';
 import { UserPreferencesPrimitive } from '@shared/domain/primitives/UserPreferencesPrimitive';
 
 export class UserPreferencesPrimitiveMother {
@@ -9,6 +11,15 @@ export class UserPreferencesPrimitiveMother {
       chartSeriesPalette:
         data.chartSeriesPalette?.map((value) => value as string) ??
         UserPreferencesPrimitiveMother.randomPalette(),
+      general: {
+        paths: {
+          dyntoolsPath:
+            data.general?.paths?.dyntoolsPath ??
+            UserPreferencesPrimitiveMother.defaultDyntoolsPath(),
+          pythonPath:
+            data.general?.paths?.pythonPath ?? UserPreferencesPrimitiveMother.defaultPythonPath(),
+        },
+      },
     };
   }
 
@@ -35,5 +46,13 @@ export class UserPreferencesPrimitiveMother {
     const g = (hash >> 8) & 0xff;
     const b = hash & 0xff;
     return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+  }
+
+  static defaultDyntoolsPath(): string {
+    return DEFAULT_DYNTOOLS_PATH;
+  }
+
+  static defaultPythonPath(): string {
+    return DEFAULT_PYTHON_PATH;
   }
 }
