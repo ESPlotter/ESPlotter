@@ -16,6 +16,8 @@ export default defineConfig({
   reporter: [['list'], ['html', { outputFolder: 'playwright-output/report', open: 'never' }]],
   use: {
     trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
   },
   outputDir: 'playwright-output/test-results',
   timeout: 60 * 1000,

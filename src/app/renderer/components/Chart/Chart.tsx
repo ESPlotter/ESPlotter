@@ -1,4 +1,12 @@
-import { IconHandGrab, IconHome, IconZoomIn, IconTrash } from '@tabler/icons-react';
+import {
+  IconEye,
+  IconEyeOff,
+  IconCamera,
+  IconHandGrab,
+  IconHome,
+  IconZoomIn,
+  IconTrash,
+} from '@tabler/icons-react';
 import { EChartsOption } from 'echarts';
 import { LineChart } from 'echarts/charts';
 import {
@@ -20,7 +28,9 @@ import { useUserPreferencesChartSeriesPalette } from '@renderer/store/UserPrefer
 import { Button } from '@shadcn/components/ui/button';
 import { generateRandomHexColor } from '@shared/utils/generateRandomHexColor';
 
+import { buildChartClipboardImage } from './chartCapture';
 import { ChartSerie } from './ChartSerie';
+import { notifyClipboardSuccess } from './clipboardToast';
 import { useChartsHotkey } from './useChartHotKey';
 
 import type { EChartsType } from 'echarts';
@@ -39,20 +49,22 @@ echarts.use([
 
 type ChartMode = 'zoom' | 'pan';
 
-export function Chart({
-  id,
-  isSelected,
-  series,
-}: {
+const CLIPBOARD_MESSAGE_SUCCESS = 'Chart copied to clipboard.';
+
+interface ChartProps {
   id: string;
   isSelected: boolean;
   series: ChartSerie[];
-}) {
+  title: string;
+}
+
+export function Chart({ id, isSelected, series, title }: ChartProps) {
   const [mode, setMode] = useState<ChartMode>('zoom');
+  const [isTooltipVisible, setIsTooltipVisible] = useState(true);
   const chartSeriesPalette = useUserPreferencesChartSeriesPalette();
   const options = useMemo(
-    () => mergeSeriesWithDefaultParams(series, chartSeriesPalette),
-    [series, chartSeriesPalette],
+    () => mergeSeriesWithDefaultParams(series, chartSeriesPalette, isTooltipVisible),
+    [series, chartSeriesPalette, isTooltipVisible],
   );
   const { setSelectedChartId, removeChart } = useChannelChartsActions();
   const chartInstanceRef = useRef<EChartsType | null>(null);
@@ -67,6 +79,7 @@ export function Chart({
   );
 
   useChartsHotkey(getChart, { key: 'z' }, () => enableZoomSelect(), { active: isSelected });
+  useChartsHotkey(getChart, { key: 'h' }, handleToggleTooltipHotkey, { active: isSelected });
 
   function getChart(): EChartsType | null {
     const chart = chartInstanceRef.current;
@@ -121,12 +134,36 @@ export function Chart({
     chart.getZr().setCursorStyle(nextMode === 'pan' ? 'grab' : 'crosshair');
   }
 
+  async function copyChartImageToClipboard(): Promise<void> {
+    const chart = getChart();
+    if (!chart) return;
+
+    try {
+      const dataUrlWithTitle = await buildChartClipboardImage(chart, title);
+      await window.clipboard.writeImage(dataUrlWithTitle);
+      notifyClipboardSuccess(CLIPBOARD_MESSAGE_SUCCESS);
+    } catch (error) {
+      console.error('Failed to copy chart image', error);
+    }
+  }
+
+  function handleCopyChartImage() {
+    void copyChartImageToClipboard();
+  }
+
   function handleSelectChart() {
     setSelectedChartId(id);
   }
 
   function handleDeleteChart() {
     removeChart(id);
+  }
+  function toggleTooltip() {
+    setIsTooltipVisible((current) => !current);
+  }
+
+  function handleToggleTooltipHotkey() {
+    toggleTooltip();
   }
 
   return (
@@ -155,12 +192,30 @@ export function Chart({
         <Button variant="outline" size="icon-sm" onClick={resetZoom} title="Reset zoom (Escape)">
           <IconHome className="size-4" />
         </Button>
+        <Button
+          variant={isTooltipVisible ? 'default' : 'outline'}
+          size="icon-sm"
+          onClick={toggleTooltip}
+          title={isTooltipVisible ? 'Hide tooltip (H)' : 'Show tooltip (H)'}
+        >
+          {isTooltipVisible ? <IconEye className="size-4" /> : <IconEyeOff className="size-4" />}
+        </Button>
+        <Button
+          variant="outline"
+          size="icon-sm"
+          onClick={handleCopyChartImage}
+          title="Copy chart image"
+          aria-label="Copy chart image"
+        >
+          <IconCamera className="size-4" />
+        </Button>
         <Button variant="outline" size="icon-sm" onClick={handleDeleteChart} title="Delete chart">
           <IconTrash className="size-4 text-red-600" />
         </Button>
       </div>
       <div
         className={`relative flex min-h-0 flex-1 rounded-sm border-2 ${isSelected ? 'border-slate-900/35' : 'border-transparent'}`}
+        data-testid="chart-plot"
       >
         <ReactEChartsCore
           className="h-full w-full"
@@ -176,7 +231,11 @@ export function Chart({
   );
 }
 
-function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): EChartsOption {
+function mergeSeriesWithDefaultParams(
+  series: ChartSerie[],
+  palette: string[],
+  isTooltipVisible: boolean,
+): EChartsOption {
   const colors = resolveSeriesColors(series, palette);
   return {
     animation: false,
@@ -190,6 +249,13 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): 
       axisLabel: {
         fontSize: 10,
       },
+      axisPointer: {
+        show: true,
+        label: {
+          show: true,
+        },
+        triggerTooltip: isTooltipVisible,
+      },
     },
     yAxis: {
       type: 'value',
@@ -198,6 +264,13 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): 
       max: (v: { min: number; max: number }) => v.max + (v.max - v.min) * 0.5,
       axisLabel: {
         fontSize: 10,
+      },
+      axisPointer: {
+        show: true,
+        label: {
+          show: true,
+        },
+        triggerTooltip: isTooltipVisible,
       },
     },
     legend: {
@@ -240,7 +313,7 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): 
       },
     ],
     tooltip: {
-      show: true,
+      show: isTooltipVisible,
       trigger: 'axis',
       axisPointer: {
         type: 'cross',

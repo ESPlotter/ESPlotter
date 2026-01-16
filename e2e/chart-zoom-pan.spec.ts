@@ -1,6 +1,7 @@
 import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
 
 import { chartContainer } from './support/chartContainer';
+import { getChartTooltipState } from './support/chartHelpers';
 import { chartTitleButton } from './support/chartTitleButton';
 import { clickSidebarChannel } from './support/clickSidebarChannel';
 import { createAndSelectChart } from './support/createAndSelectChart';
@@ -224,6 +225,60 @@ test.describe('Chart zoom, pan, and reset controls', () => {
       .toBe(true);
   });
 
+  test('can toggle tooltip visibility on chart', async () => {
+    await createAndSelectChart(mainPage);
+    await addVoltageChannelToChart(mainPage);
+    const chartTitle = 'Voltage';
+    await expectSelectedChart(mainPage, chartTitle);
+
+    const chartRoot = getChartRoot(mainPage, chartTitle);
+    const tooltipToggle = chartRoot.getByTitle(/Hide tooltip/);
+
+    await expect(tooltipToggle).toBeVisible();
+
+    const initialState = await getChartTooltipState(mainPage, chartTitle);
+    expect(initialState.show).toBe(true);
+    expect(initialState.axisPointerTriggersTooltip).toBe(true);
+
+    await tooltipToggle.click();
+    await expect(chartRoot.getByTitle(/Show tooltip/)).toBeVisible();
+
+    await expect
+      .poll(async () => await getChartTooltipState(mainPage, chartTitle))
+      .toEqual({ show: false, axisPointerTriggersTooltip: false });
+
+    await chartRoot.getByTitle(/Show tooltip/).click();
+    await expect(chartRoot.getByTitle(/Hide tooltip/)).toBeVisible();
+
+    await expect
+      .poll(async () => await getChartTooltipState(mainPage, chartTitle))
+      .toEqual({ show: true, axisPointerTriggersTooltip: true });
+  });
+
+  test('can toggle tooltip with H shortcut', async () => {
+    await createAndSelectChart(mainPage);
+    await addVoltageChannelToChart(mainPage);
+    const chartTitle = 'Voltage';
+    await expectSelectedChart(mainPage, chartTitle);
+
+    const chartRoot = getChartRoot(mainPage, chartTitle);
+    await expect(chartRoot.getByTitle(/Hide tooltip/)).toBeVisible();
+
+    await mainPage.keyboard.press('h');
+    await expect(chartRoot.getByTitle(/Show tooltip/)).toBeVisible();
+
+    await expect
+      .poll(async () => await getChartTooltipState(mainPage, chartTitle))
+      .toEqual({ show: false, axisPointerTriggersTooltip: false });
+
+    await mainPage.keyboard.press('h');
+    await expect(chartRoot.getByTitle(/Hide tooltip/)).toBeVisible();
+
+    await expect
+      .poll(async () => await getChartTooltipState(mainPage, chartTitle))
+      .toEqual({ show: true, axisPointerTriggersTooltip: true });
+  });
+
   test('chart activation still works after zoom/pan implementation', async () => {
     const firstChartTitle = await createChart(mainPage);
     const secondChartTitle = await createChart(mainPage);
@@ -330,9 +385,10 @@ async function getChartZoomRanges(page: Page, chartTitle: string): Promise<ZoomR
       if (!model) {
         throw new Error('ECharts model not available');
       }
+      const resolvedModel = model;
 
       function getRange(id: string): AxisRange {
-        const zoomModels = model.findComponents({
+        const zoomModels = resolvedModel.findComponents({
           mainType: 'dataZoom',
           query: { dataZoomId: id },
         });

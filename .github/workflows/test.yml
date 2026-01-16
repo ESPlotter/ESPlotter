@@ -136,7 +136,7 @@ jobs:
         run: npx playwright install
 
       - name: Run Playwright tests
-        run: npm run test:e2e
+        run: npm run test:e2e:compiled
 
       - name: Upload Playwright artifacts
         if: always()

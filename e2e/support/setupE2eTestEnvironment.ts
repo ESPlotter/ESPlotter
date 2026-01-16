@@ -24,7 +24,14 @@ export async function setupE2eTestEnvironment(): Promise<{
   const mainPage = await electronApp.firstWindow();
 
   await mainPage.waitForLoadState('domcontentloaded');
-  await waitForPreloadScript(mainPage);
+
+  try {
+    await waitForPreloadScript(mainPage);
+  } catch (error) {
+    await electronApp.close();
+    throw error;
+  }
+
   await waitForReactContent(mainPage);
 
   return { electronApp, mainPage };

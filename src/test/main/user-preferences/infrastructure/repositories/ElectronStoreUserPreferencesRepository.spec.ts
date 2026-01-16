@@ -64,6 +64,54 @@ describe('ElectronStoreUserPreferencesRepository', () => {
 
     unsubscribe();
   });
+
+  it('notifies listeners when the dyntools path changes', async () => {
+    const observed: UserPreferences[] = [];
+    const unsubscribe = repository.onChangeDyntoolsPath((preferences) => {
+      observed.push(preferences);
+    });
+
+    const next = UserPreferences.fromPrimitives(
+      UserPreferencesPrimitiveMother.with({
+        general: {
+          paths: {
+            dyntoolsPath: 'D:\\Tools\\dyntools',
+          },
+        },
+      }),
+    );
+
+    await repository.save(next);
+
+    expect(observed).toHaveLength(1);
+    expect(observed[0]?.toPrimitives()).toEqual(next.toPrimitives());
+
+    unsubscribe();
+  });
+
+  it('notifies listeners when the python path changes', async () => {
+    const observed: UserPreferences[] = [];
+    const unsubscribe = repository.onChangePythonPath((preferences) => {
+      observed.push(preferences);
+    });
+
+    const next = UserPreferences.fromPrimitives(
+      UserPreferencesPrimitiveMother.with({
+        general: {
+          paths: {
+            pythonPath: 'C:\\Python311\\python.exe',
+          },
+        },
+      }),
+    );
+
+    await repository.save(next);
+
+    expect(observed).toHaveLength(1);
+    expect(observed[0]?.toPrimitives()).toEqual(next.toPrimitives());
+
+    unsubscribe();
+  });
 });
 
 async function createIsolatedDirectory(): Promise<string> {

@@ -9,8 +9,13 @@ import { ChannelFileContent } from '@main/channel-file/domain/vos/ChannelFileCon
 import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFileContentPrimitive';
 import { ChannelFileContentSeriePrimitive } from '@shared/domain/primitives/ChannelFileContentSeriePrimitive';
 
+interface NodePsseOutFileServicePaths {
+  dyntoolsPath: string;
+  pythonPath: string;
+}
+
 export class NodePsseOutFileService implements PsseOutFileService {
-  constructor() {}
+  constructor(private readonly paths: NodePsseOutFileServicePaths) {}
 
   public async transformToChannelFile(filePath: string): Promise<ChannelFile> {
     const parsedOutFile = await this.callDynToolsToParseOutFile(filePath);
@@ -25,18 +30,26 @@ export class NodePsseOutFileService implements PsseOutFileService {
   private async callDynToolsToParseOutFile(outFilePath: string): Promise<string> {
     const options: PythonShellOptions = {
       mode: 'text',
-      scriptPath: path.join(app.getAppPath(), 'scripts'),
-      pythonPath: 'py',
+      scriptPath: this.resolveScriptsPath(),
+      pythonPath: this.paths.pythonPath,
       args: [path.resolve(outFilePath)],
       env: {
         ...process.env,
-        DYNTOOLS_PATH: 'C:\\Program Files\\PTI\\PSSE36\\36.3\\PSSPY313',
+        DYNTOOLS_PATH: this.paths.dyntoolsPath,
       },
     };
 
     const messages = await PythonShell.run('getParsedOutFile.py', options);
     const output = messages[0];
     return output;
+  }
+
+  private resolveScriptsPath(): string {
+    if (app.isPackaged) {
+      return path.join(process.resourcesPath, 'scripts');
+    }
+
+    return path.join(app.getAppPath(), 'scripts');
   }
 
   private mapParsedOutFileToChannelFileContent(parsedOutFile: string): ChannelFileContent {

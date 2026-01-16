@@ -1,12 +1,20 @@
 import { create } from 'zustand';
 
 import { DEFAULT_CHART_SERIES_PALETTE } from '@shared/domain/constants/defaultChartSeriesPalette';
+import { DEFAULT_DYNTOOLS_PATH } from '@shared/domain/constants/defaultDyntoolsPath';
+import { DEFAULT_PYTHON_PATH } from '@shared/domain/constants/defaultPythonPath';
 import { generateRandomHexColor } from '@shared/utils/generateRandomHexColor';
 
 interface UserPreferencesState {
   chartSeriesPalette: string[];
+  dyntoolsPath: string;
+  pythonPath: string;
   actions: {
     setChartSeriesPalette: (palette: string[]) => void;
+    setDyntoolsPath: (path: string) => void;
+    updateDyntoolsPath: (path: string) => Promise<void>;
+    setPythonPath: (path: string) => void;
+    updatePythonPath: (path: string) => Promise<void>;
     replaceColor: (index: number, value: string) => void;
     addColor: (color?: string) => void;
     removeColor: (index: number) => void;
@@ -17,11 +25,30 @@ interface UserPreferencesState {
 
 const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
   chartSeriesPalette: [...DEFAULT_CHART_SERIES_PALETTE],
+  dyntoolsPath: DEFAULT_DYNTOOLS_PATH,
+  pythonPath: DEFAULT_PYTHON_PATH,
   actions: {
     setChartSeriesPalette: (palette: string[]) =>
       set(() => ({
         chartSeriesPalette: [...palette],
       })),
+    setDyntoolsPath: (path: string) =>
+      set(() => ({
+        dyntoolsPath: path,
+      })),
+    updateDyntoolsPath: async (path: string) => {
+      const result = await window.userPreferences.updateDyntoolsPath(path.trim());
+      set(() => ({ dyntoolsPath: result.general.paths.dyntoolsPath }));
+    },
+    setPythonPath: (path: string) =>
+      set(() => ({
+        pythonPath: path,
+      })),
+    updatePythonPath: async (path: string) => {
+      const result = await window.userPreferences.updatePythonPath(path.trim());
+      set(() => ({ pythonPath: result.general.paths.pythonPath }));
+    },
+
     replaceColor: async (index: number, value: string) => {
       let nextPalette: string[] = [];
 
@@ -91,6 +118,14 @@ const useUserPreferencesStore = create<UserPreferencesState>()((set) => ({
 
 export function useUserPreferencesChartSeriesPalette(): string[] {
   return useUserPreferencesStore((state) => state.chartSeriesPalette);
+}
+
+export function useUserPreferencesDyntoolsPath(): string {
+  return useUserPreferencesStore((state) => state.dyntoolsPath);
+}
+
+export function useUserPreferencesPythonPath(): string {
+  return useUserPreferencesStore((state) => state.pythonPath);
 }
 
 export function useUserPreferencesActions() {

@@ -13,10 +13,19 @@ export interface RendererExposureMap {
   userPreferences: {
     getChartSeriesPalette: () => Promise<string[]>;
     updateChartSeriesPalette: (colors: string[]) => Promise<UserPreferencesPrimitive>;
-    onChangedChartSeriesPalette: (
-      listener: (preferences: UserPreferencesPrimitive) => void,
-    ) => () => void;
+    getDyntoolsPath: () => Promise<string>;
+    updateDyntoolsPath: (path: string) => Promise<UserPreferencesPrimitive>;
+    selectDyntoolsPath: () => Promise<string | null>;
+    getPythonPath: () => Promise<string>;
+    updatePythonPath: (path: string) => Promise<UserPreferencesPrimitive>;
+    selectPythonPath: () => Promise<string | null>;
+    onChangedChartSeriesPalette: (listener: (colors: string[]) => void) => () => void;
+    onChangedDyntoolsPath: (listener: (path: string) => void) => () => void;
+    onChangedPythonPath: (listener: (path: string) => void) => () => void;
     onOpenRequested: (listener: () => void) => () => void;
+  };
+  clipboard: {
+    writeImage: (dataUrl: string) => Promise<void>;
   };
 }
 
@@ -24,11 +33,20 @@ export interface IpcChannelMap {
   ping: () => string;
   getChartSeriesPalette: () => Promise<string[]>;
   updateChartSeriesPalette: (colors: string[]) => Promise<UserPreferencesPrimitive>;
+  writeClipboardImage: (dataUrl: string) => Promise<void>;
+  getDyntoolsPath: () => Promise<string>;
+  updateDyntoolsPath: (path: string) => Promise<UserPreferencesPrimitive>;
+  selectDyntoolsPath: () => Promise<string | null>;
+  getPythonPath: () => Promise<string>;
+  updatePythonPath: (path: string) => Promise<UserPreferencesPrimitive>;
+  selectPythonPath: () => Promise<string | null>;
 }
 
 export interface IpcEventMap {
   channelFileOpened: (payload: ChannelFilePrimitive) => void;
-  userPreferencesChanged: (payload: UserPreferencesPrimitive) => void;
+  chartSeriesPaletteChanged: (payload: string[]) => void;
+  dyntoolsPathChanged: (payload: string) => void;
+  pythonPathChanged: (payload: string) => void;
   userPreferencesOpenRequested: () => void;
 }
 

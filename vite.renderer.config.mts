@@ -27,6 +27,17 @@ export default defineConfig(async () => {
       port: 5173,
       strictPort: true,
     },
+    optimizeDeps: {
+      include: [
+        'echarts',
+        'echarts/core',
+        'echarts/charts',
+        'echarts/components',
+        'echarts/renderers',
+        'echarts-for-react',
+        'echarts-for-react/lib/core',
+      ],
+    },
     plugins: [react(), tailwindcss()],
   };
 });

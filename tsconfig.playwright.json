@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "module": "ESNext",
     "types": ["@playwright/test"]
   },
   "include": ["e2e/**/*.ts", "types/**/*.d.ts", "playwright.config.ts"]
