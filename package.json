@@ -21,7 +21,8 @@
     "test:components": "vitest --config vitest.components.config.ts",
     "test:components:watch": "vitest --config vitest.components.config.ts --watch",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:compiled": "npm run package && npx playwright test --config playwright.compiled.config.ts"
   },
   "keywords": [],
   "author": {
