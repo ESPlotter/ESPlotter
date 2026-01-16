@@ -10,6 +10,7 @@
     "build:electron": "tsc -p tsconfig.node.json --noEmit && vite build --config vite.main.config.mts && vite build --config vite.preload.config.mts",
     "pretest:e2e": "npm run build:electron",
     "package": "electron-forge package",
+    "package:e2e": "set ESPLOTTER_ENABLE_NODE_INSPECT=1&& electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint . && npm run format:check",
@@ -22,7 +23,7 @@
     "test:components:watch": "vitest --config vitest.components.config.ts --watch",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:compiled": "npm run package && npx playwright test --config playwright.compiled.config.ts"
+    "test:e2e:compiled": "npm run package:e2e && npx playwright test --config playwright.compiled.config.ts"
   },
   "keywords": [],
   "author": {

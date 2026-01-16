@@ -32,6 +32,7 @@ This document defines where and how we test new functionality across the project
 
 - Set `ESPLOTTER_E2E_PACKAGED=1` to run against a packaged app.
 - Set `ESPLOTTER_E2E_APP_PATH` to the packaged executable path.
+- Use `npm run package:e2e` to package with the Node.js inspector fuse enabled.
 - When packaged mode is enabled, the Playwright `webServer` is disabled and the tests launch the app binary directly.
 
 #### Best Practices
