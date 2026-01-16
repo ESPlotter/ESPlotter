@@ -30,7 +30,7 @@ export class NodePsseOutFileService implements PsseOutFileService {
   private async callDynToolsToParseOutFile(outFilePath: string): Promise<string> {
     const options: PythonShellOptions = {
       mode: 'text',
-      scriptPath: path.join(app.getAppPath(), 'scripts'),
+      scriptPath: this.resolveScriptsPath(),
       pythonPath: this.paths.pythonPath,
       args: [path.resolve(outFilePath)],
       env: {
@@ -42,6 +42,14 @@ export class NodePsseOutFileService implements PsseOutFileService {
     const messages = await PythonShell.run('getParsedOutFile.py', options);
     const output = messages[0];
     return output;
+  }
+
+  private resolveScriptsPath(): string {
+    if (app.isPackaged) {
+      return path.join(process.resourcesPath, 'scripts');
+    }
+
+    return path.join(app.getAppPath(), 'scripts');
   }
 
   private mapParsedOutFileToChannelFileContent(parsedOutFile: string): ChannelFileContent {
