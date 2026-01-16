@@ -255,6 +255,30 @@ test.describe('Chart zoom, pan, and reset controls', () => {
       .toEqual({ show: true, axisPointerTriggersTooltip: true });
   });
 
+  test('can toggle tooltip with H shortcut', async () => {
+    await createAndSelectChart(mainPage);
+    await addVoltageChannelToChart(mainPage);
+    const chartTitle = 'Voltage';
+    await expectSelectedChart(mainPage, chartTitle);
+
+    const chartRoot = getChartRoot(mainPage, chartTitle);
+    await expect(chartRoot.getByTitle(/Hide tooltip/)).toBeVisible();
+
+    await mainPage.keyboard.press('h');
+    await expect(chartRoot.getByTitle(/Show tooltip/)).toBeVisible();
+
+    await expect
+      .poll(async () => await getChartTooltipState(mainPage, chartTitle))
+      .toEqual({ show: false, axisPointerTriggersTooltip: false });
+
+    await mainPage.keyboard.press('h');
+    await expect(chartRoot.getByTitle(/Hide tooltip/)).toBeVisible();
+
+    await expect
+      .poll(async () => await getChartTooltipState(mainPage, chartTitle))
+      .toEqual({ show: true, axisPointerTriggersTooltip: true });
+  });
+
   test('chart activation still works after zoom/pan implementation', async () => {
     const firstChartTitle = await createChart(mainPage);
     const secondChartTitle = await createChart(mainPage);
