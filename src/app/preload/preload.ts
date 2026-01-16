@@ -35,3 +35,7 @@ contextBridgeExposeInMainWorld('userPreferences', {
   onOpenRequested: (listener: () => void) =>
     ipcRendererOn('userPreferencesOpenRequested', listener),
 });
+
+contextBridgeExposeInMainWorld('clipboard', {
+  writeImage: (dataUrl: string) => ipcRendererInvoke('writeClipboardImage', dataUrl),
+});

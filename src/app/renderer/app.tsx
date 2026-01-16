@@ -4,6 +4,7 @@ import { createHashRouter, RouterProvider } from 'react-router';
 import { useOpenPreferencesOnRequest } from './hooks/useOpenPreferencesOnRequest';
 import { HomePage } from './pages/home/page';
 import { UserPreferencesPage } from './pages/preferences/page';
+import { Toaster } from './shadcn/components/ui/sonner';
 
 export type RouterType = ReturnType<typeof createHashRouter>;
 
@@ -25,5 +26,10 @@ export function App() {
 
   useOpenPreferencesOnRequest(router);
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Toaster />
+    </>
+  );
 }
