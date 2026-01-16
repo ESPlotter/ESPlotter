@@ -1,4 +1,11 @@
-import { IconCamera, IconHandGrab, IconHome, IconZoomIn } from '@tabler/icons-react';
+import {
+  IconEye,
+  IconEyeOff,
+  IconCamera,
+  IconHandGrab,
+  IconHome,
+  IconZoomIn,
+} from '@tabler/icons-react';
 import { EChartsOption } from 'echarts';
 import { LineChart } from 'echarts/charts';
 import {
@@ -52,10 +59,11 @@ interface ChartProps {
 
 export function Chart({ id, isSelected, series, title }: ChartProps) {
   const [mode, setMode] = useState<ChartMode>('zoom');
+  const [isTooltipVisible, setIsTooltipVisible] = useState(true);
   const chartSeriesPalette = useUserPreferencesChartSeriesPalette();
   const options = useMemo(
-    () => mergeSeriesWithDefaultParams(series, chartSeriesPalette),
-    [series, chartSeriesPalette],
+    () => mergeSeriesWithDefaultParams(series, chartSeriesPalette, isTooltipVisible),
+    [series, chartSeriesPalette, isTooltipVisible],
   );
   const { setSelectedChartId } = useChannelChartsActions();
   const chartInstanceRef = useRef<EChartsType | null>(null);
@@ -145,6 +153,10 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
     setSelectedChartId(id);
   }
 
+  function toggleTooltip() {
+    setIsTooltipVisible((current) => !current);
+  }
+
   return (
     <div
       className="flex h-full w-full flex-col gap-1"
@@ -170,6 +182,14 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
         </Button>
         <Button variant="outline" size="icon-sm" onClick={resetZoom} title="Reset zoom (Escape)">
           <IconHome className="size-4" />
+        </Button>
+        <Button
+          variant={isTooltipVisible ? 'default' : 'outline'}
+          size="icon-sm"
+          onClick={toggleTooltip}
+          title={isTooltipVisible ? 'Hide tooltip' : 'Show tooltip'}
+        >
+          {isTooltipVisible ? <IconEye className="size-4" /> : <IconEyeOff className="size-4" />}
         </Button>
         <Button
           variant="outline"
@@ -199,7 +219,11 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
   );
 }
 
-function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): EChartsOption {
+function mergeSeriesWithDefaultParams(
+  series: ChartSerie[],
+  palette: string[],
+  isTooltipVisible: boolean,
+): EChartsOption {
   const colors = resolveSeriesColors(series, palette);
   return {
     animation: false,
@@ -213,6 +237,13 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): 
       axisLabel: {
         fontSize: 10,
       },
+      axisPointer: {
+        show: true,
+        label: {
+          show: true,
+        },
+        triggerTooltip: isTooltipVisible,
+      },
     },
     yAxis: {
       type: 'value',
@@ -221,6 +252,13 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): 
       max: (v: { min: number; max: number }) => v.max + (v.max - v.min) * 0.5,
       axisLabel: {
         fontSize: 10,
+      },
+      axisPointer: {
+        show: true,
+        label: {
+          show: true,
+        },
+        triggerTooltip: isTooltipVisible,
       },
     },
     legend: {
@@ -263,7 +301,7 @@ function mergeSeriesWithDefaultParams(series: ChartSerie[], palette: string[]): 
       },
     ],
     tooltip: {
-      show: true,
+      show: isTooltipVisible,
       trigger: 'axis',
       axisPointer: {
         type: 'cross',
