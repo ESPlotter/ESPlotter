@@ -28,6 +28,13 @@ This document defines where and how we test new functionality across the project
 - Drive the Electron application via Playwright. Confirm that menu actions, dialogs, and chart updates behave correctly with real user flows.
 - Ensure the happy path is always covered for new features. Add regression scenarios when the feature involves persistence or asynchronous updates.
 
+#### Packaged Runs
+
+- Set `ESPLOTTER_E2E_PACKAGED=1` to run against a packaged app.
+- Set `ESPLOTTER_E2E_APP_PATH` to the packaged executable path.
+- Use `npm run package:e2e` to package with the Node.js inspector fuse enabled.
+- When packaged mode is enabled, the Playwright `webServer` is disabled and the tests launch the app binary directly.
+
 #### Best Practices
 
 - Check `e2e/support` for existing helpers before adding new ones.

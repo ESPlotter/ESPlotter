@@ -7,6 +7,8 @@ import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { ForgeConfig } from '@electron-forge/shared-types';
 
+const enableNodeCliInspectArguments = process.env.ESPLOTTER_ENABLE_NODE_INSPECT === '1';
+
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
@@ -45,7 +47,7 @@ const config: ForgeConfig = {
       [FuseV1Options.RunAsNode]: false,
       [FuseV1Options.EnableCookieEncryption]: true,
       [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
-      [FuseV1Options.EnableNodeCliInspectArguments]: false,
+      [FuseV1Options.EnableNodeCliInspectArguments]: enableNodeCliInspectArguments,
       [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
