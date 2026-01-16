@@ -20,7 +20,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="flex h-screen w-full flex-col">
+      <main className="flex h-screen min-w-0 flex-1 flex-col">
         <div className="flex shrink-0 items-center gap-2 justify-end border-b px-4 py-2">
           {/* <SidebarTrigger /> */}
           {shouldShowCaptureButton ? (

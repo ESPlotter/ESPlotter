@@ -78,6 +78,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
   );
 
   useChartsHotkey(getChart, { key: 'z' }, () => enableZoomSelect(), { active: isSelected });
+  useChartsHotkey(getChart, { key: 'h' }, handleToggleTooltipHotkey, { active: isSelected });
 
   function getChart(): EChartsType | null {
     const chart = chartInstanceRef.current;
@@ -157,6 +158,10 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
     setIsTooltipVisible((current) => !current);
   }
 
+  function handleToggleTooltipHotkey() {
+    toggleTooltip();
+  }
+
   return (
     <div
       className="flex h-full w-full flex-col gap-1"
@@ -187,7 +192,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
           variant={isTooltipVisible ? 'default' : 'outline'}
           size="icon-sm"
           onClick={toggleTooltip}
-          title={isTooltipVisible ? 'Hide tooltip' : 'Show tooltip'}
+          title={isTooltipVisible ? 'Hide tooltip (H)' : 'Show tooltip (H)'}
         >
           {isTooltipVisible ? <IconEye className="size-4" /> : <IconEyeOff className="size-4" />}
         </Button>
