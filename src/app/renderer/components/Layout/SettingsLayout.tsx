@@ -17,7 +17,7 @@ export function SettingsLayout({ children, sidebarProps }: SettingsLayoutProps) 
   return (
     <SidebarProvider>
       <SettingsSidebar {...sidebarProps} />
-      <main className="w-full">
+      <main className="min-w-0 flex-1">
         <div className="flex items-center justify-end border-b px-2">
           <Button variant="outline" className="m-4" onClick={() => navigate('/')}>
             <IconPlus /> Close
