@@ -34,37 +34,73 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
       set(() => ({
         selectedChartId: chartId,
       })),
+
     addChart: (chartId: string) =>
       set((state) => {
         if (state.charts[chartId]) {
           throw new Error(`Chart with id ${chartId} already exists.`);
         }
+
         const name = getNextChartName(state.charts);
+
         return {
           charts: {
             ...state.charts,
             [chartId]: {
-              name: name,
+              name,
               channels: {},
             },
           },
           selectedChartId: chartId,
         };
       }),
-    removeChart: (chartId: string) =>
-      set((state) => {
-        const { [chartId]: _removedChart, ...remainingCharts } = state.charts;
-      
-        const nextSelectedChartId =
-          state.selectedChartId === chartId
-            ? Object.keys(remainingCharts)[0] ?? null
-            : state.selectedChartId;
-      
-        return {
-          charts: remainingCharts,
-          selectedChartId: nextSelectedChartId,
-        };
-      }),
+
+removeChart: (chartId: string) =>
+  set((state) => {
+    const { [chartId]: removedChart, ...remainingCharts } = state.charts;
+
+    const newCharts: typeof remainingCharts = {};
+
+    // Verificamos si el chart eliminado era automático
+    const deletedNumber =
+      removedChart && /^Chart \d+$/.test(removedChart.name)
+        ? Number(removedChart.name.replace('Chart ', ''))
+        : null;
+       
+   // let counter = 1; // contador para renumerar charts automáticos si se borra un personalizado
+
+Object.entries(remainingCharts).forEach(([id, chart],index) => {
+  console.log(chart);
+  console.log(index);
+  
+  if (!/^Chart \d+$/.test(chart.name)) {
+    newCharts[id] = chart;
+    return;
+  }
+
+  const currentNumber = Number(chart.name.replace('Chart ', ''));
+  let newNumber: number;
+
+  if (deletedNumber) {
+    // borrado automático → solo bajan los posteriores
+    newNumber = currentNumber > deletedNumber ? currentNumber - 1 : currentNumber;
+  } else {
+    newNumber = index + 1;
+  }
+
+  newCharts[id] = { ...chart, name: `Chart ${newNumber}` };
+});
+    const nextSelectedChartId =
+      state.selectedChartId === chartId
+        ? Object.keys(newCharts)[0] ?? null
+        : state.selectedChartId;
+
+    return {
+      charts: newCharts,
+      selectedChartId: nextSelectedChartId,
+    };
+  }),
+
 
     addChannelToChart: (chartId: string, channelId: string, serie: ChartSerie) =>
       set((state) => {
@@ -94,6 +130,7 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
           },
         };
       }),
+
     removeChannelFromChart: (chartId: string, channelId: string) =>
       set((state) => {
         const chart = state.charts[chartId];
@@ -111,6 +148,7 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
           },
         };
       }),
+
     changeNameOfChart: (chartId: string, newName: string) =>
       set((state) => {
         const chart = state.charts[chartId];
@@ -133,15 +171,5 @@ export const useChannelChartsActions = () => useChannelChartsStore((state) => st
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getNextChartName(charts: Record<string, any>): string {
-  const existingNumbers = Object.values(charts)
-    .map((c) => {
-      const match = c.name.match(/^Chart (\d+)$/);
-      return match ? Number(match[1]) : null;
-    })
-    .filter(Boolean) as number[];
-
-  let i = 1;
-  while (existingNumbers.includes(i)) i++;
-  return `Chart ${i}`;
+  return `Chart ${Object.keys(charts).length + 1}`;
 }
-
