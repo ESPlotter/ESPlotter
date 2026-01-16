@@ -4,6 +4,8 @@ import {
   IconCamera,
   IconHandGrab,
   IconHome,
+  IconLetterX,
+  IconLetterY,
   IconZoomIn,
 } from '@tabler/icons-react';
 import { EChartsOption } from 'echarts';
@@ -69,6 +71,8 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
   const chartInstanceRef = useRef<EChartsType | null>(null);
 
   useChartsHotkey(getChart, { key: 'Escape' }, () => resetZoom(), { active: isSelected });
+  useChartsHotkey(getChart, { key: 'x' }, () => resetZoomX(), { active: isSelected });
+  useChartsHotkey(getChart, { key: 'y' }, () => resetZoomY(), { active: isSelected });
 
   useChartsHotkey(
     getChart,
@@ -93,7 +97,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
     enableZoomSelect();
   }
 
-  function resetZoom() {
+  function resetZoomX() {
     const chart = getChart();
     if (!chart) return;
 
@@ -103,6 +107,11 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
       start: 0,
       end: 100,
     });
+  }
+
+  function resetZoomY() {
+    const chart = getChart();
+    if (!chart) return;
 
     chart.dispatchAction({
       type: 'dataZoom',
@@ -110,6 +119,11 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
       start: 0,
       end: 100,
     });
+  }
+
+  function resetZoom() {
+    resetZoomX();
+    resetZoomY();
   }
 
   function enableZoomSelect() {
@@ -184,6 +198,12 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
           title="Pan mode (Space)"
         >
           <IconHandGrab className="size-4" />
+        </Button>
+        <Button variant="outline" size="icon-sm" onClick={resetZoomX} title="Reset zoom X (X Key)">
+          <IconLetterX className="size-4" />
+        </Button>
+        <Button variant="outline" size="icon-sm" onClick={resetZoomY} title="Reset zoom Y (Y Key)">
+          <IconLetterY className="size-4" />
         </Button>
         <Button variant="outline" size="icon-sm" onClick={resetZoom} title="Reset zoom (Escape)">
           <IconHome className="size-4" />
