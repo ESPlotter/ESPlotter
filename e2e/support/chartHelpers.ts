@@ -66,32 +66,12 @@ export async function getRenderedSeriesSummary(
         }
         current = current.return;
       }
-      const locateEchartsInstance = (
-        node: FiberNode | null | undefined,
-      ): EChartsInstance | null => {
-        let pointer: FiberNode | null | undefined = node;
-        while (pointer) {
-          const component = pointer.stateNode as ReactEChartsComponent | null | undefined;
-          if (component?.getEchartsInstance) {
-            const instance = component.getEchartsInstance();
-            if (instance) {
-              return instance;
-            }
-          }
-          pointer = pointer.return;
-        }
-        return null;
-      };
-      const echartsInstance = locateEchartsInstance(current ?? rootFiber);
-      const optionFromInstance = echartsInstance?.getOption();
       const rawSeries: ChartLikeSerie[] | undefined =
         seriesProp && seriesProp.length > 0
           ? seriesProp
-          : optionFromInstance?.series && Array.isArray(optionFromInstance.series)
-            ? (optionFromInstance.series as ChartLikeSerie[])
-            : optionFromProps?.series && Array.isArray(optionFromProps.series)
-              ? (optionFromProps.series as ChartLikeSerie[])
-              : undefined;
+          : optionFromProps?.series && Array.isArray(optionFromProps.series)
+            ? (optionFromProps.series as ChartLikeSerie[])
+            : undefined;
       if (!rawSeries) {
         return [];
       }
@@ -113,6 +93,64 @@ export async function getRenderedSeriesSummary(
           lastPoint: data.length > 0 ? data[data.length - 1] : null,
         };
       });
+    },
+    { chartIndex },
+  );
+}
+
+export async function getChartTooltipState(
+  page: Page,
+  chartTitle: string,
+): Promise<{ show: boolean; axisPointerTriggersTooltip: boolean }> {
+  const chartIndex = await getChartIndex(page, chartTitle);
+  return page.evaluate(
+    async ({ chartIndex: idx }) => {
+      const containers = Array.from(
+        document.querySelectorAll<HTMLDivElement>('.echarts-for-react'),
+      );
+      const target = containers[idx];
+      if (!target) {
+        throw new Error('Chart container not found');
+      }
+      const fiberKey = Object.getOwnPropertyNames(target).find((key: string) =>
+        key.startsWith('__reactFiber'),
+      );
+      const host = target as unknown as Record<string, unknown>;
+      const rootFiber = fiberKey ? (host[fiberKey] as FiberNode | null) : null;
+      let current: FiberNode | null | undefined = rootFiber;
+      let echartsInstance: EChartsInstance | null = null;
+      while (current && !echartsInstance) {
+        const component = current.stateNode as ReactEChartsComponent | null | undefined;
+        if (component?.getEchartsInstance) {
+          const instance = component.getEchartsInstance();
+          if (instance) {
+            echartsInstance = instance;
+            break;
+          }
+        }
+        current = current.return;
+      }
+      if (!echartsInstance) {
+        throw new Error('ECharts instance not found');
+      }
+      const optionFromInstance = echartsInstance.getOption();
+      const tooltipOption = Array.isArray(optionFromInstance.tooltip)
+        ? optionFromInstance.tooltip[0]
+        : optionFromInstance.tooltip;
+      const xAxisOption = Array.isArray(optionFromInstance.xAxis)
+        ? optionFromInstance.xAxis[0]
+        : optionFromInstance.xAxis;
+      const yAxisOption = Array.isArray(optionFromInstance.yAxis)
+        ? optionFromInstance.yAxis[0]
+        : optionFromInstance.yAxis;
+      const show = tooltipOption?.show ?? true;
+      const xTrigger = xAxisOption?.axisPointer?.triggerTooltip;
+      const yTrigger = yAxisOption?.axisPointer?.triggerTooltip;
+      const axisPointerTriggersTooltip = (xTrigger ?? true) && (yTrigger ?? true);
+      return {
+        show,
+        axisPointerTriggersTooltip,
+      };
     },
     { chartIndex },
   );
@@ -150,6 +188,17 @@ export type ChartLikeSerie = {
 };
 export type EChartsOption = {
   series?: unknown;
+  tooltip?: { show?: boolean } | Array<{ show?: boolean }>;
+  xAxis?:
+    | { axisPointer?: { triggerTooltip?: boolean } }
+    | Array<{
+        axisPointer?: { triggerTooltip?: boolean };
+      }>;
+  yAxis?:
+    | { axisPointer?: { triggerTooltip?: boolean } }
+    | Array<{
+        axisPointer?: { triggerTooltip?: boolean };
+      }>;
 };
 export type EChartsInstance = {
   getOption: () => EChartsOption;
