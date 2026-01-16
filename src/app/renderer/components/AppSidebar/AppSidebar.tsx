@@ -83,7 +83,7 @@ export function AppSidebar() {
                 <Accordion type="single" collapsible key={item.filePath}>
                   <AccordionItem value={item.filePath}>
                     <AccordionTrigger className="text-sm font-medium">
-                      {item.fileName}
+                      <span className="block w-full truncate">{item.fileName}</span>
                     </AccordionTrigger>
                     <AccordionContent>
                       {item.channels?.map((channel) => {

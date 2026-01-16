@@ -29,7 +29,8 @@ import type { VariantProps } from 'class-variance-authority';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = '16rem';
+const SIDEBAR_WIDTH_DEFAULT = 256;
+const SIDEBAR_MIN_WIDTH = 200;
 const SIDEBAR_WIDTH_MOBILE = '18rem';
 const SIDEBAR_WIDTH_ICON = '3rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
@@ -41,6 +42,8 @@ type SidebarContextProps = {
   openMobile: boolean;
   setOpenMobile: (open: boolean) => void;
   isMobile: boolean;
+  width: number;
+  setWidth: (width: number) => void;
   toggleSidebar: () => void;
 };
 
@@ -90,6 +93,8 @@ function SidebarProvider({
     [setOpenProp, open],
   );
 
+  const [width, setWidth] = React.useState(SIDEBAR_WIDTH_DEFAULT);
+
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
@@ -120,9 +125,11 @@ function SidebarProvider({
       isMobile,
       openMobile,
       setOpenMobile,
+      width,
+      setWidth,
       toggleSidebar,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, width, setWidth, toggleSidebar],
   );
 
   return (
@@ -132,7 +139,7 @@ function SidebarProvider({
           data-slot="sidebar-wrapper"
           style={
             {
-              '--sidebar-width': SIDEBAR_WIDTH,
+              '--sidebar-width': `${width}px`,
               '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
               ...style,
             } as React.CSSProperties
@@ -163,6 +170,7 @@ function Sidebar({
   collapsible?: 'offcanvas' | 'icon' | 'none';
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+  const [isResizing, setIsResizing] = React.useState(false);
 
   if (collapsible === 'none') {
     return (
@@ -206,7 +214,7 @@ function Sidebar({
 
   return (
     <div
-      className="group peer text-sidebar-foreground hidden md:block"
+      className="group peer relative text-sidebar-foreground hidden md:block"
       data-state={state}
       data-collapsible={state === 'collapsed' ? collapsible : ''}
       data-variant={variant}
@@ -223,6 +231,7 @@ function Sidebar({
           variant === 'floating' || variant === 'inset'
             ? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]'
             : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon)',
+          isResizing && 'transition-none',
         )}
       />
       <div
@@ -236,6 +245,9 @@ function Sidebar({
           variant === 'floating' || variant === 'inset'
             ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
             : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l',
+          'max-w-full',
+
+          isResizing && 'transition-none',
           className,
         )}
         {...props}
@@ -248,6 +260,7 @@ function Sidebar({
           {children}
         </div>
       </div>
+      <SidebarRail onResizeStateChange={setIsResizing} side={side} />
     </div>
   );
 }
@@ -274,8 +287,83 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
   );
 }
 
-function SidebarRail({ className, ...props }: React.ComponentProps<'button'>) {
-  const { toggleSidebar } = useSidebar();
+function SidebarRail({
+  className,
+  onResizeStateChange,
+  side = 'left',
+  ...props
+}: React.ComponentProps<'button'> & {
+  onResizeStateChange?: (value: boolean) => void;
+  side?: 'left' | 'right';
+}) {
+  const { toggleSidebar, setWidth } = useSidebar();
+  const initialWidthRef = React.useRef(0);
+  const startXRef = React.useRef(0);
+  const isResizingRef = React.useRef(false);
+  const didDragRef = React.useRef(false);
+
+  const { onClick, ...restProps } = props;
+
+  const handlePointerMove = React.useCallback(
+    (event: PointerEvent) => {
+      if (!isResizingRef.current) {
+        return;
+      }
+
+      const delta = event.clientX - startXRef.current;
+      if (Math.abs(delta) > 2) {
+        didDragRef.current = true;
+      }
+
+      const directionMultiplier = side === 'right' ? -1 : 1;
+      const nextWidth = Math.min(
+        window.innerWidth,
+        Math.max(SIDEBAR_MIN_WIDTH, initialWidthRef.current + delta * directionMultiplier),
+      );
+      setWidth(nextWidth);
+    },
+    [setWidth, side],
+  );
+
+  const handlePointerUp = React.useCallback(() => {
+    if (!isResizingRef.current) {
+      return;
+    }
+
+    isResizingRef.current = false;
+    onResizeStateChange?.(false);
+    window.removeEventListener('pointermove', handlePointerMove);
+    window.removeEventListener('pointerup', handlePointerUp);
+    window.setTimeout(() => {
+      didDragRef.current = false;
+    }, 0);
+  }, [handlePointerMove, onResizeStateChange]);
+
+  function handlePointerDown(event: React.PointerEvent<HTMLButtonElement>) {
+    if (event.button !== 0) {
+      return;
+    }
+
+    event.stopPropagation();
+    isResizingRef.current = true;
+    didDragRef.current = false;
+    onResizeStateChange?.(true);
+    initialWidthRef.current =
+      event.currentTarget.parentElement?.offsetWidth ?? SIDEBAR_WIDTH_DEFAULT;
+    startXRef.current = event.clientX;
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+  }
+
+  function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
+    if (isResizingRef.current || didDragRef.current) {
+      return;
+    }
+
+    onClick?.(event);
+    toggleSidebar();
+  }
 
   return (
     <button
@@ -283,18 +371,19 @@ function SidebarRail({ className, ...props }: React.ComponentProps<'button'>) {
       data-slot="sidebar-rail"
       aria-label="Toggle Sidebar"
       tabIndex={-1}
-      onClick={toggleSidebar}
-      title="Toggle Sidebar"
+      onPointerDown={handlePointerDown}
+      onClick={handleClick}
+      title="Resize Sidebar"
       className={cn(
-        'hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] sm:flex',
-        'in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize',
-        '[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
-        'hover:group-data-[collapsible=offcanvas]:bg-sidebar group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full',
+        'hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-6 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-8 group-data-[side=right]:left-8 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] sm:flex',
+        'cursor-col-resize',
+        '[[data-side=left][data-state=collapsed]_&]:cursor-col-resize [[data-side=right][data-state=collapsed]_&]:cursor-col-resize',
+        'hover:group-data-[collapsible=offcanvas]:bg-sidebar/30 group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full',
         '[[data-side=left][data-collapsible=offcanvas]_&]:-right-2',
         '[[data-side=right][data-collapsible=offcanvas]_&]:-left-2',
         className,
       )}
-      {...props}
+      {...restProps}
     />
   );
 }
