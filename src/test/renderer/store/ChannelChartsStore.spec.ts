@@ -98,4 +98,76 @@ describe('ChannelChartsStore', () => {
       expect(charts['chart-id-1'].name).toBe('My Custom Chart');
     });
   });
+
+  describe('removeChannelsFromAllCharts', () => {
+    test('should remove all channels from a specific file path', () => {
+      const { addChart, addChannelToChart, removeChannelsFromAllCharts } =
+        useChannelChartsStore.getState().actions;
+
+      addChart('chart-id-1');
+      const voltageSerie = createMockSerie('Voltage');
+      const frequencySerie = createMockSerie('Frequency');
+
+      addChannelToChart('chart-id-1', '/path/to/file1.csv::channel-1', voltageSerie);
+      addChannelToChart('chart-id-1', '/path/to/file2.csv::channel-2', frequencySerie);
+
+      removeChannelsFromAllCharts('/path/to/file1.csv');
+
+      const { charts } = useChannelChartsStore.getState();
+      expect(charts['chart-id-1'].channels['/path/to/file1.csv::channel-1']).toBeUndefined();
+      expect(charts['chart-id-1'].channels['/path/to/file2.csv::channel-2']).toBeDefined();
+    });
+
+    test('should remove channels from multiple charts', () => {
+      const { addChart, addChannelToChart, removeChannelsFromAllCharts } =
+        useChannelChartsStore.getState().actions;
+
+      addChart('chart-id-1');
+      addChart('chart-id-2');
+      const voltageSerie = createMockSerie('Voltage');
+      const currentSerie = createMockSerie('Current');
+      const frequencySerie = createMockSerie('Frequency');
+
+      addChannelToChart('chart-id-1', '/path/to/file1.csv::channel-1', voltageSerie);
+      addChannelToChart('chart-id-1', '/path/to/file2.csv::channel-2', frequencySerie);
+      addChannelToChart('chart-id-2', '/path/to/file1.csv::channel-3', currentSerie);
+      addChannelToChart('chart-id-2', '/path/to/file2.csv::channel-4', frequencySerie);
+
+      removeChannelsFromAllCharts('/path/to/file1.csv');
+
+      const { charts } = useChannelChartsStore.getState();
+      expect(charts['chart-id-1'].channels['/path/to/file1.csv::channel-1']).toBeUndefined();
+      expect(charts['chart-id-1'].channels['/path/to/file2.csv::channel-2']).toBeDefined();
+      expect(charts['chart-id-2'].channels['/path/to/file1.csv::channel-3']).toBeUndefined();
+      expect(charts['chart-id-2'].channels['/path/to/file2.csv::channel-4']).toBeDefined();
+    });
+
+    test('should preserve all channels when file path does not match', () => {
+      const { addChart, addChannelToChart, removeChannelsFromAllCharts } =
+        useChannelChartsStore.getState().actions;
+
+      addChart('chart-id-1');
+      const voltageSerie = createMockSerie('Voltage');
+      const frequencySerie = createMockSerie('Frequency');
+
+      addChannelToChart('chart-id-1', '/path/to/file1.csv::channel-1', voltageSerie);
+      addChannelToChart('chart-id-1', '/path/to/file2.csv::channel-2', frequencySerie);
+
+      removeChannelsFromAllCharts('/path/to/file3.csv');
+
+      const { charts } = useChannelChartsStore.getState();
+      expect(charts['chart-id-1'].channels['/path/to/file1.csv::channel-1']).toBeDefined();
+      expect(charts['chart-id-1'].channels['/path/to/file2.csv::channel-2']).toBeDefined();
+    });
+
+    test('should handle charts with no channels', () => {
+      const { addChart, removeChannelsFromAllCharts } = useChannelChartsStore.getState().actions;
+
+      addChart('chart-id-1');
+      removeChannelsFromAllCharts('/path/to/file1.csv');
+
+      const { charts } = useChannelChartsStore.getState();
+      expect(Object.keys(charts['chart-id-1'].channels)).toHaveLength(0);
+    });
+  });
 });

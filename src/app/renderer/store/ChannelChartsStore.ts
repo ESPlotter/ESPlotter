@@ -21,6 +21,7 @@ interface ChannelChartsState {
     removeChart: (chartId: string) => void;
     addChannelToChart: (chartId: string, channelId: string, serie: ChartSerie) => void;
     removeChannelFromChart: (chartId: string, channelId: string) => void;
+    removeChannelsFromAllCharts: (filePath: string) => void;
     changeNameOfChart: (chartId: string, newName: string) => void;
   };
 }
@@ -101,6 +102,26 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
             },
           },
         };
+      }),
+    removeChannelsFromAllCharts: (filePath: string) =>
+      set((state) => {
+        const updatedCharts = Object.entries(state.charts).reduce(
+          (acc, [chartId, chart]) => {
+            const remainingChannels = Object.entries(chart.channels).reduce(
+              (channelAcc, [channelKey, serie]) => {
+                if (!channelKey.startsWith(`${filePath}::`)) {
+                  channelAcc[channelKey] = serie;
+                }
+                return channelAcc;
+              },
+              {} as { [channelId: string]: ChartSerie },
+            );
+            acc[chartId] = { ...chart, channels: remainingChannels };
+            return acc;
+          },
+          {} as typeof state.charts,
+        );
+        return { charts: updatedCharts };
       }),
     changeNameOfChart: (chartId: string, newName: string) =>
       set((state) => {
