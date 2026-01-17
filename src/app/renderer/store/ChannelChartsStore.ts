@@ -22,6 +22,7 @@ interface ChannelChartsState {
     addChannelToChart: (chartId: string, channelId: string, serie: ChartSerie) => void;
     removeChannelFromChart: (chartId: string, channelId: string) => void;
     changeNameOfChart: (chartId: string, newName: string) => void;
+    removeAllCharts: () => void;
   };
 }
 
@@ -61,35 +62,31 @@ removeChart: (chartId: string) =>
 
     const newCharts: typeof remainingCharts = {};
 
-    // Verificamos si el chart eliminado era automático
     const deletedNumber =
       removedChart && /^Chart \d+$/.test(removedChart.name)
         ? Number(removedChart.name.replace('Chart ', ''))
         : null;
        
-   // let counter = 1; // contador para renumerar charts automáticos si se borra un personalizado
 
-Object.entries(remainingCharts).forEach(([id, chart],index) => {
-  console.log(chart);
-  console.log(index);
-  
-  if (!/^Chart \d+$/.test(chart.name)) {
-    newCharts[id] = chart;
-    return;
-  }
+    Object.entries(remainingCharts).forEach(([id, chart],index) => {
 
-  const currentNumber = Number(chart.name.replace('Chart ', ''));
-  let newNumber: number;
-
-  if (deletedNumber) {
-    // borrado automático → solo bajan los posteriores
-    newNumber = currentNumber > deletedNumber ? currentNumber - 1 : currentNumber;
-  } else {
-    newNumber = index + 1;
-  }
-
-  newCharts[id] = { ...chart, name: `Chart ${newNumber}` };
-});
+      if (!/^Chart \d+$/.test(chart.name)) {
+        newCharts[id] = chart;
+        return;
+      }
+    
+      const currentNumber = Number(chart.name.replace('Chart ', ''));
+      let newNumber: number;
+    
+      if (deletedNumber) {
+        // borrado automático → solo bajan los posteriores
+        newNumber = currentNumber > deletedNumber ? currentNumber - 1 : currentNumber;
+      } else {
+        newNumber = index + 1;
+      }
+    
+      newCharts[id] = { ...chart, name: `Chart ${newNumber}` };
+    });
     const nextSelectedChartId =
       state.selectedChartId === chartId
         ? Object.keys(newCharts)[0] ?? null
@@ -162,6 +159,12 @@ Object.entries(remainingCharts).forEach(([id, chart],index) => {
           },
         };
       }),
+
+    removeAllCharts: () =>
+    set(() => ({
+      charts: {},
+      selectedChartId: null,
+    })),
   },
 }));
 
