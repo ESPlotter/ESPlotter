@@ -1,6 +1,8 @@
+import { nanoid } from 'nanoid';
 import { create } from 'zustand';
 
 import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
+
 
 const DEFAULT_CHART_NAME_PATTERN = /^Chart \d+$/;
 
@@ -157,11 +159,19 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
         };
       }),
 
-    removeAllCharts: () =>
-      set(() => ({
-        charts: {},
-        selectedChartId: null,
-      })),
+  removeAllCharts: () =>
+        set(() => {
+          const defaultChartId = nanoid();
+          return {
+            charts: {
+              [defaultChartId]: {
+                name: 'Chart 1',
+                channels: {},
+              },
+            },
+            selectedChartId: defaultChartId,
+          };
+      }),
   },
 }));
 
