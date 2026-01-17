@@ -13,6 +13,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const charts = useCharts();
   const chartCount = Object.keys(charts).length;
   const shouldShowCaptureButton = chartCount > 1;
+  const shouldShowDeleteAllButton = chartCount > 1;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,14 +51,16 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           <Button variant="outline" onClick={() => addChart(nanoid())}>
             <IconPlus /> New Chart
           </Button>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            onClick={removeAllCharts}
-            title="Delete all charts (Ctrl+Delete)"
-          >
-            <IconTrash className="size-4 text-red-600" />
-          </Button>
+          {shouldShowDeleteAllButton ? (
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={removeAllCharts}
+              title="Delete all charts (Ctrl+Delete)"
+            >
+              <IconTrash className="size-4 text-red-600" />
+            </Button>
+          ) : null}
         </div>
         <section className="flex-1 overflow-auto p-4" data-testid="chart-scroll-container">
           {children}
