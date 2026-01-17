@@ -3,7 +3,6 @@ import { create } from 'zustand';
 
 import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
 
-
 const DEFAULT_CHART_NAME_PATTERN = /^Chart \d+$/;
 
 interface ChannelChartsState {
@@ -89,7 +88,7 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
         });
         const nextSelectedChartId =
           state.selectedChartId === chartId
-            ? (Object.keys(newCharts)[Object.keys(newCharts).length - 1] ?? null) 
+            ? (Object.keys(newCharts)[Object.keys(newCharts).length - 1] ?? null)
             : state.selectedChartId;
 
         return {
@@ -159,18 +158,18 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
         };
       }),
 
-  removeAllCharts: () =>
-        set(() => {
-          const defaultChartId = nanoid();
-          return {
-            charts: {
-              [defaultChartId]: {
-                name: 'Chart 1',
-                channels: {},
-              },
+    removeAllCharts: () =>
+      set(() => {
+        const defaultChartId = nanoid();
+        return {
+          charts: {
+            [defaultChartId]: {
+              name: 'Chart 1',
+              channels: {},
             },
-            selectedChartId: defaultChartId,
-          };
+          },
+          selectedChartId: defaultChartId,
+        };
       }),
   },
 }));
