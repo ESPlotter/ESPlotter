@@ -56,48 +56,45 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
         };
       }),
 
-removeChart: (chartId: string) =>
-  set((state) => {
-    const { [chartId]: removedChart, ...remainingCharts } = state.charts;
+    removeChart: (chartId: string) =>
+      set((state) => {
+        const { [chartId]: removedChart, ...remainingCharts } = state.charts;
 
-    const newCharts: typeof remainingCharts = {};
+        const newCharts: typeof remainingCharts = {};
 
-    const deletedNumber =
-      removedChart && /^Chart \d+$/.test(removedChart.name)
-        ? Number(removedChart.name.replace('Chart ', ''))
-        : null;
-       
+        const deletedNumber =
+          removedChart && /^Chart \d+$/.test(removedChart.name)
+            ? Number(removedChart.name.replace('Chart ', ''))
+            : null;
 
-    Object.entries(remainingCharts).forEach(([id, chart],index) => {
+        Object.entries(remainingCharts).forEach(([id, chart], index) => {
+          if (!/^Chart \d+$/.test(chart.name)) {
+            newCharts[id] = chart;
+            return;
+          }
 
-      if (!/^Chart \d+$/.test(chart.name)) {
-        newCharts[id] = chart;
-        return;
-      }
-    
-      const currentNumber = Number(chart.name.replace('Chart ', ''));
-      let newNumber: number;
-    
-      if (deletedNumber) {
-        // borrado automático → solo bajan los posteriores
-        newNumber = currentNumber > deletedNumber ? currentNumber - 1 : currentNumber;
-      } else {
-        newNumber = index + 1;
-      }
-    
-      newCharts[id] = { ...chart, name: `Chart ${newNumber}` };
-    });
-    const nextSelectedChartId =
-      state.selectedChartId === chartId
-        ? Object.keys(newCharts)[0] ?? null
-        : state.selectedChartId;
+          const currentNumber = Number(chart.name.replace('Chart ', ''));
+          let newNumber: number;
 
-    return {
-      charts: newCharts,
-      selectedChartId: nextSelectedChartId,
-    };
-  }),
+          if (deletedNumber) {
+            // borrado automático → solo bajan los posteriores
+            newNumber = currentNumber > deletedNumber ? currentNumber - 1 : currentNumber;
+          } else {
+            newNumber = index + 1;
+          }
 
+          newCharts[id] = { ...chart, name: `Chart ${newNumber}` };
+        });
+        const nextSelectedChartId =
+          state.selectedChartId === chartId
+            ? (Object.keys(newCharts)[0] ?? null)
+            : state.selectedChartId;
+
+        return {
+          charts: newCharts,
+          selectedChartId: nextSelectedChartId,
+        };
+      }),
 
     addChannelToChart: (chartId: string, channelId: string, serie: ChartSerie) =>
       set((state) => {
@@ -161,10 +158,10 @@ removeChart: (chartId: string) =>
       }),
 
     removeAllCharts: () =>
-    set(() => ({
-      charts: {},
-      selectedChartId: null,
-    })),
+      set(() => ({
+        charts: {},
+        selectedChartId: null,
+      })),
   },
 }));
 
