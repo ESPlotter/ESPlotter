@@ -1,8 +1,8 @@
 import { describe, expect, test, beforeEach } from 'vitest';
 
+import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
 import { useChannelChartsStore } from '@renderer/store/ChannelChartsStore';
 import { useChannelFilesStore } from '@renderer/store/ChannelFilesStore';
-import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
 import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
 
 function createMockSerie(name: string): ChartSerie {
