@@ -4,6 +4,8 @@ import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
 
 const DEFAULT_CHART_NAME_PATTERN = /^Chart \d+$/;
 
+const MAX_FREE_SERIES = 3;
+
 interface ChannelChartsState {
   charts: {
     [chartId: string]: {
@@ -62,9 +64,20 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
         const chart = state.charts[chartId];
         if (!chart) {
           throw new Error(`Chart with id ${chartId} does not exist.`);
-        }
+        }   
 
         const channelCount = Object.keys(chart.channels).length;
+         
+            //  LIMIT FOR FREE VERSION
+
+          if (channelCount >= MAX_FREE_SERIES) {
+            alert(
+              "Free version allows only 3 series in one chart.\nUpgrade to premium at: https://esplotter.com"
+            );
+            return state; // stop here
+          }
+
+
         const isFirstChannel = channelCount === 0;
         const hasDefaultName = DEFAULT_CHART_NAME_PATTERN.test(chart.name);
 
