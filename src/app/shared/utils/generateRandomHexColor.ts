@@ -1,15 +1,4 @@
-const MAX_FREE_SERIES = 3;
-let usedColors = 0;
-
 export function generateRandomHexColor(): string {
-  if (usedColors >= MAX_FREE_SERIES) {
-    throw new Error(
-      "Free version allows only 3 series. Please upgrade to premium."
-    );
-  }
-
-  usedColors++;
-
   let hash = 0;
   for (let i = 0; i < 10; i++) {
     hash = (hash << 5) - hash + Math.floor(Math.random() * 256);

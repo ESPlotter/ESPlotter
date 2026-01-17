@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeEach } from 'vitest';
+import { describe, expect, test, beforeEach, vi } from 'vitest';
 
 import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
 import { useChannelChartsStore } from '@renderer/store/ChannelChartsStore';
@@ -96,6 +96,35 @@ describe('ChannelChartsStore', () => {
 
       const { charts } = useChannelChartsStore.getState();
       expect(charts['chart-id-1'].name).toBe('My Custom Chart');
+    });
+
+    //  NEW TEST FOR FREE VERSION LIMIT
+    test('should not allow adding more than 3 series to a chart', () => {
+      const { addChart, addChannelToChart } = useChannelChartsStore.getState().actions;
+
+      addChart('chart-id-1');
+
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+      addChannelToChart('chart-id-1', 'channel-1', createMockSerie('S1'));
+      addChannelToChart('chart-id-1', 'channel-2', createMockSerie('S2'));
+      addChannelToChart('chart-id-1', 'channel-3', createMockSerie('S3'));
+
+      let charts = useChannelChartsStore.getState().charts;
+      expect(Object.keys(charts['chart-id-1'].channels).length).toBe(3);
+
+      // Try to add 4th
+      addChannelToChart('chart-id-1', 'channel-4', createMockSerie('S4'));
+
+      charts = useChannelChartsStore.getState().charts;
+
+      // Still only 3
+      expect(Object.keys(charts['chart-id-1'].channels).length).toBe(3);
+
+      // Alert should have been shown
+      expect(alertSpy).toHaveBeenCalled();
+
+      alertSpy.mockRestore();
     });
   });
 });

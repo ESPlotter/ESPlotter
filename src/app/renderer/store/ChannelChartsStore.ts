@@ -1,10 +1,11 @@
+import { MAX_FREE_SERIES } from './../../shared/config/limits';
 import { create } from 'zustand';
 
 import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
 
 const DEFAULT_CHART_NAME_PATTERN = /^Chart \d+$/;
 
-const MAX_FREE_SERIES = 3;
+
 
 interface ChannelChartsState {
   charts: {
