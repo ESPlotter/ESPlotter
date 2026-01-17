@@ -70,10 +70,10 @@ test.describe('Close channel files', () => {
 
     // Create a chart and add channels from both files
     await createChart(mainPage);
-    
+
     // Add channel from test1
     await clickSidebarChannel(mainPage, 'Voltage ()', 'test1');
-    
+
     // Add channel from test4
     await clickSidebarChannel(mainPage, 'Active Power ()', 'test4');
 

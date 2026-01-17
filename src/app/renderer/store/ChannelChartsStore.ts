@@ -105,21 +105,16 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
       }),
     removeChannelsFromAllCharts: (filePath: string) =>
       set((state) => {
-        const updatedCharts = Object.entries(state.charts).reduce(
-          (acc, [chartId, chart]) => {
-            const remainingChannels = Object.entries(chart.channels).reduce(
-              (channelAcc, [channelKey, serie]) => {
-                if (!channelKey.startsWith(`${filePath}::`)) {
-                  channelAcc[channelKey] = serie;
-                }
-                return channelAcc;
-              },
-              {} as { [channelId: string]: ChartSerie },
+        const prefix = `${filePath}::`;
+        const updatedCharts = Object.fromEntries(
+          Object.entries(state.charts).map(([chartId, chart]) => {
+            const remainingChannels = Object.fromEntries(
+              Object.entries(chart.channels).filter(
+                ([channelKey]) => !channelKey.startsWith(prefix),
+              ),
             );
-            acc[chartId] = { ...chart, channels: remainingChannels };
-            return acc;
-          },
-          {} as typeof state.charts,
+            return [chartId, { ...chart, channels: remainingChannels }];
+          }),
         );
         return { charts: updatedCharts };
       }),
