@@ -24,11 +24,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@shadcn/components/ui/sidebar';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@shadcn/components/ui/tooltip';
 import { ChannelFileContentSeriePrimitive } from '@shared/domain/primitives/ChannelFileContentSeriePrimitive';
 import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
 
@@ -100,19 +95,15 @@ export function AppSidebar() {
                     <AccordionTrigger className="text-sm font-medium">
                       <div className="flex w-full items-center justify-between gap-2">
                         <span className="block flex-1 truncate text-left">{item.fileName}</span>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={(e) => handleCloseFile(item.filePath, e)}
-                              className="rounded p-1 hover:bg-muted"
-                              aria-label="Close file"
-                              type="button"
-                            >
-                              <XIcon className="size-4" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>Close</TooltipContent>
-                        </Tooltip>
+                        <button
+                          onClick={(e) => handleCloseFile(item.filePath, e)}
+                          className="rounded p-1 hover:bg-muted"
+                          aria-label="Close file"
+                          title="Close"
+                          type="button"
+                        >
+                          <XIcon className="size-4" />
+                        </button>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
