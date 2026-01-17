@@ -1,5 +1,6 @@
 import { IconCamera, IconPlus, IconTrash } from '@tabler/icons-react';
 import { nanoid } from 'nanoid';
+import { useEffect } from 'react';
 
 import { AppSidebar } from '@components/AppSidebar/AppSidebar';
 import { captureVisibleChartsToClipboard } from '@renderer/components/Chart/captureVisibleCharts';
@@ -12,6 +13,18 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const charts = useCharts();
   const chartCount = Object.keys(charts).length;
   const shouldShowCaptureButton = chartCount > 1;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'Delete') {
+        e.preventDefault();
+        removeAllCharts();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, { passive: false });
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [removeAllCharts]);
 
   function handleCopyVisibleCharts() {
     void captureVisibleChartsToClipboard();
@@ -41,7 +54,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             variant="outline"
             size="icon-sm"
             onClick={removeAllCharts}
-            title="Delete all charts"
+            title="Delete all charts (Ctrl+Delete)"
           >
             <IconTrash className="size-4 text-red-600" />
           </Button>
