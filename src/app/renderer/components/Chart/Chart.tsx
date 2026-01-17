@@ -80,6 +80,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
 
   useChartsHotkey(getChart, { key: 'z' }, () => enableZoomSelect(), { active: isSelected });
   useChartsHotkey(getChart, { key: 'h' }, handleToggleTooltipHotkey, { active: isSelected });
+  useChartsHotkey(getChart, { key: 'Delete' }, handleDeleteChart, { active: isSelected });
 
   function getChart(): EChartsType | null {
     const chart = chartInstanceRef.current;
@@ -209,7 +210,12 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
         >
           <IconCamera className="size-4" />
         </Button>
-        <Button variant="outline" size="icon-sm" onClick={handleDeleteChart} title="Delete chart">
+        <Button
+          variant="outline"
+          size="icon-sm"
+          onClick={handleDeleteChart}
+          title="Delete chart (Delete key)"
+        >
           <IconTrash className="size-4 text-red-600" />
         </Button>
       </div>

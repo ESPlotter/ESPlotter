@@ -87,7 +87,7 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
         });
         const nextSelectedChartId =
           state.selectedChartId === chartId
-            ? (Object.keys(newCharts)[0] ?? null)
+            ? (Object.keys(newCharts)[Object.keys(newCharts).length - 1] ?? null) 
             : state.selectedChartId;
 
         return {
