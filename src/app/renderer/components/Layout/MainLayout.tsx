@@ -8,6 +8,12 @@ import { Button } from '@renderer/shadcn/components/ui/button';
 import { useChannelChartsActions, useCharts } from '@renderer/store/ChannelChartsStore';
 import { SidebarProvider } from '@shadcn/components/ui/sidebar';
 
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  const tag = target.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable;
+}
+
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const { addChart, removeAllCharts } = useChannelChartsActions();
   const charts = useCharts();
@@ -17,6 +23,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isTypingTarget(e.target)) return;
       if (e.ctrlKey && e.key === 'Delete') {
         e.preventDefault();
         removeAllCharts();
