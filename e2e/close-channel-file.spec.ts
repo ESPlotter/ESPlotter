@@ -30,7 +30,7 @@ test.describe('Close channel files', () => {
     await expect(mainPage.getByRole('button', { name: 'test1' })).toBeVisible();
 
     // Click the close button (X icon)
-    const closeButton = mainPage.getByTitle('Close').first();
+    const closeButton = mainPage.getByRole('button', { name: /close file/i }).first();
     await closeButton.click();
 
     // Verify file is removed from sidebar
@@ -51,7 +51,7 @@ test.describe('Close channel files', () => {
     expect(seriesSummary.seriesCount).toBeGreaterThan(0);
 
     // Close the file
-    const closeButton = mainPage.getByTitle('Close').first();
+    const closeButton = mainPage.getByRole('button', { name: /close file/i }).first();
     await closeButton.click();
 
     // Verify channels are removed from chart
@@ -82,7 +82,7 @@ test.describe('Close channel files', () => {
     expect(seriesSummary.seriesCount).toBe(2);
 
     // Close test1 file
-    const closeButtons = mainPage.getByTitle('Close');
+    const closeButtons = mainPage.getByRole('button', { name: /close file/i });
     await closeButtons.first().click();
 
     // Verify test1 is removed but test4 remains
