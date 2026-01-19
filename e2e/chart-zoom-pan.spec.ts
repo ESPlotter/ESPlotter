@@ -199,7 +199,9 @@ test.describe('Chart zoom, pan, and reset controls', () => {
         const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
         return (
           zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
-          zoomedRanges.xAxis.end < initialRanges.xAxis.end
+          zoomedRanges.xAxis.end < initialRanges.xAxis.end &&
+          Math.abs(zoomedRanges.yAxis.start - initialRanges.yAxis.start) > 0.1 &&
+          Math.abs(zoomedRanges.yAxis.end - initialRanges.yAxis.end) > 0.1
         );
       })
       .toBe(true);
@@ -211,7 +213,8 @@ test.describe('Chart zoom, pan, and reset controls', () => {
         return (
           Math.abs(resetRanges.xAxis.start - initialRanges.xAxis.start) < 0.1 &&
           Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) < 0.1 &&
-          Math.abs(resetRanges.yAxis.start - initialRanges.yAxis.start) > 0.1
+          Math.abs(resetRanges.yAxis.start - initialRanges.yAxis.start) > 0.1 &&
+          Math.abs(resetRanges.yAxis.end - initialRanges.yAxis.end) > 0.1
         );
       })
       .toBe(true);
@@ -245,7 +248,9 @@ test.describe('Chart zoom, pan, and reset controls', () => {
         const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
         return (
           zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
-          zoomedRanges.xAxis.end < initialRanges.xAxis.end
+          zoomedRanges.xAxis.end < initialRanges.xAxis.end &&
+          Math.abs(zoomedRanges.yAxis.start - initialRanges.yAxis.start) > 0.1 &&
+          Math.abs(zoomedRanges.yAxis.end - initialRanges.yAxis.end) > 0.1
         );
       })
       .toBe(true);
@@ -257,7 +262,8 @@ test.describe('Chart zoom, pan, and reset controls', () => {
         return (
           Math.abs(resetRanges.yAxis.start - initialRanges.yAxis.start) < 0.1 &&
           Math.abs(resetRanges.yAxis.end - initialRanges.yAxis.end) < 0.1 &&
-          Math.abs(resetRanges.xAxis.start - initialRanges.xAxis.start) > 0.1
+          Math.abs(resetRanges.xAxis.start - initialRanges.xAxis.start) > 0.1 &&
+          Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) > 0.1
         );
       })
       .toBe(true);
