@@ -24,3 +24,9 @@ export async function readClipboardImageSize(
     return { width: size.width, height: size.height };
   });
 }
+
+export async function clearClipboardImage(app: ElectronApplication): Promise<void> {
+  await app.evaluate(({ clipboard }) => {
+    clipboard.clear();
+  });
+}

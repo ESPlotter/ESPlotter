@@ -21,6 +21,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!shouldShowCaptureButton) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented) return;
       if (isTypingTarget(event.target)) return;
@@ -32,7 +33,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
     window.addEventListener('keydown', onKeyDown, { passive: false });
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [handleCopyVisibleCharts]);
+  }, [handleCopyVisibleCharts, shouldShowCaptureButton]);
 
   return (
     <SidebarProvider>
