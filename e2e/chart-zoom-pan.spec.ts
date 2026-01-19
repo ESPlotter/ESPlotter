@@ -41,7 +41,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     await expect(panButton).toBeVisible();
 
     // Check for reset button
-    const resetButton = chartRoot.getByRole('button', { name: 'Reset zoom (Escape)' });
+    const resetButton = chartRoot.getByRole('button', { name: 'Reset zoom', exact: true });
     await expect(resetButton).toBeVisible();
   });
 
@@ -130,7 +130,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
 
     const chartRoot = getChartRoot(mainPage, chartTitle);
     const chartElement = chartContainer(mainPage, chartTitle).locator('.echarts-for-react').first();
-    const resetButton = chartRoot.getByRole('button', { name: 'Reset zoom (Escape)' });
+    const resetButton = chartRoot.getByRole('button', { name: 'Reset zoom', exact: true });
 
     await expect(chartElement).toBeVisible();
     await waitForChartData(mainPage, chartTitle);
@@ -160,12 +160,12 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     await resetButton.click();
     await expect
       .poll(async () => {
-        const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
+        const resetRanges = await getChartZoomRanges(mainPage, chartTitle);
         return (
-          zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
-          zoomedRanges.xAxis.end < initialRanges.xAxis.end &&
-          zoomedRanges.yAxis.start > initialRanges.yAxis.start &&
-          zoomedRanges.yAxis.end < initialRanges.yAxis.end
+          resetRanges.xAxis.start === initialRanges.xAxis.start &&
+          resetRanges.xAxis.end === initialRanges.xAxis.end &&
+          resetRanges.yAxis.start === initialRanges.yAxis.start &&
+          resetRanges.yAxis.end === initialRanges.yAxis.end
         );
       })
       .toBe(true);
@@ -179,7 +179,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
 
     const chartRoot = getChartRoot(mainPage, chartTitle);
     const chartElement = chartContainer(mainPage, chartTitle).locator('.echarts-for-react').first();
-    const resetZoomXButton = chartRoot.getByRole('button', { name: 'Reset zoom X (X Key)' });
+    const resetZoomXButton = chartRoot.getByRole('button', { name: 'Reset zoom X' });
 
     await expect(chartElement).toBeVisible();
     await waitForChartData(mainPage, chartTitle);
@@ -225,7 +225,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
 
     const chartRoot = getChartRoot(mainPage, chartTitle);
     const chartElement = chartContainer(mainPage, chartTitle).locator('.echarts-for-react').first();
-    const resetZoomYButton = chartRoot.getByRole('button', { name: 'Reset zoom Y (Y Key)' });
+    const resetZoomYButton = chartRoot.getByRole('button', { name: 'Reset zoom Y' });
 
     await expect(chartElement).toBeVisible();
     await waitForChartData(mainPage, chartTitle);
