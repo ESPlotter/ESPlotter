@@ -12,7 +12,7 @@ export async function getElectronAppForE2eTest(): Promise<ElectronApplication> {
       executablePath: getPackagedAppPath(),
       timeout: 20_000,
       env: getElectronLaunchEnv(true),
-      args: ['--remote-debugging-port=0', '--disable-gpu'],
+      args: ['--remote-debugging-port=0', '--disable-gpu', '--disable-auto-update'],
     });
   }
 

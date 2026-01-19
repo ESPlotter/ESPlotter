@@ -28,6 +28,11 @@ if (shouldQuitForSquirrel()) {
   app.quit();
 }
 
+if (app.isPackaged && !process.argv.includes('--disable-auto-update')) {
+  const requireForEsm = createRequire(import.meta.url);
+  requireForEsm('update-electron-app')();
+}
+
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
