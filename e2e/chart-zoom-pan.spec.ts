@@ -41,7 +41,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     await expect(panButton).toBeVisible();
 
     // Check for reset button
-    const resetButton = chartRoot.getByTitle(/Reset zoom/);
+    const resetButton = chartRoot.getByRole('button', { name: 'Reset zoom', exact: true });
     await expect(resetButton).toBeVisible();
   });
 
@@ -130,7 +130,7 @@ test.describe('Chart zoom, pan, and reset controls', () => {
 
     const chartRoot = getChartRoot(mainPage, chartTitle);
     const chartElement = chartContainer(mainPage, chartTitle).locator('.echarts-for-react').first();
-    const resetButton = chartRoot.getByTitle(/Reset zoom/);
+    const resetButton = chartRoot.getByRole('button', { name: 'Reset zoom', exact: true });
 
     await expect(chartElement).toBeVisible();
     await waitForChartData(mainPage, chartTitle);
@@ -162,8 +162,108 @@ test.describe('Chart zoom, pan, and reset controls', () => {
       .poll(async () => {
         const resetRanges = await getChartZoomRanges(mainPage, chartTitle);
         return (
+          resetRanges.xAxis.start === initialRanges.xAxis.start &&
+          resetRanges.xAxis.end === initialRanges.xAxis.end &&
+          resetRanges.yAxis.start === initialRanges.yAxis.start &&
+          resetRanges.yAxis.end === initialRanges.yAxis.end
+        );
+      })
+      .toBe(true);
+  });
+
+  test('can reset zoom X using reset X button', async () => {
+    await createAndSelectChart(mainPage);
+    await addVoltageChannelToChart(mainPage);
+    const chartTitle = 'Voltage';
+    await expectSelectedChart(mainPage, chartTitle);
+
+    const chartRoot = getChartRoot(mainPage, chartTitle);
+    const chartElement = chartContainer(mainPage, chartTitle).locator('.echarts-for-react').first();
+    const resetZoomXButton = chartRoot.getByRole('button', { name: 'Reset zoom X' });
+
+    await expect(chartElement).toBeVisible();
+    await waitForChartData(mainPage, chartTitle);
+
+    const initialRanges = await getChartZoomRanges(mainPage, chartTitle);
+
+    const box = await chartElement.boundingBox();
+    if (!box) throw new Error('Chart element not found');
+
+    await mainPage.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5);
+    await mainPage.mouse.down();
+    await mainPage.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.7, { steps: 10 });
+    await mainPage.mouse.up();
+
+    await expect
+      .poll(async () => {
+        const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
+        return (
+          zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
+          zoomedRanges.xAxis.end < initialRanges.xAxis.end &&
+          Math.abs(zoomedRanges.yAxis.start - initialRanges.yAxis.start) > 0.1 &&
+          Math.abs(zoomedRanges.yAxis.end - initialRanges.yAxis.end) > 0.1
+        );
+      })
+      .toBe(true);
+
+    await resetZoomXButton.click();
+    await expect
+      .poll(async () => {
+        const resetRanges = await getChartZoomRanges(mainPage, chartTitle);
+        return (
           Math.abs(resetRanges.xAxis.start - initialRanges.xAxis.start) < 0.1 &&
-          Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) < 0.1
+          Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) < 0.1 &&
+          Math.abs(resetRanges.yAxis.start - initialRanges.yAxis.start) > 0.1 &&
+          Math.abs(resetRanges.yAxis.end - initialRanges.yAxis.end) > 0.1
+        );
+      })
+      .toBe(true);
+  });
+
+  test('can reset zoom Y using reset Y button', async () => {
+    await createAndSelectChart(mainPage);
+    await addVoltageChannelToChart(mainPage);
+    const chartTitle = 'Voltage';
+    await expectSelectedChart(mainPage, chartTitle);
+
+    const chartRoot = getChartRoot(mainPage, chartTitle);
+    const chartElement = chartContainer(mainPage, chartTitle).locator('.echarts-for-react').first();
+    const resetZoomYButton = chartRoot.getByRole('button', { name: 'Reset zoom Y' });
+
+    await expect(chartElement).toBeVisible();
+    await waitForChartData(mainPage, chartTitle);
+
+    const initialRanges = await getChartZoomRanges(mainPage, chartTitle);
+
+    const box = await chartElement.boundingBox();
+    if (!box) throw new Error('Chart element not found');
+
+    await mainPage.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5);
+    await mainPage.mouse.down();
+    await mainPage.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.7, { steps: 10 });
+    await mainPage.mouse.up();
+
+    await expect
+      .poll(async () => {
+        const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
+        return (
+          zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
+          zoomedRanges.xAxis.end < initialRanges.xAxis.end &&
+          Math.abs(zoomedRanges.yAxis.start - initialRanges.yAxis.start) > 0.1 &&
+          Math.abs(zoomedRanges.yAxis.end - initialRanges.yAxis.end) > 0.1
+        );
+      })
+      .toBe(true);
+
+    await resetZoomYButton.click();
+    await expect
+      .poll(async () => {
+        const resetRanges = await getChartZoomRanges(mainPage, chartTitle);
+        return (
+          Math.abs(resetRanges.yAxis.start - initialRanges.yAxis.start) < 0.1 &&
+          Math.abs(resetRanges.yAxis.end - initialRanges.yAxis.end) < 0.1 &&
+          Math.abs(resetRanges.xAxis.start - initialRanges.xAxis.start) > 0.1 &&
+          Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) > 0.1
         );
       })
       .toBe(true);
