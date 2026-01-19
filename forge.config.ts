@@ -1,8 +1,5 @@
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
-import { MakerDeb } from '@electron-forge/maker-deb';
-import { MakerRpm } from '@electron-forge/maker-rpm';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
-import { MakerZIP } from '@electron-forge/maker-zip';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { ForgeConfig } from '@electron-forge/shared-types';
@@ -15,8 +12,25 @@ const config: ForgeConfig = {
     extraResource: ['scripts'],
   },
   rebuildConfig: {},
-  makers: [new MakerSquirrel({}), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({})],
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: {
+          owner: 'ESPlotter',
+          name: 'ESPlotter',
+        },
+        prerelease: false,
+        draft: true,
+      },
+    },
+  ],
+  makers: [new MakerSquirrel({})],
   plugins: [
+    {
+      name: '@electron-forge/plugin-auto-unpack-natives',
+      config: {},
+    },
     new VitePlugin({
       // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.
       // If you are familiar with Vite configuration, it will look really familiar.

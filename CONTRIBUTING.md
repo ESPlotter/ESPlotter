@@ -23,8 +23,7 @@ Read the full text in `CODE_OF_CONDUCT.md`.
 
 ## Pull Requests
 
-- All PRs should target `develop` by default.
-- `main` is only used for exceptional cases (for example, hotfixes).
+- All PRs should target `main`.
 - Create a branch with a clear prefix:
   - `feat/` for new features
   - `fix/` for bug fixes
