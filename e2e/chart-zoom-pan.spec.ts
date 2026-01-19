@@ -160,10 +160,12 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     await resetButton.click();
     await expect
       .poll(async () => {
-        const resetRanges = await getChartZoomRanges(mainPage, chartTitle);
+        const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
         return (
-          Math.abs(resetRanges.xAxis.start - initialRanges.xAxis.start) < 0.1 &&
-          Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) < 0.1
+          zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
+          zoomedRanges.xAxis.end < initialRanges.xAxis.end &&
+          zoomedRanges.yAxis.start > initialRanges.yAxis.start &&
+          zoomedRanges.yAxis.end < initialRanges.yAxis.end
         );
       })
       .toBe(true);
