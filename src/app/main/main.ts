@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { app, BrowserWindow, globalShortcut } from 'electron';
+import { updateElectronApp } from 'update-electron-app';
 
 import { registerMainIpcHandlers } from '@main/shared/infrastructure/ipc/registerMainIpcHandlers';
 import { registerMainMenu } from '@main/shared/infrastructure/menu/registerMainMenu';
@@ -29,8 +30,7 @@ if (shouldQuitForSquirrel()) {
 }
 
 if (app.isPackaged && !process.argv.includes('--disable-auto-update')) {
-  const requireForEsm = createRequire(import.meta.url);
-  requireForEsm('update-electron-app')();
+  updateElectronApp();
 }
 
 const createWindow = () => {
