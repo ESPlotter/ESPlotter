@@ -63,6 +63,40 @@ test.describe('Chart grid copy to clipboard', () => {
       .poll(async () => await readClipboardImageHasContent(electronApp), { timeout: 10000 })
       .toBe(true);
   });
+
+  test('copies visible charts with Shift+S shortcut', async () => {
+    await createChartsWithChannel(mainPage, 5);
+
+    const scrollContainer = mainPage.getByTestId('chart-scroll-container');
+    const sizes = await scrollContainer.evaluate((element) => ({
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+    }));
+
+    if (sizes.scrollHeight > sizes.clientHeight) {
+      await scrollContainer.evaluate((element) => {
+        element.scrollTop = element.clientHeight;
+      });
+    }
+
+    const expectedSize = await scrollContainer.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+      };
+    });
+
+    await mainPage.keyboard.press('Shift+S');
+
+    await expect
+      .poll(async () => await readClipboardImageSize(electronApp), { timeout: 10000 })
+      .toEqual(expectedSize);
+
+    await expect
+      .poll(async () => await readClipboardImageHasContent(electronApp), { timeout: 10000 })
+      .toBe(true);
+  });
 });
 
 async function createChartsWithChannel(page: Page, count: number): Promise<void> {

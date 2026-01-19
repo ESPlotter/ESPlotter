@@ -42,6 +42,24 @@ test.describe('Chart copy to clipboard', () => {
       .poll(async () => await readClipboardImageHasContent(electronApp), { timeout: 10000 })
       .toBe(true);
   });
+
+  test('copies chart image to clipboard with S shortcut', async () => {
+    await mainPage.keyboard.press('Escape');
+    await createAndSelectChart(mainPage);
+    await clickSidebarChannel(mainPage, 'Voltage (V)');
+    await expectSelectedChart(mainPage, 'Voltage');
+    await waitForChartData(mainPage, 'Voltage');
+
+    await mainPage.keyboard.press('s');
+
+    await expect
+      .poll(async () => await readClipboardImageDataUrl(electronApp), { timeout: 10000 })
+      .toMatch(/^data:image\/png;base64,/);
+
+    await expect
+      .poll(async () => await readClipboardImageHasContent(electronApp), { timeout: 10000 })
+      .toBe(true);
+  });
 });
 
 function getChartRoot(page: Page, chartTitle: string) {
