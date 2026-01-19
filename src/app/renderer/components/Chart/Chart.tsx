@@ -83,7 +83,9 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
 
   useChartsHotkey(getChart, { key: 'z' }, () => enableZoomSelect(), { active: isSelected });
   useChartsHotkey(getChart, { key: 'h' }, handleToggleTooltipHotkey, { active: isSelected });
-  useChartsHotkey(getChart, { key: 's' }, handleCopyChartImageHotkey, { active: isSelected });
+  useChartsHotkey(getChart, { key: 's', shift: false }, handleCopyChartImageHotkey, {
+    active: isSelected,
+  });
 
   function getChart(): EChartsType | null {
     const chart = chartInstanceRef.current;
