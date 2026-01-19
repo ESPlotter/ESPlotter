@@ -30,7 +30,7 @@
     "name": "nabby27",
     "email": "26057762+nabby27@users.noreply.github.com"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "devDependencies": {
     "@electron-forge/cli": "7.11.1",
     "@electron-forge/maker-deb": "7.11.1",
