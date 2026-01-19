@@ -83,6 +83,9 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
 
   useChartsHotkey(getChart, { key: 'z' }, () => enableZoomSelect(), { active: isSelected });
   useChartsHotkey(getChart, { key: 'h' }, handleToggleTooltipHotkey, { active: isSelected });
+  useChartsHotkey(getChart, { key: 's', shift: false }, handleCopyChartImageHotkey, {
+    active: isSelected,
+  });
 
   function getChart(): EChartsType | null {
     const chart = chartInstanceRef.current;
@@ -164,6 +167,10 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
     void copyChartImageToClipboard();
   }
 
+  function handleCopyChartImageHotkey() {
+    void copyChartImageToClipboard();
+  }
+
   function handleSelectChart() {
     setSelectedChartId(id);
   }
@@ -241,7 +248,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
           variant="outline"
           size="icon-sm"
           onClick={handleCopyChartImage}
-          title="Copy chart image"
+          title="Copy chart image (S)"
           aria-label="Copy chart image"
         >
           <IconCamera className="size-4" />

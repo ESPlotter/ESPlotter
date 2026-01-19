@@ -3,7 +3,7 @@ import { expect, test, type ElectronApplication, type Page } from '@playwright/t
 import { clickSidebarChannel } from './support/clickSidebarChannel';
 import { createAndSelectChart } from './support/createAndSelectChart';
 import { openFixtureAndExpandInSidebar } from './support/openFixtureAndExpandInSidebar';
-import { readClipboardImageSize } from './support/readClipboardImage';
+import { clearClipboardImage, readClipboardImageSize } from './support/readClipboardImage';
 import { readClipboardImageHasContent } from './support/readClipboardImageHasContent';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
@@ -30,6 +30,18 @@ test.describe('Chart grid copy to clipboard', () => {
     await expect(copyButton).toBeVisible();
   });
 
+  test('does not copy visible charts shortcut when button is hidden', async () => {
+    await createChartsWithChannel(mainPage, 1);
+    await expect(mainPage.getByRole('button', { name: 'Copy visible charts' })).toHaveCount(0);
+
+    await clearClipboardImage(electronApp);
+    await mainPage.keyboard.press('Shift+S');
+
+    await expect
+      .poll(async () => await readClipboardImageSize(electronApp), { timeout: 2000 })
+      .toBeNull();
+  });
+
   test('copies only visible charts from the grid', async () => {
     await createChartsWithChannel(mainPage, 5);
 
@@ -54,6 +66,40 @@ test.describe('Chart grid copy to clipboard', () => {
     });
 
     await mainPage.getByRole('button', { name: 'Copy visible charts' }).click();
+
+    await expect
+      .poll(async () => await readClipboardImageSize(electronApp), { timeout: 10000 })
+      .toEqual(expectedSize);
+
+    await expect
+      .poll(async () => await readClipboardImageHasContent(electronApp), { timeout: 10000 })
+      .toBe(true);
+  });
+
+  test('copies visible charts with Shift+S shortcut', async () => {
+    await createChartsWithChannel(mainPage, 5);
+
+    const scrollContainer = mainPage.getByTestId('chart-scroll-container');
+    const sizes = await scrollContainer.evaluate((element) => ({
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+    }));
+
+    if (sizes.scrollHeight > sizes.clientHeight) {
+      await scrollContainer.evaluate((element) => {
+        element.scrollTop = element.clientHeight;
+      });
+    }
+
+    const expectedSize = await scrollContainer.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+      };
+    });
+
+    await mainPage.keyboard.press('Shift+S');
 
     await expect
       .poll(async () => await readClipboardImageSize(electronApp), { timeout: 10000 })
