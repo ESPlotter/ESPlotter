@@ -29,7 +29,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           npm i
-          npx electron-builder --publish always
+          npm run publish
 
       - name: Build Changelog
         id: changelog
