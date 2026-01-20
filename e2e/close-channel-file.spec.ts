@@ -29,10 +29,10 @@ test.describe('Close channel files', () => {
     // Verify file is visible in sidebar
     await expect(mainPage.getByRole('button', { name: 'test1' })).toBeVisible();
 
-    // Click the close button (X icon)
+    // Click the close button (X icon) - use force since it's inside AccordionTrigger
     const closeButton = mainPage.getByRole('button', { name: /close file/i }).first();
     await closeButton.waitFor({ state: 'visible' });
-    await closeButton.click();
+    await closeButton.click({ force: true });
 
     // Verify file is removed from sidebar
     await expect(mainPage.getByRole('button', { name: 'test1' })).not.toBeVisible();
@@ -51,10 +51,10 @@ test.describe('Close channel files', () => {
     let seriesSummary = await getRenderedSeriesSummary(mainPage, 0);
     expect(seriesSummary.seriesCount).toBeGreaterThan(0);
 
-    // Close the file
+    // Close the file - use force since button is inside AccordionTrigger
     const closeButton = mainPage.getByRole('button', { name: /close file/i }).first();
     await closeButton.waitFor({ state: 'visible' });
-    await closeButton.click();
+    await closeButton.click({ force: true });
 
     // Verify channels are removed from chart
     seriesSummary = await getRenderedSeriesSummary(mainPage, 0);
@@ -83,10 +83,10 @@ test.describe('Close channel files', () => {
     let seriesSummary = await getRenderedSeriesSummary(mainPage, 0);
     expect(seriesSummary.seriesCount).toBe(2);
 
-    // Close test1 file
+    // Close test1 file - use force since button is inside AccordionTrigger
     const closeButtons = mainPage.getByRole('button', { name: /close file/i });
     await closeButtons.first().waitFor({ state: 'visible' });
-    await closeButtons.first().click();
+    await closeButtons.first().click({ force: true });
 
     // Verify test1 is removed but test4 remains
     await expect(mainPage.getByRole('button', { name: 'test1' })).not.toBeVisible();
@@ -109,10 +109,10 @@ test.describe('Close channel files', () => {
     // Verify chart title was set to channel name "Voltage"
     await expect(mainPage.getByRole('button', { name: 'Voltage' })).toBeVisible();
 
-    // Close the file
+    // Close the file - use force since button is inside AccordionTrigger
     const closeButton = mainPage.getByRole('button', { name: /close file/i }).first();
     await closeButton.waitFor({ state: 'visible' });
-    await closeButton.click();
+    await closeButton.click({ force: true });
 
     // Verify chart title reset to "Chart 1" (chart position)
     await expect(mainPage.getByRole('button', { name: 'Chart 1' })).toBeVisible();
@@ -143,10 +143,10 @@ test.describe('Close channel files', () => {
     // Add channel from test4
     await clickSidebarChannel(mainPage, 'Active Power ()', 'test4');
 
-    // Close test1 file (which has the Voltage channel)
+    // Close test1 file (which has the Voltage channel) - use force since button is inside AccordionTrigger
     const closeButtons = mainPage.getByRole('button', { name: /close file/i });
     await closeButtons.first().waitFor({ state: 'visible' });
-    await closeButtons.first().click();
+    await closeButtons.first().click({ force: true });
 
     // Verify chart title updated to "Active Power" (first remaining channel)
     await expect(mainPage.getByRole('button', { name: 'Active Power' })).toBeVisible();
@@ -182,10 +182,10 @@ test.describe('Close channel files', () => {
     // Add another channel from test4
     await clickSidebarChannel(mainPage, 'Active Power ()', 'test4');
 
-    // Close test1 file
+    // Close test1 file - use force since button is inside AccordionTrigger
     const closeButtons = mainPage.getByRole('button', { name: /close file/i });
     await closeButtons.first().waitFor({ state: 'visible' });
-    await closeButtons.first().click();
+    await closeButtons.first().click({ force: true });
 
     // Verify chart title remains "My Custom Chart" (unchanged)
     await expect(mainPage.getByRole('button', { name: 'My Custom Chart' })).toBeVisible();
@@ -218,10 +218,10 @@ test.describe('Close channel files', () => {
     await createChart(mainPage);
     await clickSidebarChannel(mainPage, 'Reactive Power ()', 'test1');
 
-    // Close test1 file
+    // Close test1 file - use force since button is inside AccordionTrigger
     const closeButtons = mainPage.getByRole('button', { name: /close file/i });
     await closeButtons.first().waitFor({ state: 'visible' });
-    await closeButtons.first().click();
+    await closeButtons.first().click({ force: true });
 
     // Chart 1: Had "Voltage" title, removed Voltage, now empty -> should be "Chart 1"
     await expect(mainPage.getByRole('button', { name: 'Chart 1' })).toBeVisible();
