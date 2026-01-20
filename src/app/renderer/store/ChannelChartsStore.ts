@@ -113,19 +113,21 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
               channelKey.startsWith(prefix),
             );
             const remainingChannels = Object.fromEntries(
-              Object.entries(chart.channels).filter(([channelKey]) => !channelKey.startsWith(prefix)),
+              Object.entries(chart.channels).filter(
+                ([channelKey]) => !channelKey.startsWith(prefix),
+              ),
             );
 
             // Determine new chart name
             let newName = chart.name;
-            
+
             // Check if any removed channel name matches the chart title
             const removedChannelNames = removedChannels.map(([_, serie]) => serie.name);
             const chartTitleMatchesRemovedChannel = removedChannelNames.includes(chart.name);
 
             if (chartTitleMatchesRemovedChannel) {
               const remainingChannelsList = Object.values(remainingChannels);
-              
+
               if (remainingChannelsList.length === 0) {
                 // Chart is now empty, reset to default name
                 // Find the chart's position (1-indexed) based on when it was created

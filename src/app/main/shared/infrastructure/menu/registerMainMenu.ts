@@ -128,10 +128,12 @@ async function openCsvTxtFile(win: BrowserWindow, path: string): Promise<void> {
 }
 
 async function createChannelFileDependencies() {
-  const { ChannelFileStructureChecker } =
-    await import('@main/channel-file/domain/services/ChannelFileStructureChecker');
-  const { NodeChannelFileService } =
-    await import('@main/channel-file/infrastructure/services/NodeChannelFileService');
+  const { ChannelFileStructureChecker } = await import(
+    '@main/channel-file/domain/services/ChannelFileStructureChecker'
+  );
+  const { NodeChannelFileService } = await import(
+    '@main/channel-file/infrastructure/services/NodeChannelFileService'
+  );
 
   const structureChecker = new ChannelFileStructureChecker();
   const channelFileService = new NodeChannelFileService(structureChecker);
@@ -140,12 +142,15 @@ async function createChannelFileDependencies() {
 }
 
 async function createIngestionDependencies() {
-  const { NodePsseOutFileService } =
-    await import('@main/channel-file/infrastructure/services/NodePsseOutFileService');
-  const { ElectronStoreUserPreferencesRepository } =
-    await import('@main/user-preferences/infrastructure/repositories/ElectronStoreUserPreferencesRepository');
-  const { GetUserPreferences } =
-    await import('@main/user-preferences/application/use-cases/GetUserPreferences');
+  const { NodePsseOutFileService } = await import(
+    '@main/channel-file/infrastructure/services/NodePsseOutFileService'
+  );
+  const { ElectronStoreUserPreferencesRepository } = await import(
+    '@main/user-preferences/infrastructure/repositories/ElectronStoreUserPreferencesRepository'
+  );
+  const { GetUserPreferences } = await import(
+    '@main/user-preferences/application/use-cases/GetUserPreferences'
+  );
 
   const repository = new ElectronStoreUserPreferencesRepository();
   const getUserPreferences = new GetUserPreferences(repository);
@@ -160,8 +165,9 @@ async function createIngestionDependencies() {
 }
 
 async function createCsvTxtDependencies() {
-  const { NodeCsvTxtFileService } =
-    await import('@main/channel-file/infrastructure/services/NodeCsvTxtFileService');
+  const { NodeCsvTxtFileService } = await import(
+    '@main/channel-file/infrastructure/services/NodeCsvTxtFileService'
+  );
 
   const csvTxtFileService = new NodeCsvTxtFileService();
 
