@@ -31,6 +31,7 @@ test.describe('Close channel files', () => {
 
     // Click the close button (X icon)
     const closeButton = mainPage.getByRole('button', { name: /close file/i }).first();
+    await closeButton.waitFor({ state: 'visible' });
     await closeButton.click();
 
     // Verify file is removed from sidebar
@@ -52,6 +53,7 @@ test.describe('Close channel files', () => {
 
     // Close the file
     const closeButton = mainPage.getByRole('button', { name: /close file/i }).first();
+    await closeButton.waitFor({ state: 'visible' });
     await closeButton.click();
 
     // Verify channels are removed from chart
@@ -83,6 +85,7 @@ test.describe('Close channel files', () => {
 
     // Close test1 file
     const closeButtons = mainPage.getByRole('button', { name: /close file/i });
+    await closeButtons.first().waitFor({ state: 'visible' });
     await closeButtons.first().click();
 
     // Verify test1 is removed but test4 remains
@@ -108,6 +111,7 @@ test.describe('Close channel files', () => {
 
     // Close the file
     const closeButton = mainPage.getByRole('button', { name: /close file/i }).first();
+    await closeButton.waitFor({ state: 'visible' });
     await closeButton.click();
 
     // Verify chart title reset to "Chart 1" (chart position)
@@ -141,6 +145,7 @@ test.describe('Close channel files', () => {
 
     // Close test1 file (which has the Voltage channel)
     const closeButtons = mainPage.getByRole('button', { name: /close file/i });
+    await closeButtons.first().waitFor({ state: 'visible' });
     await closeButtons.first().click();
 
     // Verify chart title updated to "Active Power" (first remaining channel)
@@ -179,6 +184,7 @@ test.describe('Close channel files', () => {
 
     // Close test1 file
     const closeButtons = mainPage.getByRole('button', { name: /close file/i });
+    await closeButtons.first().waitFor({ state: 'visible' });
     await closeButtons.first().click();
 
     // Verify chart title remains "My Custom Chart" (unchanged)
@@ -214,6 +220,7 @@ test.describe('Close channel files', () => {
 
     // Close test1 file
     const closeButtons = mainPage.getByRole('button', { name: /close file/i });
+    await closeButtons.first().waitFor({ state: 'visible' });
     await closeButtons.first().click();
 
     // Chart 1: Had "Voltage" title, removed Voltage, now empty -> should be "Chart 1"
