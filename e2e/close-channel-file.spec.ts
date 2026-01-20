@@ -93,4 +93,146 @@ test.describe('Close channel files', () => {
     seriesSummary = await getRenderedSeriesSummary(mainPage, 0);
     expect(seriesSummary.seriesCount).toBe(1);
   });
+
+  test('should reset chart title to default when closing file makes chart empty and title matched channel', async () => {
+    // Open a test file
+    await openFixtureViaImportMenu(electronApp, mainPage, 'test1.txt');
+    await expandFileInSidebar(mainPage, 'test1');
+
+    // Create a chart and add a channel
+    await createChart(mainPage);
+    await clickSidebarChannel(mainPage, 'Voltage ()');
+
+    // Verify chart title was set to channel name "Voltage"
+    await expect(mainPage.getByRole('button', { name: 'Voltage' })).toBeVisible();
+
+    // Close the file
+    const closeButton = mainPage.getByRole('button', { name: /close file/i }).first();
+    await closeButton.click();
+
+    // Verify chart title reset to "Chart 1" (chart position)
+    await expect(mainPage.getByRole('button', { name: 'Chart 1' })).toBeVisible();
+
+    // Verify channels are removed from chart
+    const seriesSummary = await getRenderedSeriesSummary(mainPage, 0);
+    expect(seriesSummary.seriesCount).toBe(0);
+  });
+
+  test('should update chart title to first remaining channel when title matched removed channel', async () => {
+    // Open two test files
+    await openFixtureViaImportMenu(electronApp, mainPage, 'test1.txt');
+    await openFixtureViaImportMenu(electronApp, mainPage, 'test4.csv');
+
+    // Expand both files
+    await expandFileInSidebar(mainPage, 'test1');
+    await expandFileInSidebar(mainPage, 'test4');
+
+    // Create a chart and add channels from both files
+    await createChart(mainPage);
+
+    // Add channel from test1 first
+    await clickSidebarChannel(mainPage, 'Voltage ()', 'test1');
+
+    // Verify chart title was set to "Voltage"
+    await expect(mainPage.getByRole('button', { name: 'Voltage' })).toBeVisible();
+
+    // Add channel from test4
+    await clickSidebarChannel(mainPage, 'Active Power ()', 'test4');
+
+    // Close test1 file (which has the Voltage channel)
+    const closeButtons = mainPage.getByRole('button', { name: /close file/i });
+    await closeButtons.first().click();
+
+    // Verify chart title updated to "Active Power" (first remaining channel)
+    await expect(mainPage.getByRole('button', { name: 'Active Power' })).toBeVisible();
+
+    // Verify only one channel remains in chart
+    const seriesSummary = await getRenderedSeriesSummary(mainPage, 0);
+    expect(seriesSummary.seriesCount).toBe(1);
+  });
+
+  test('should not change chart title when it does not match removed channel', async () => {
+    // Open two test files
+    await openFixtureViaImportMenu(electronApp, mainPage, 'test1.txt');
+    await openFixtureViaImportMenu(electronApp, mainPage, 'test4.csv');
+
+    // Expand both files
+    await expandFileInSidebar(mainPage, 'test1');
+    await expandFileInSidebar(mainPage, 'test4');
+
+    // Create a chart and add channel from test1
+    await createChart(mainPage);
+    await clickSidebarChannel(mainPage, 'Voltage ()', 'test1');
+
+    // Manually change the chart title to a custom name
+    const chartTitleButton = mainPage.getByRole('button', { name: 'Voltage' });
+    await chartTitleButton.click();
+    const titleInput = mainPage.getByRole('textbox', { name: /chart name/i });
+    await titleInput.fill('My Custom Chart');
+    await titleInput.press('Enter');
+
+    // Verify custom title is set
+    await expect(mainPage.getByRole('button', { name: 'My Custom Chart' })).toBeVisible();
+
+    // Add another channel from test4
+    await clickSidebarChannel(mainPage, 'Active Power ()', 'test4');
+
+    // Close test1 file
+    const closeButtons = mainPage.getByRole('button', { name: /close file/i });
+    await closeButtons.first().click();
+
+    // Verify chart title remains "My Custom Chart" (unchanged)
+    await expect(mainPage.getByRole('button', { name: 'My Custom Chart' })).toBeVisible();
+
+    // Verify one channel remains in chart
+    const seriesSummary = await getRenderedSeriesSummary(mainPage, 0);
+    expect(seriesSummary.seriesCount).toBe(1);
+  });
+
+  test('should handle multiple charts with different title scenarios', async () => {
+    // Open two test files
+    await openFixtureViaImportMenu(electronApp, mainPage, 'test1.txt');
+    await openFixtureViaImportMenu(electronApp, mainPage, 'test4.csv');
+
+    // Expand both files
+    await expandFileInSidebar(mainPage, 'test1');
+    await expandFileInSidebar(mainPage, 'test4');
+
+    // Create chart 1 with only test1 Voltage
+    await createChart(mainPage);
+    await clickSidebarChannel(mainPage, 'Voltage ()', 'test1');
+    await expect(mainPage.getByRole('button', { name: 'Voltage' }).first()).toBeVisible();
+
+    // Create chart 2 with test1 Voltage and test4 Active Power
+    await createChart(mainPage);
+    await clickSidebarChannel(mainPage, 'Voltage ()', 'test1');
+    await clickSidebarChannel(mainPage, 'Active Power ()', 'test4');
+
+    // Create chart 3 with only test1 Reactive Power
+    await createChart(mainPage);
+    await clickSidebarChannel(mainPage, 'Reactive Power ()', 'test1');
+
+    // Close test1 file
+    const closeButtons = mainPage.getByRole('button', { name: /close file/i });
+    await closeButtons.first().click();
+
+    // Chart 1: Had "Voltage" title, removed Voltage, now empty -> should be "Chart 1"
+    await expect(mainPage.getByRole('button', { name: 'Chart 1' })).toBeVisible();
+
+    // Chart 2: Had "Voltage" title, removed Voltage, still has Active Power -> should be "Active Power"
+    await expect(mainPage.getByRole('button', { name: 'Active Power' })).toBeVisible();
+
+    // Chart 3: Had "Reactive Power" title, removed Reactive Power, now empty -> should be "Chart 3"
+    await expect(mainPage.getByRole('button', { name: 'Chart 3' })).toBeVisible();
+
+    // Verify series counts
+    let seriesSummary = await getRenderedSeriesSummary(mainPage, 0);
+    expect(seriesSummary.seriesCount).toBe(0);
+
+    seriesSummary = await getRenderedSeriesSummary(mainPage, 1);
+    expect(seriesSummary.seriesCount).toBe(1);
+
+    seriesSummary = await getRenderedSeriesSummary(mainPage, 2);
+    expect(seriesSummary.seriesCount).toBe(0);
+  });
 });
