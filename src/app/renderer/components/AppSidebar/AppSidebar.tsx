@@ -76,8 +76,7 @@ export function AppSidebar() {
     addChannelToChart(selectedChartId, channelKey, serie);
   }
 
-  function handleCloseFile(filePath: string, event: React.MouseEvent) {
-    event.stopPropagation();
+  function handleCloseFile(filePath: string) {
     removeChannelsFromAllCharts(filePath);
     removeFile(filePath);
   }
@@ -92,20 +91,20 @@ export function AppSidebar() {
               {allItems.map((item) => (
                 <Accordion type="single" collapsible key={item.filePath}>
                   <AccordionItem value={item.filePath}>
-                    <AccordionTrigger className="text-sm font-medium">
-                      <div className="flex w-full items-center justify-between gap-2">
+                    <div className="flex w-full items-center gap-2">
+                      <AccordionTrigger className="flex-1 text-sm font-medium">
                         <span className="block flex-1 truncate text-left">{item.fileName}</span>
-                        <button
-                          onClick={(e) => handleCloseFile(item.filePath, e)}
-                          className="rounded p-1 hover:bg-muted"
-                          aria-label="Close file"
-                          title="Close"
-                          type="button"
-                        >
-                          <XIcon className="size-4" />
-                        </button>
-                      </div>
-                    </AccordionTrigger>
+                      </AccordionTrigger>
+                      <button
+                        onClick={() => handleCloseFile(item.filePath)}
+                        className="rounded p-1 hover:bg-muted"
+                        aria-label="Close file"
+                        title="Close"
+                        type="button"
+                      >
+                        <XIcon className="size-4" />
+                      </button>
+                    </div>
                     <AccordionContent>
                       {item.channels?.map((channel) => {
                         const channelKey = buildChannelKey(item.filePath, channel.id);
