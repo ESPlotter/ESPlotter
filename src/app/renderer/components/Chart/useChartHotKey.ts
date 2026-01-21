@@ -26,7 +26,7 @@ function matchHotkey(e: KeyboardEvent, hk: Exclude<Hotkey, (e: KeyboardEvent) =>
   return true;
 }
 
-function isTypingTarget(target: EventTarget | null) {
+export function isTypingTarget(target: EventTarget | null) {
   const el = target as HTMLElement | null;
   if (!el) return false;
   const tag = el.tagName?.toLowerCase();

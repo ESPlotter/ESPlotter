@@ -1,8 +1,9 @@
 {
   "name": "esplotter",
-  "productName": "esplotter",
-  "version": "1.0.0",
+  "productName": "ESPlotter",
+  "version": "1.1.3",
   "description": "My Electron application description",
+  "repository": "ESPlotter/ESPlotter",
   "main": ".vite/build/main.mjs",
   "scripts": {
     "start": "electron-forge start",
@@ -30,7 +31,7 @@
     "name": "nabby27",
     "email": "26057762+nabby27@users.noreply.github.com"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "devDependencies": {
     "@electron-forge/cli": "7.11.1",
     "@electron-forge/maker-deb": "7.11.1",
@@ -40,6 +41,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "7.11.1",
     "@electron-forge/plugin-fuses": "7.11.1",
     "@electron-forge/plugin-vite": "7.11.1",
+    "@electron-forge/publisher-github": "^7.11.1",
     "@electron/fuses": "1.8.0",
     "@faker-js/faker": "^10.1.0",
     "@playwright/test": "1.57.0",
@@ -51,11 +53,11 @@
     "@types/electron-squirrel-startup": "1.0.2",
     "@types/node": "25.0.9",
     "@types/react": "19.2.8",
-    "cross-env": "10.1.0",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "5.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "2.1.1",
+    "cross-env": "10.1.0",
     "electron": "40.0.0",
     "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
@@ -103,6 +105,7 @@
     "react-dom": "19.2.3",
     "react-router": "7.12.0",
     "sonner": "^2.0.7",
+    "update-electron-app": "^3.1.2",
     "zustand": "^5.0.10"
   },
   "optionalDependencies": {

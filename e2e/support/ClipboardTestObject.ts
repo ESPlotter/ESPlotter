@@ -26,6 +26,12 @@ export class ClipboardTestObject {
     });
   }
 
+  async clearImage(): Promise<void> {
+    await this.app.evaluate(({ clipboard }) => {
+      clipboard.clear();
+    });
+  }
+
   async hasImageContent(): Promise<boolean> {
     return this.app.evaluate(({ clipboard }) => {
       const image = clipboard.readImage();
@@ -71,6 +77,10 @@ export class ClipboardTestObject {
 
   async expectImageHasContent(): Promise<void> {
     await expect.poll(async () => this.hasImageContent(), { timeout: 10000 }).toBe(true);
+  }
+
+  async expectImageEmpty(timeout = 2000): Promise<void> {
+    await expect.poll(async () => this.readImageSize(), { timeout }).toBeNull();
   }
 
   async expectImageSize(expectedSize: ClipboardImageSize): Promise<void> {

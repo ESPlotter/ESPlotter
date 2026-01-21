@@ -17,7 +17,7 @@ test.describe('Electron App', () => {
   });
 
   test('should launch electron app', async () => {
-    await appTest.expectAppName('esplotter');
+    await appTest.expectAppName('ESPlotter');
   });
 
   test('should have proper window dimensions', async () => {

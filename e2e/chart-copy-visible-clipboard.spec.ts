@@ -22,12 +22,33 @@ test.describe('Chart grid copy to clipboard', () => {
     await mainPageTest.charts.expectCopyVisibleChartsButtonVisible();
   });
 
+  test('does not copy visible charts shortcut when button is hidden', async () => {
+    await mainPageTest.createChartsWithChannel('Voltage (V)', 1);
+    await mainPageTest.charts.expectCopyVisibleChartsButtonHidden();
+
+    await mainPageTest.clipboard.clearImage();
+    await mainPageTest.charts.pressCopyVisibleChartsShortcut();
+
+    await mainPageTest.clipboard.expectImageEmpty();
+  });
+
   test('copies only visible charts from the grid', async () => {
     await mainPageTest.createChartsWithChannel('Voltage (V)', 5);
     await mainPageTest.charts.scrollChartGridToBottomIfNeeded();
     const expectedSize = await mainPageTest.charts.getChartGridSize();
 
     await mainPageTest.charts.copyVisibleCharts();
+
+    await mainPageTest.clipboard.expectImageSize(expectedSize);
+    await mainPageTest.clipboard.expectImageHasContent();
+  });
+
+  test('copies visible charts with Shift+S shortcut', async () => {
+    await mainPageTest.createChartsWithChannel('Voltage (V)', 5);
+    await mainPageTest.charts.scrollChartGridToBottomIfNeeded();
+    const expectedSize = await mainPageTest.charts.getChartGridSize();
+
+    await mainPageTest.charts.pressCopyVisibleChartsShortcut();
 
     await mainPageTest.clipboard.expectImageSize(expectedSize);
     await mainPageTest.clipboard.expectImageHasContent();

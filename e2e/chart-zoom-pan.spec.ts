@@ -75,6 +75,48 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     await mainPageTest.charts.expectZoomReset(chartTitle, initialRanges);
   });
 
+  test('can reset zoom X using reset X button', async () => {
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
+    const chartTitle = 'Voltage';
+    await mainPageTest.charts.expectSelectedChart(chartTitle);
+    await mainPageTest.charts.waitForChartData(chartTitle);
+
+    const initialRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
+
+    await mainPageTest.charts.dragOnChartByPercent(chartTitle, {
+      startX: 0.3,
+      startY: 0.5,
+      endX: 0.7,
+      endY: 0.7,
+    });
+    await mainPageTest.charts.expectZoomedInBothAxes(chartTitle, initialRanges);
+
+    await mainPageTest.charts.clickResetZoomX(chartTitle);
+    await mainPageTest.charts.expectZoomResetX(chartTitle, initialRanges);
+  });
+
+  test('can reset zoom Y using reset Y button', async () => {
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
+    const chartTitle = 'Voltage';
+    await mainPageTest.charts.expectSelectedChart(chartTitle);
+    await mainPageTest.charts.waitForChartData(chartTitle);
+
+    const initialRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
+
+    await mainPageTest.charts.dragOnChartByPercent(chartTitle, {
+      startX: 0.3,
+      startY: 0.5,
+      endX: 0.7,
+      endY: 0.7,
+    });
+    await mainPageTest.charts.expectZoomedInBothAxes(chartTitle, initialRanges);
+
+    await mainPageTest.charts.clickResetZoomY(chartTitle);
+    await mainPageTest.charts.expectZoomResetY(chartTitle, initialRanges);
+  });
+
   test('can pan chart in pan mode', async () => {
     await mainPageTest.charts.createAndSelectChart();
     await mainPageTest.sidebar.toggleChannel('Voltage (V)');

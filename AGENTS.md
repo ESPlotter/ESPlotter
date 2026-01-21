@@ -19,6 +19,7 @@ Before generating or modifying code, identify the relevant topic in the table an
 | Continuous Integration | [docs/ci.md](./docs/ci.md)                                                           | Workflows, pipelines, checks               |
 | Tests                  | [docs/tests.md](./docs/tests.md)                                                     | Strategy, coverage, tools                  |
 | Env Variables          | [docs/env-vars.md](./docs/env-vars.md)                                               | Names, scopes, secrets                     |
+| Conventional Commits   | [docs/conventional-commits.md](./docs/conventional-commits.md)                       | Commit messages, types, scopes             |
 
 ## Good practices
 

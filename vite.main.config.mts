@@ -33,7 +33,11 @@ export default defineConfig({
       fileName: () => 'main',
     },
     rollupOptions: {
-      external: ['electron', 'electron-squirrel-startup', ...nodeBuiltins],
+      external: (id) =>
+        id === 'electron' ||
+        id === 'electron-squirrel-startup' ||
+        nodeBuiltins.includes(id) ||
+        nodeBuiltins.some((builtin) => id.startsWith(`${builtin}/`)),
       output: {
         entryFileNames: 'main.mjs',
       },

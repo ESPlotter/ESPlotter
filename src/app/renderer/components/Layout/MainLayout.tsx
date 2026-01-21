@@ -1,5 +1,6 @@
 import { IconCamera, IconPlus } from '@tabler/icons-react';
 import { nanoid } from 'nanoid';
+import { useCallback, useEffect } from 'react';
 
 import { AppSidebar } from '@components/AppSidebar/AppSidebar';
 import { captureVisibleChartsToClipboard } from '@renderer/components/Chart/captureVisibleCharts';
@@ -7,15 +8,32 @@ import { Button } from '@renderer/shadcn/components/ui/button';
 import { useChannelChartsActions, useCharts } from '@renderer/store/ChannelChartsStore';
 import { SidebarProvider } from '@shadcn/components/ui/sidebar';
 
+import { isTypingTarget } from '../Chart/useChartHotKey';
+
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const { addChart } = useChannelChartsActions();
   const charts = useCharts();
   const chartCount = Object.keys(charts).length;
   const shouldShowCaptureButton = chartCount > 1;
 
-  function handleCopyVisibleCharts() {
+  const handleCopyVisibleCharts = useCallback(function handleCopyVisibleCharts() {
     void captureVisibleChartsToClipboard();
-  }
+  }, []);
+
+  useEffect(() => {
+    if (!shouldShowCaptureButton) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      if (isTypingTarget(event.target)) return;
+      if (event.shiftKey && event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        handleCopyVisibleCharts();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown, { passive: false });
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleCopyVisibleCharts, shouldShowCaptureButton]);
 
   return (
     <SidebarProvider>
@@ -29,7 +47,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               size="icon"
               onClick={handleCopyVisibleCharts}
               aria-label="Copy visible charts"
-              title="Copy visible charts"
+              title="Copy visible charts (Shift+S)"
             >
               <IconCamera />
             </Button>

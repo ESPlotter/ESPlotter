@@ -471,7 +471,7 @@ export class ChartTestObject {
     const chartRoot = this.getChartRoot(chartTitle);
     await expect(chartRoot.getByTitle(/Zoom mode/)).toBeVisible();
     await expect(chartRoot.getByTitle(/Pan mode/)).toBeVisible();
-    await expect(chartRoot.getByTitle(/Reset zoom/)).toBeVisible();
+    await expect(chartRoot.getByRole('button', { name: 'Reset zoom', exact: true })).toBeVisible();
   }
 
   async clickPanMode(chartTitle: string): Promise<void> {
@@ -488,7 +488,19 @@ export class ChartTestObject {
 
   async clickResetZoom(chartTitle: string): Promise<void> {
     await this.getChartRoot(chartTitle)
-      .getByTitle(/Reset zoom/)
+      .getByRole('button', { name: 'Reset zoom', exact: true })
+      .click();
+  }
+
+  async clickResetZoomX(chartTitle: string): Promise<void> {
+    await this.getChartRoot(chartTitle)
+      .getByRole('button', { name: 'Reset zoom X' })
+      .click();
+  }
+
+  async clickResetZoomY(chartTitle: string): Promise<void> {
+    await this.getChartRoot(chartTitle)
+      .getByRole('button', { name: 'Reset zoom Y' })
       .click();
   }
 
@@ -606,13 +618,57 @@ export class ChartTestObject {
       .toBe(true);
   }
 
+  async expectZoomedInBothAxes(chartTitle: string, initialRanges: ZoomRanges): Promise<void> {
+    await expect
+      .poll(async () => {
+        const zoomedRanges = await this.getZoomRanges(chartTitle);
+        return (
+          zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
+          zoomedRanges.xAxis.end < initialRanges.xAxis.end &&
+          Math.abs(zoomedRanges.yAxis.start - initialRanges.yAxis.start) > 0.1 &&
+          Math.abs(zoomedRanges.yAxis.end - initialRanges.yAxis.end) > 0.1
+        );
+      })
+      .toBe(true);
+  }
+
   async expectZoomReset(chartTitle: string, initialRanges: ZoomRanges): Promise<void> {
     await expect
       .poll(async () => {
         const resetRanges = await this.getZoomRanges(chartTitle);
         return (
           Math.abs(resetRanges.xAxis.start - initialRanges.xAxis.start) < 0.1 &&
-          Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) < 0.1
+          Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) < 0.1 &&
+          Math.abs(resetRanges.yAxis.start - initialRanges.yAxis.start) < 0.1 &&
+          Math.abs(resetRanges.yAxis.end - initialRanges.yAxis.end) < 0.1
+        );
+      })
+      .toBe(true);
+  }
+
+  async expectZoomResetX(chartTitle: string, initialRanges: ZoomRanges): Promise<void> {
+    await expect
+      .poll(async () => {
+        const resetRanges = await this.getZoomRanges(chartTitle);
+        return (
+          Math.abs(resetRanges.xAxis.start - initialRanges.xAxis.start) < 0.1 &&
+          Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) < 0.1 &&
+          Math.abs(resetRanges.yAxis.start - initialRanges.yAxis.start) > 0.1 &&
+          Math.abs(resetRanges.yAxis.end - initialRanges.yAxis.end) > 0.1
+        );
+      })
+      .toBe(true);
+  }
+
+  async expectZoomResetY(chartTitle: string, initialRanges: ZoomRanges): Promise<void> {
+    await expect
+      .poll(async () => {
+        const resetRanges = await this.getZoomRanges(chartTitle);
+        return (
+          Math.abs(resetRanges.yAxis.start - initialRanges.yAxis.start) < 0.1 &&
+          Math.abs(resetRanges.yAxis.end - initialRanges.yAxis.end) < 0.1 &&
+          Math.abs(resetRanges.xAxis.start - initialRanges.xAxis.start) > 0.1 &&
+          Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) > 0.1
         );
       })
       .toBe(true);
@@ -642,6 +698,15 @@ export class ChartTestObject {
 
   async copyChartImage(chartTitle: string): Promise<void> {
     await this.getChartCard(chartTitle).getByTitle('Copy chart image').click();
+  }
+
+  async pressCopyChartShortcut(): Promise<void> {
+    await this.page.keyboard.press('Escape');
+    await this.page.keyboard.press('s');
+  }
+
+  async pressCopyVisibleChartsShortcut(): Promise<void> {
+    await this.page.keyboard.press('Shift+S');
   }
 
   async expectCopyVisibleChartsButtonVisible(): Promise<void> {
