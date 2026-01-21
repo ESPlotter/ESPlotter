@@ -1,7 +1,7 @@
 import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
 
 import { clickSidebarChannel } from './support/clickSidebarChannel';
-import { closeSidebarFile } from './support/closeSidebarFile';
+import { closeChannelFile } from './support/closeChannelFile';
 import { createChart } from './support/createChart';
 import { expandFileInSidebar } from './support/expandFileInSidebar';
 import { getRenderedSeriesSummary } from './support/getRenderedSeriesSummary';
@@ -31,7 +31,7 @@ test.describe('Close channel files', () => {
     await expect(mainPage.getByRole('button', { name: 'test1' })).toBeVisible();
 
     // Click the close button (X icon)
-    await closeSidebarFile(mainPage, 'test1');
+    await closeChannelFile(mainPage, 'test1');
 
     // Verify file is removed from sidebar
     await expect(mainPage.getByRole('button', { name: 'test1' })).not.toBeVisible();
@@ -51,7 +51,7 @@ test.describe('Close channel files', () => {
     expect(seriesSummary.length).toBeGreaterThan(0);
 
     // Close the file
-    await closeSidebarFile(mainPage, 'test1');
+    await closeChannelFile(mainPage, 'test1');
 
     // Verify channels are removed from chart
     seriesSummary = await getRenderedSeriesSummary(mainPage, 'Chart 1');
@@ -81,7 +81,7 @@ test.describe('Close channel files', () => {
     expect(seriesSummary.length).toBe(2);
 
     // Close test1 file
-    await closeSidebarFile(mainPage, 'test1');
+    await closeChannelFile(mainPage, 'test1');
 
     // Verify test1 is removed but test4 remains
     await expect(mainPage.getByRole('button', { name: 'test1' })).not.toBeVisible();
@@ -105,7 +105,7 @@ test.describe('Close channel files', () => {
     await expect(mainPage.getByRole('heading', { level: 2, name: 'Voltage' })).toBeVisible();
 
     // Close the file
-    await closeSidebarFile(mainPage, 'test1');
+    await closeChannelFile(mainPage, 'test1');
 
     // Verify chart title reset to "Chart 1" (chart position)
     await expect(mainPage.getByRole('heading', { level: 2, name: 'Chart 1' })).toBeVisible();
@@ -137,7 +137,7 @@ test.describe('Close channel files', () => {
     await clickSidebarChannel(mainPage, 'Active Power ()', 'test4');
 
     // Close test1 file (which has the Voltage channel)
-    await closeSidebarFile(mainPage, 'test1');
+    await closeChannelFile(mainPage, 'test1');
 
     // Verify chart title updated to "Active Power" (first remaining channel)
     await expect(mainPage.getByRole('heading', { level: 2, name: 'Active Power' })).toBeVisible();
@@ -168,16 +168,20 @@ test.describe('Close channel files', () => {
     await titleInput.press('Enter');
 
     // Verify custom title is set
-    await expect(mainPage.getByRole('heading', { level: 2, name: 'My Custom Chart' })).toBeVisible();
+    await expect(
+      mainPage.getByRole('heading', { level: 2, name: 'My Custom Chart' }),
+    ).toBeVisible();
 
     // Add another channel from test4
     await clickSidebarChannel(mainPage, 'Active Power ()', 'test4');
 
     // Close test1 file
-    await closeSidebarFile(mainPage, 'test1');
+    await closeChannelFile(mainPage, 'test1');
 
     // Verify chart title remains "My Custom Chart" (unchanged)
-    await expect(mainPage.getByRole('heading', { level: 2, name: 'My Custom Chart' })).toBeVisible();
+    await expect(
+      mainPage.getByRole('heading', { level: 2, name: 'My Custom Chart' }),
+    ).toBeVisible();
 
     // Verify one channel remains in chart
     const seriesSummary = await getRenderedSeriesSummary(mainPage, 'My Custom Chart');
@@ -196,7 +200,9 @@ test.describe('Close channel files', () => {
     // Create chart 1 with only test1 Voltage
     await createChart(mainPage);
     await clickSidebarChannel(mainPage, 'Voltage ()', 'test1');
-    await expect(mainPage.getByRole('heading', { level: 2, name: 'Voltage' }).first()).toBeVisible();
+    await expect(
+      mainPage.getByRole('heading', { level: 2, name: 'Voltage' }).first(),
+    ).toBeVisible();
 
     // Create chart 2 with test1 Voltage and test4 Active Power
     await createChart(mainPage);
@@ -208,7 +214,7 @@ test.describe('Close channel files', () => {
     await clickSidebarChannel(mainPage, 'Reactive Power ()', 'test1');
 
     // Close test1 file
-    await closeSidebarFile(mainPage, 'test1');
+    await closeChannelFile(mainPage, 'test1');
 
     // Chart 1: Had "Voltage" title, removed Voltage, now empty -> should be "Chart 1"
     await expect(mainPage.getByRole('heading', { level: 2, name: 'Chart 1' })).toBeVisible();
