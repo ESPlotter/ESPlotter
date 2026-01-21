@@ -14,27 +14,27 @@ test.describe('Close channel files', () => {
   });
 
   test('should close a channel file and remove it from the sidebar', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test1.txt');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test1.txt');
     await mainPageTest.sidebar.expectFileVisible('test1');
     await mainPageTest.sidebar.closeChannelFile('test1');
     await mainPageTest.sidebar.expectFileNotVisible('test1');
   });
 
   test('should remove channels from chart when closing the file', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test1.txt');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test1.txt');
     await mainPageTest.charts.createChart();
     await mainPageTest.sidebar.toggleChannel('Voltage ()');
 
-    await mainPageTest.charts.expectSeriesCountGreaterThan('Voltage', 0);
+    await mainPageTest.charts.expectSeriesCount('Voltage', 1);
     await mainPageTest.sidebar.closeChannelFile('test1');
     await mainPageTest.charts.expectSeriesCount('Chart 1', 0);
   });
 
   test('should only remove channels from the closed file', async () => {
-    await mainPageTest.openFixtureViaImportMenu('test1.txt');
-    await mainPageTest.openFixtureViaImportMenu('test4.csv');
-    await mainPageTest.sidebar.expandFile('test1');
-    await mainPageTest.sidebar.expandFile('test4');
+    await mainPageTest.openChannelFileViaImportMenu('test1.txt');
+    await mainPageTest.openChannelFileViaImportMenu('test4.csv');
+    await mainPageTest.sidebar.expandChannelFile('test1');
+    await mainPageTest.sidebar.expandChannelFile('test4');
     await mainPageTest.charts.createChart();
     await mainPageTest.sidebar.toggleChannel('Voltage ()', 'test1');
     await mainPageTest.sidebar.toggleChannel('Active Power ()', 'test4');
@@ -49,7 +49,7 @@ test.describe('Close channel files', () => {
   });
 
   test('should reset chart title to default when closing file makes chart empty and title matched channel', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test1.txt');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test1.txt');
     await mainPageTest.charts.createChart();
     await mainPageTest.sidebar.toggleChannel('Voltage ()');
 
@@ -62,10 +62,10 @@ test.describe('Close channel files', () => {
   });
 
   test('should update chart title to first remaining channel when title matched removed channel', async () => {
-    await mainPageTest.openFixtureViaImportMenu('test1.txt');
-    await mainPageTest.openFixtureViaImportMenu('test4.csv');
-    await mainPageTest.sidebar.expandFile('test1');
-    await mainPageTest.sidebar.expandFile('test4');
+    await mainPageTest.openChannelFileViaImportMenu('test1.txt');
+    await mainPageTest.openChannelFileViaImportMenu('test4.csv');
+    await mainPageTest.sidebar.expandChannelFile('test1');
+    await mainPageTest.sidebar.expandChannelFile('test4');
     await mainPageTest.charts.createChart();
     await mainPageTest.sidebar.toggleChannel('Voltage ()', 'test1');
 
@@ -79,10 +79,10 @@ test.describe('Close channel files', () => {
   });
 
   test('should not change chart title when it does not match removed channel', async () => {
-    await mainPageTest.openFixtureViaImportMenu('test1.txt');
-    await mainPageTest.openFixtureViaImportMenu('test4.csv');
-    await mainPageTest.sidebar.expandFile('test1');
-    await mainPageTest.sidebar.expandFile('test4');
+    await mainPageTest.openChannelFileViaImportMenu('test1.txt');
+    await mainPageTest.openChannelFileViaImportMenu('test4.csv');
+    await mainPageTest.sidebar.expandChannelFile('test1');
+    await mainPageTest.sidebar.expandChannelFile('test4');
     await mainPageTest.charts.createChart();
     await mainPageTest.sidebar.toggleChannel('Voltage ()', 'test1');
     await mainPageTest.charts.renameChartTitle('Voltage', 'My Custom Chart');
@@ -96,10 +96,10 @@ test.describe('Close channel files', () => {
   });
 
   test('should handle multiple charts with different title scenarios', async () => {
-    await mainPageTest.openFixtureViaImportMenu('test1.txt');
-    await mainPageTest.openFixtureViaImportMenu('test4.csv');
-    await mainPageTest.sidebar.expandFile('test1');
-    await mainPageTest.sidebar.expandFile('test4');
+    await mainPageTest.openChannelFileViaImportMenu('test1.txt');
+    await mainPageTest.openChannelFileViaImportMenu('test4.csv');
+    await mainPageTest.sidebar.expandChannelFile('test1');
+    await mainPageTest.sidebar.expandChannelFile('test4');
 
     await mainPageTest.charts.createChart();
     await mainPageTest.sidebar.toggleChannel('Voltage ()', 'test1');

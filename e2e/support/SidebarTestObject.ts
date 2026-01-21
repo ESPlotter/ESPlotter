@@ -3,7 +3,7 @@ import { expect, type Locator, type Page } from '@playwright/test';
 export class SidebarTestObject {
   constructor(private readonly page: Page) {}
 
-  async expandFile(fileLabel: string): Promise<void> {
+  async expandChannelFile(fileLabel: string): Promise<void> {
     const fileTrigger = this.getFileTrigger(fileLabel);
     await fileTrigger.waitFor({ state: 'visible' });
     await fileTrigger.click();
@@ -41,9 +41,7 @@ export class SidebarTestObject {
 
   async expectChannelsVisible(channelNames: string[]): Promise<void> {
     for (const channelName of channelNames) {
-      await expect(
-        this.page.getByRole('button', { name: channelName, exact: true }),
-      ).toBeVisible();
+      await expect(this.page.getByRole('button', { name: channelName, exact: true })).toBeVisible();
     }
   }
 

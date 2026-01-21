@@ -6,8 +6,8 @@ import { ChartTestObject } from './ChartTestObject';
 import { ClipboardTestObject } from './ClipboardTestObject';
 import { MenuTestObject } from './MenuTestObject';
 import { PreferencesTestObject } from './PreferencesTestObject';
-import { SidebarTestObject } from './SidebarTestObject';
 import { setupE2eTestEnvironment } from './setupE2eTestEnvironment';
+import { SidebarTestObject } from './SidebarTestObject';
 
 interface WindowFilesApi {
   onChannelFileOpened: (listener: () => void) => () => void;
@@ -48,17 +48,17 @@ export class MainPageTestObject {
     await this.app.close();
   }
 
-  async openFixtureViaImportMenu(fixtureName: string): Promise<void> {
+  async openChannelFileViaImportMenu(fixtureName: string): Promise<void> {
     await this.setNextOpenFixturePath(fixtureName);
     const parsedPromise = this.waitForLastOpenedChannelFileChanged();
     await this.menu.openImportMenu();
     await parsedPromise;
   }
 
-  async openFixtureAndExpandInSidebar(fixtureName: string): Promise<void> {
-    await this.openFixtureViaImportMenu(fixtureName);
+  async openChannelFileAndExpandInSidebar(fixtureName: string): Promise<void> {
+    await this.openChannelFileViaImportMenu(fixtureName);
     const fileLabel = fixtureName.split('.')[0];
-    await this.sidebar.expandFile(fileLabel);
+    await this.sidebar.expandChannelFile(fileLabel);
   }
 
   async attemptImportFixture(fixtureName: string): Promise<void> {

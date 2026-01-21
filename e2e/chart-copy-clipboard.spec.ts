@@ -7,7 +7,7 @@ let mainPageTest: MainPageTestObject;
 test.describe('Chart copy to clipboard', () => {
   test.beforeEach(async () => {
     mainPageTest = await MainPageTestObject.create();
-    await mainPageTest.openFixtureAndExpandInSidebar('test3.json');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test3.json');
   });
 
   test.afterEach(async () => {

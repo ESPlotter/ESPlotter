@@ -14,7 +14,7 @@ test.describe('Import flow', () => {
   });
 
   test('imports a valid file (test3.json)', async () => {
-    await mainPageTest.openFixtureViaImportMenu('test3.json');
+    await mainPageTest.openChannelFileViaImportMenu('test3.json');
     await mainPageTest.sidebar.expectFileVisible('test3');
   });
 

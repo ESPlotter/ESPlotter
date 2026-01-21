@@ -14,7 +14,7 @@ test.describe('Legend names with conflicts from different channels file', () => 
   });
 
   test('shows channel names without test names when no conflicts exist', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test2.json');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test2.json');
     await mainPageTest.charts.createAndSelectChart();
 
     await mainPageTest.sidebar.toggleChannel('Voltage (V)');
@@ -24,8 +24,8 @@ test.describe('Legend names with conflicts from different channels file', () => 
   });
 
   test('appends test names when same channel from different tests are added', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test2.json');
-    await mainPageTest.openFixtureAndExpandInSidebar('test3.json');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test2.json');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test3.json');
 
     await mainPageTest.charts.createAndSelectChart();
 
@@ -37,8 +37,8 @@ test.describe('Legend names with conflicts from different channels file', () => 
   });
 
   test('appends test names to ALL series when ANY conflict exists', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test2.json');
-    await mainPageTest.openFixtureAndExpandInSidebar('test3.json');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test2.json');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test3.json');
 
     await mainPageTest.charts.createAndSelectChart();
     await mainPageTest.sidebar.toggleChannel('Voltage (V)', 'test2');
@@ -53,8 +53,8 @@ test.describe('Legend names with conflicts from different channels file', () => 
   });
 
   test('handles conflicts with both Voltage and Frequency from two tests', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test2.json');
-    await mainPageTest.openFixtureAndExpandInSidebar('test3.json');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test2.json');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test3.json');
 
     await mainPageTest.charts.createAndSelectChart();
 
@@ -72,8 +72,8 @@ test.describe('Legend names with conflicts from different channels file', () => 
   });
 
   test('resolves conflicts when channel is removed', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test2.json');
-    await mainPageTest.openFixtureAndExpandInSidebar('test3.json');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test2.json');
+    await mainPageTest.openChannelFileAndExpandInSidebar('test3.json');
 
     await mainPageTest.charts.createAndSelectChart();
 
