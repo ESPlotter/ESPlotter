@@ -19,27 +19,26 @@ test.describe('Color palette', () => {
 
   test('creates a new color in the palette', async () => {
     await mainPageTest.preferences.openColorPalette();
-    const { index, color } = await mainPageTest.preferences.createColor();
+    const color = '#00ffff';
+    const index = await mainPageTest.preferences.createColor(color);
     await mainPageTest.preferences.expectColorVisible(index, color);
   });
 
   test('changes an existing color value', async () => {
     await mainPageTest.preferences.openColorPalette();
-    const { index } = await mainPageTest.preferences.createColor();
+    const index = await mainPageTest.preferences.createColor('#ff0000');
 
-    const newHex = '#00ffff';
-    await mainPageTest.preferences.updateColorViaPreferences(index, newHex);
-    await mainPageTest.preferences.expectColorTextVisible(newHex);
+    const newColor = '#00ffff';
+    await mainPageTest.preferences.updateColor(index, newColor);
+    await mainPageTest.preferences.expectColorTextVisible(newColor);
   });
 
   test('removes a color from the palette', async () => {
     await mainPageTest.preferences.openColorPalette();
-    const { index, color } = await mainPageTest.preferences.createColor();
+    const color = '#ffa500';
+    const index = await mainPageTest.preferences.createColor(color);
 
     await mainPageTest.preferences.removeColor(index);
-
-    if (color) {
-      await mainPageTest.preferences.expectColorTextNotVisible(color);
-    }
+    await mainPageTest.preferences.expectColorTextNotVisible(color);
   });
 });
