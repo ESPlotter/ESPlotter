@@ -70,9 +70,9 @@ export class ClipboardTestObject {
   }
 
   async expectImageDataUrl(): Promise<void> {
-    await expect.poll(async () => this.readImageDataUrl(), { timeout: 10000 }).toMatch(
-      /^data:image\/png;base64/,
-    );
+    await expect
+      .poll(async () => this.readImageDataUrl(), { timeout: 10000 })
+      .toMatch(/^data:image\/png;base64/);
   }
 
   async expectImageHasContent(): Promise<void> {

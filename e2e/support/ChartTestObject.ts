@@ -493,15 +493,11 @@ export class ChartTestObject {
   }
 
   async clickResetZoomX(chartTitle: string): Promise<void> {
-    await this.getChartRoot(chartTitle)
-      .getByRole('button', { name: 'Reset zoom X' })
-      .click();
+    await this.getChartRoot(chartTitle).getByRole('button', { name: 'Reset zoom X' }).click();
   }
 
   async clickResetZoomY(chartTitle: string): Promise<void> {
-    await this.getChartRoot(chartTitle)
-      .getByRole('button', { name: 'Reset zoom Y' })
-      .click();
+    await this.getChartRoot(chartTitle).getByRole('button', { name: 'Reset zoom Y' }).click();
   }
 
   async expectZoomModeActive(chartTitle: string, active = true): Promise<void> {
