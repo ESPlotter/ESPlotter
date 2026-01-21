@@ -1,44 +1,32 @@
-import { expect, test, type ElectronApplication, type Page } from '@playwright/test';
+import { test } from '@playwright/test';
 
-import { createChart } from './support/createChart';
-import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
+import { MainPageTestObject } from './support/MainPageTestObject';
 
-let electronApp: ElectronApplication;
-let mainPage: Page;
+let mainPageTest: MainPageTestObject;
 
 test.describe('Chart rename', () => {
   test.beforeEach(async () => {
-    ({ electronApp, mainPage } = await setupE2eTestEnvironment());
+    mainPageTest = await MainPageTestObject.create();
   });
 
   test.afterEach(async () => {
-    await electronApp.close();
+    await mainPageTest.close();
   });
 
   test('allows renaming a chart from its title', async () => {
-    const defaultTitle = await createChart(mainPage);
+    const defaultTitle = await mainPageTest.charts.createChart();
     const newName = 'Custom chart name';
 
-    await expect(mainPage.getByRole('button', { name: defaultTitle })).toBeVisible();
-
-    await mainPage.getByRole('button', { name: defaultTitle }).click();
-
-    const input = mainPage.getByRole('textbox', { name: 'Chart name' });
-    await input.fill(newName);
-    await input.press('Enter');
-
-    await expect(mainPage.getByRole('button', { name: newName })).toBeVisible();
+    await mainPageTest.charts.expectTitleButtonVisible(defaultTitle);
+    await mainPageTest.charts.renameChartTitle(defaultTitle, newName);
+    await mainPageTest.charts.expectTitleButtonVisible(newName);
+    await mainPageTest.charts.expectTitleButtonNotVisible(defaultTitle);
   });
 
   test('cancels title changes when pressing Escape', async () => {
-    const defaultTitle = await createChart(mainPage);
+    const defaultTitle = await mainPageTest.charts.createChart();
 
-    await mainPage.getByRole('button', { name: defaultTitle }).click();
-
-    const input = mainPage.getByRole('textbox', { name: 'Chart name' });
-    await input.fill('Temporary name');
-    await input.press('Escape');
-
-    await expect(mainPage.getByRole('button', { name: defaultTitle })).toBeVisible();
+    await mainPageTest.charts.cancelChartRename(defaultTitle, 'Temporary name');
+    await mainPageTest.charts.expectTitleButtonVisible(defaultTitle);
   });
 });
