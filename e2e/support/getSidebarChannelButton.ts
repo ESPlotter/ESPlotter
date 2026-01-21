@@ -6,13 +6,11 @@ export function getSidebarChannelButton(
   fileLabel?: string,
 ): Locator {
   if (fileLabel) {
-    // Find the file heading, go to parent accordion item, then find channel button within that item
-    return page
-      .getByRole('heading', { level: 3, name: fileLabel })
-      .locator('..')
-      .locator('[data-sidebar="menu-button"]')
-      .filter({ hasText: channelLabel })
+    const fileTrigger = page.getByRole('button', { name: fileLabel });
+    return fileTrigger
+      .locator('xpath=ancestor::*[@data-slot="accordion-item"]')
+      .getByRole('button', { name: channelLabel })
       .first();
   }
-  return page.locator('[data-sidebar="menu-button"]').filter({ hasText: channelLabel }).first();
+  return page.getByRole('button', { name: channelLabel }).first();
 }

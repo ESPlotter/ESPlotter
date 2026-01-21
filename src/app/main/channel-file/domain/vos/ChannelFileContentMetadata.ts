@@ -12,12 +12,4 @@ export class ChannelFileContentMetadata {
   public toPrimitives(): ChannelFileContentMetadataPrimitive {
     return { ...this.value };
   }
-
-  public get timestamp(): string {
-    return this.value.timestamp;
-  }
-
-  public get SCR(): number {
-    return this.value.SCR;
-  }
 }
