@@ -1,18 +1,16 @@
-import { expect, test, type ElectronApplication, type Page } from '@playwright/test';
+import { test, type ElectronApplication, type Page } from '@playwright/test';
 
-import { clickSidebarChannel } from './support/clickSidebarChannel';
-import { createChart } from './support/createChart';
-import { getChartTitles } from './support/getChartTitles';
-import { openFixtureAndExpandInSidebar } from './support/openFixtureAndExpandInSidebar';
-import { selectChartByTitle } from './support/selectChartByTitle';
+import { MainPageTestObject } from './support/MainPageTestObject';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
 let electronApp: ElectronApplication;
 let mainPage: Page;
+let mainPageTest: MainPageTestObject;
 
 test.describe('Chart title initialization', () => {
   test.beforeEach(async () => {
     ({ electronApp, mainPage } = await setupE2eTestEnvironment());
+    mainPageTest = new MainPageTestObject(electronApp, mainPage);
   });
 
   test.afterEach(async () => {
@@ -20,66 +18,57 @@ test.describe('Chart title initialization', () => {
   });
 
   test('creates charts with incremental default names', async () => {
-    const firstChartTitle = await createChart(mainPage);
-    expect(firstChartTitle).toBe('Chart 1');
+    await mainPageTest.charts.createChart();
+    await mainPageTest.charts.expectChartTitlesContain(['Chart 1']);
 
-    const secondChartTitle = await createChart(mainPage);
-    expect(secondChartTitle).toBe('Chart 2');
+    await mainPageTest.charts.createChart();
+    await mainPageTest.charts.expectChartTitlesContain(['Chart 2']);
 
-    const thirdChartTitle = await createChart(mainPage);
-    expect(thirdChartTitle).toBe('Chart 3');
+    await mainPageTest.charts.createChart();
+    await mainPageTest.charts.expectChartTitlesContain(['Chart 3']);
   });
 
   test('renames chart to channel name when adding first channel', async () => {
-    await openFixtureAndExpandInSidebar(electronApp, mainPage, 'test3.json', 'test3');
+    await mainPageTest.openFixtureAndExpandInSidebar('test3.json', 'test3');
 
-    const chartTitle = await createChart(mainPage);
-    expect(chartTitle).toBe('Chart 1');
+    const chartTitle = await mainPageTest.charts.createChart();
 
-    await selectChartByTitle(mainPage, chartTitle);
-    await clickSidebarChannel(mainPage, 'Voltage (V)');
+    await mainPageTest.charts.selectChartByTitle(chartTitle);
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
 
-    const updatedTitles = await getChartTitles(mainPage);
-    expect(updatedTitles).toContain('Voltage');
-    expect(updatedTitles).not.toContain('Chart 1');
+    await mainPageTest.charts.expectChartTitlesContain(['Voltage']);
+    await mainPageTest.charts.expectChartTitlesNotContain(['Chart 1']);
   });
 
   test('does not rename chart when adding second channel', async () => {
-    await openFixtureAndExpandInSidebar(electronApp, mainPage, 'test3.json', 'test3');
+    await mainPageTest.openFixtureAndExpandInSidebar('test3.json', 'test3');
 
-    const chartTitle = await createChart(mainPage);
-    await selectChartByTitle(mainPage, chartTitle);
+    const chartTitle = await mainPageTest.charts.createChart();
+    await mainPageTest.charts.selectChartByTitle(chartTitle);
 
-    await clickSidebarChannel(mainPage, 'Voltage (V)');
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
 
-    const titlesAfterFirstChannel = await getChartTitles(mainPage);
-    expect(titlesAfterFirstChannel).toContain('Voltage');
+    await mainPageTest.charts.expectChartTitlesContain(['Voltage']);
 
-    await clickSidebarChannel(mainPage, 'Frequency (Hz)');
+    await mainPageTest.sidebar.toggleChannel('Frequency (Hz)');
 
-    const titlesAfterSecondChannel = await getChartTitles(mainPage);
-    expect(titlesAfterSecondChannel).toContain('Voltage');
-    expect(titlesAfterSecondChannel).not.toContain('Frequency');
+    await mainPageTest.charts.expectChartTitlesContain(['Voltage']);
+    await mainPageTest.charts.expectChartTitlesNotContain(['Frequency']);
   });
 
   test('does not rename chart if user has manually changed the title', async () => {
-    await openFixtureAndExpandInSidebar(electronApp, mainPage, 'test3.json', 'test3');
+    await mainPageTest.openFixtureAndExpandInSidebar('test3.json', 'test3');
 
-    const chartTitle = await createChart(mainPage);
+    const chartTitle = await mainPageTest.charts.createChart();
     const customTitle = 'My Custom Chart';
 
-    await mainPage.getByRole('button', { name: chartTitle }).click();
-    const input = mainPage.getByRole('textbox', { name: 'Chart name' });
-    await input.fill(customTitle);
-    await input.press('Enter');
+    await mainPageTest.charts.renameChartTitle(chartTitle, customTitle);
+    await mainPageTest.charts.expectTitleButtonVisible(customTitle);
 
-    await expect(mainPage.getByRole('button', { name: customTitle })).toBeVisible();
+    await mainPageTest.charts.selectChartByTitle(customTitle);
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
 
-    await selectChartByTitle(mainPage, customTitle);
-    await clickSidebarChannel(mainPage, 'Voltage (V)');
-
-    const updatedTitles = await getChartTitles(mainPage);
-    expect(updatedTitles).toContain(customTitle);
-    expect(updatedTitles).not.toContain('Voltage');
+    await mainPageTest.charts.expectChartTitlesContain([customTitle]);
+    await mainPageTest.charts.expectChartTitlesNotContain(['Voltage']);
   });
 });

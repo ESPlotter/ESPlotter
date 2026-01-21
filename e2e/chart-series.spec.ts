@@ -1,18 +1,10 @@
-import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
+import { test, type ElectronApplication, type Page } from '@playwright/test';
 
 import { mapToChartSerie } from '@renderer/components/Chart/mapToChartSerie';
 
 import test3Fixture from '../fixtures/test3.json';
 
-import { chartContainer } from './support/chartContainer';
-import { chartTitleButton } from './support/chartTitleButton';
-import { clickSidebarChannel } from './support/clickSidebarChannel';
-import { createAndSelectChart } from './support/createAndSelectChart';
-import { createChart } from './support/createChart';
-import { expectSelectedChart } from './support/expectSelectedChart';
-import { getRenderedSeriesSummary } from './support/getRenderedSeriesSummary';
-import { openFixtureAndExpandInSidebar } from './support/openFixtureAndExpandInSidebar';
-import { selectChartByTitle } from './support/selectChartByTitle';
+import { MainPageTestObject } from './support/MainPageTestObject';
 import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
 import type { ChartSerie } from '@renderer/components/Chart/ChartSerie';
@@ -32,13 +24,22 @@ if (!expectedVoltageSerie || !expectedFrequencySerie) {
 const expectedVoltageSummary = buildSerieSummary(expectedVoltageSerie);
 const expectedFrequencySummary = buildSerieSummary(expectedFrequencySerie);
 
+interface RenderedSerieSummary {
+  name: string;
+  dataLength: number;
+  firstPoint: [number, number] | null;
+  lastPoint: [number, number] | null;
+}
+
 let electronApp: ElectronApplication;
 let mainPage: Page;
+let mainPageTest: MainPageTestObject;
 
 test.describe('Chart channel selection', () => {
   test.beforeEach(async () => {
     ({ electronApp, mainPage } = await setupE2eTestEnvironment());
-    await openFixtureAndExpandInSidebar(electronApp, mainPage, 'test3.json', 'test3');
+    mainPageTest = new MainPageTestObject(electronApp, mainPage);
+    await mainPageTest.openFixtureAndExpandInSidebar('test3.json', 'test3');
   });
 
   test.afterEach(async () => {
@@ -48,38 +49,38 @@ test.describe('Chart channel selection', () => {
   test('adds the Voltage serie to the selected chart', async () => {
     const channelTitle = 'Voltage (V)';
     const channelChartTitle = 'Voltage';
-    await createAndSelectChart(mainPage);
+    await mainPageTest.charts.createAndSelectChart();
 
-    await clickSidebarChannel(mainPage, channelTitle);
-    await expectSelectedChart(mainPage, channelChartTitle);
+    await mainPageTest.sidebar.toggleChannel(channelTitle);
+    await mainPageTest.charts.expectSelectedChart(channelChartTitle);
 
-    await expectChartSeries(mainPage, channelChartTitle, [expectedVoltageSummary]);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitle, [expectedVoltageSummary]);
   });
 
   test('adds the Frequency serie to the selected chart', async () => {
     const channelTitle = 'Frequency (Hz)';
     const channelChartTitle = 'Frequency';
-    await createAndSelectChart(mainPage);
+    await mainPageTest.charts.createAndSelectChart();
 
-    await clickSidebarChannel(mainPage, channelTitle);
-    await expectSelectedChart(mainPage, channelChartTitle);
+    await mainPageTest.sidebar.toggleChannel(channelTitle);
+    await mainPageTest.charts.expectSelectedChart(channelChartTitle);
 
-    await expectChartSeries(mainPage, channelChartTitle, [expectedFrequencySummary]);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitle, [expectedFrequencySummary]);
   });
 
   test('allows selecting both series on the same chart', async () => {
     const channelTitle = 'Voltage (V)';
     const channelChartTitle = 'Voltage';
-    await createAndSelectChart(mainPage);
+    await mainPageTest.charts.createAndSelectChart();
 
-    await clickSidebarChannel(mainPage, channelTitle);
-    await expectSelectedChart(mainPage, channelChartTitle);
-    await expectChartSeries(mainPage, channelChartTitle, [expectedVoltageSummary]);
+    await mainPageTest.sidebar.toggleChannel(channelTitle);
+    await mainPageTest.charts.expectSelectedChart(channelChartTitle);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitle, [expectedVoltageSummary]);
 
-    await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChart(mainPage, channelChartTitle);
+    await mainPageTest.sidebar.toggleChannel('Frequency (Hz)');
+    await mainPageTest.charts.expectSelectedChart(channelChartTitle);
 
-    await expectChartSeries(mainPage, channelChartTitle, [
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitle, [
       expectedVoltageSummary,
       expectedFrequencySummary,
     ]);
@@ -88,71 +89,64 @@ test.describe('Chart channel selection', () => {
   test('allows switching the selected serie within a chart', async () => {
     const channelTitle = 'Voltage (V)';
     const channelChartTitle = 'Voltage';
-    await createAndSelectChart(mainPage);
+    await mainPageTest.charts.createAndSelectChart();
 
-    await clickSidebarChannel(mainPage, channelTitle);
-    await expectChartSeries(mainPage, channelChartTitle, [expectedVoltageSummary]);
+    await mainPageTest.sidebar.toggleChannel(channelTitle);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitle, [expectedVoltageSummary]);
 
-    await clickSidebarChannel(mainPage, channelTitle);
-    await expectSelectedChart(mainPage, channelChartTitle);
-    await expectChartSeries(mainPage, channelChartTitle, []);
+    await mainPageTest.sidebar.toggleChannel(channelTitle);
+    await mainPageTest.charts.expectSelectedChart(channelChartTitle);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitle, []);
 
-    await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChart(mainPage, channelChartTitle);
-    await expectChartSeries(mainPage, channelChartTitle, [expectedFrequencySummary]);
+    await mainPageTest.sidebar.toggleChannel('Frequency (Hz)');
+    await mainPageTest.charts.expectSelectedChart(channelChartTitle);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitle, [expectedFrequencySummary]);
 
-    await clickSidebarChannel(mainPage, 'Frequency (Hz)');
-    await expectSelectedChart(mainPage, channelChartTitle);
-    await expectChartSeries(mainPage, channelChartTitle, []);
+    await mainPageTest.sidebar.toggleChannel('Frequency (Hz)');
+    await mainPageTest.charts.expectSelectedChart(channelChartTitle);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitle, []);
   });
 
   test('keeps channel selections isolated per chart', async () => {
     const channelTitleFirstChart = 'Voltage (V)';
     const channelChartTitleFirstChart = 'Voltage';
-    await createAndSelectChart(mainPage);
-    await clickSidebarChannel(mainPage, channelTitleFirstChart);
-    await expectChartSeries(mainPage, channelChartTitleFirstChart, [expectedVoltageSummary]);
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel(channelTitleFirstChart);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitleFirstChart, [expectedVoltageSummary]);
 
     const channelTitleSecondChart = 'Frequency (Hz)';
     const channelChartTitleSecondChart = 'Frequency';
-    await createAndSelectChart(mainPage);
-    await clickSidebarChannel(mainPage, channelTitleSecondChart);
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel(channelTitleSecondChart);
 
-    await expectChartSeries(mainPage, channelChartTitleFirstChart, [expectedVoltageSummary]);
-    await expectChartSeries(mainPage, channelChartTitleSecondChart, [expectedFrequencySummary]);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitleFirstChart, [expectedVoltageSummary]);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitleSecondChart, [expectedFrequencySummary]);
   });
 
   test('creates new charts from the New Chart button', async () => {
-    const firstChartTitle = await createChart(mainPage);
-    await expect(chartTitleButton(mainPage, firstChartTitle)).toHaveText(firstChartTitle);
+    const firstChartTitle = await mainPageTest.charts.createChart();
+    await mainPageTest.charts.expectTitleButtonText(firstChartTitle);
 
-    const secondChartTitle = await createChart(mainPage);
+    const secondChartTitle = await mainPageTest.charts.createChart();
 
-    await expect(chartTitleButton(mainPage, secondChartTitle)).toHaveText(secondChartTitle);
-    await expect(mainPage.locator('.echarts-for-react')).toHaveCount(2);
+    await mainPageTest.charts.expectTitleButtonText(secondChartTitle);
+    await mainPageTest.charts.expectChartCount(2);
   });
 
   test('switches the selected chart when clicking different charts', async () => {
-    const firstChartTitle = await createChart(mainPage);
-    const secondChartTitle = await createChart(mainPage);
+    const firstChartTitle = await mainPageTest.charts.createChart();
+    const secondChartTitle = await mainPageTest.charts.createChart();
 
-    await selectChartByTitle(mainPage, firstChartTitle);
-    await expectSelectedChart(mainPage, firstChartTitle);
+    await mainPageTest.charts.selectChartByTitle(firstChartTitle);
+    await mainPageTest.charts.expectSelectedChart(firstChartTitle);
 
-    await selectChartByTitle(mainPage, secondChartTitle);
-    await expectSelectedChart(mainPage, secondChartTitle);
+    await mainPageTest.charts.selectChartByTitle(secondChartTitle);
+    await mainPageTest.charts.expectSelectedChart(secondChartTitle);
 
-    await chartContainer(mainPage, secondChartTitle).click();
-    await expectSelectedChart(mainPage, secondChartTitle);
+    await mainPageTest.charts.clickChartContainer(secondChartTitle);
+    await mainPageTest.charts.expectSelectedChart(secondChartTitle);
   });
 });
-
-type RenderedSerieSummary = {
-  name: string;
-  dataLength: number;
-  firstPoint: [number, number] | null;
-  lastPoint: [number, number] | null;
-};
 
 function buildSerieSummary(serie: ChartSerie): RenderedSerieSummary {
   return {
@@ -161,25 +155,4 @@ function buildSerieSummary(serie: ChartSerie): RenderedSerieSummary {
     firstPoint: serie.data[0] ?? null,
     lastPoint: serie.data.at(-1) ?? null,
   };
-}
-
-async function expectChartSeries(
-  page: Page,
-  chartTitle: string,
-  expectedSeries: {
-    name: string;
-    dataLength: number;
-    firstPoint: [number, number] | null;
-    lastPoint: [number, number] | null;
-  }[],
-) {
-  await expect
-    .poll(
-      async () => {
-        const actual = await getRenderedSeriesSummary(page, chartTitle);
-        return actual;
-      },
-      { timeout: 10000 },
-    )
-    .toEqual(expectedSeries);
 }
