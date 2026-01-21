@@ -1,23 +1,19 @@
-import { test, type ElectronApplication, type Page } from '@playwright/test';
+import { test } from '@playwright/test';
 
 import { ElectronAppTestObject } from './support/ElectronAppTestObject';
 import { MainPageTestObject } from './support/MainPageTestObject';
-import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
-let electronApp: ElectronApplication;
-let mainPage: Page;
 let appTest: ElectronAppTestObject;
 let mainPageTest: MainPageTestObject;
 
 test.describe('Electron App', () => {
   test.beforeEach(async () => {
-    ({ electronApp, mainPage } = await setupE2eTestEnvironment());
-    appTest = new ElectronAppTestObject(electronApp, mainPage);
-    mainPageTest = new MainPageTestObject(electronApp, mainPage);
+    mainPageTest = await MainPageTestObject.create();
+    appTest = new ElectronAppTestObject(mainPageTest.electronApp, mainPageTest.mainPage);
   });
 
   test.afterEach(async () => {
-    await electronApp.close();
+    await mainPageTest.close();
   });
 
   test('should launch electron app', async () => {

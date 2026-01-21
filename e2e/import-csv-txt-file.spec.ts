@@ -1,22 +1,16 @@
-import { test, type ElectronApplication, type Page } from '@playwright/test';
+import { test } from '@playwright/test';
 
 import { MainPageTestObject } from './support/MainPageTestObject';
-import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
-let electronApp: ElectronApplication;
-let mainPage: Page;
 let mainPageTest: MainPageTestObject;
 
 test.describe('Import CSV/TXT files', () => {
   test.beforeEach(async () => {
-    ({ electronApp, mainPage } = await setupE2eTestEnvironment());
-    mainPageTest = new MainPageTestObject(electronApp, mainPage);
+    mainPageTest = await MainPageTestObject.create();
   });
 
   test.afterEach(async () => {
-    if (electronApp) {
-      await electronApp.close();
-    }
+    await mainPageTest.close();
   });
 
   test('imports a valid TXT file (test1.txt) and renders channels', async () => {

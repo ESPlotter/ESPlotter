@@ -1,20 +1,16 @@
-import { test, type ElectronApplication, type Page } from '@playwright/test';
+import { test } from '@playwright/test';
 
 import { MainPageTestObject } from './support/MainPageTestObject';
-import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
 test.describe('Open .out files', () => {
-  let electronApp: ElectronApplication;
-  let mainPage: Page;
   let mainPageTest: MainPageTestObject;
 
   test.beforeEach(async () => {
-    ({ electronApp, mainPage } = await setupE2eTestEnvironment());
-    mainPageTest = new MainPageTestObject(electronApp, mainPage);
+    mainPageTest = await MainPageTestObject.create();
   });
 
   test.afterEach(async () => {
-    await electronApp.close();
+    await mainPageTest.close();
   });
 
   test('shows channels and plots a serie from example.out', async () => {

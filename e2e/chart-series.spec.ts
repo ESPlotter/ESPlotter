@@ -1,11 +1,10 @@
-import { test, type ElectronApplication, type Page } from '@playwright/test';
+import { test } from '@playwright/test';
 
 import { mapToChartSerie } from '@renderer/components/Chart/mapToChartSerie';
 
 import test3Fixture from '../fixtures/test3.json';
 
 import { MainPageTestObject } from './support/MainPageTestObject';
-import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
 import type { ChartSerie } from '@renderer/components/Chart/ChartSerie';
 import type { ChannelFileContentSeriePrimitive } from '@shared/domain/primitives/ChannelFileContentSeriePrimitive';
@@ -31,19 +30,16 @@ interface RenderedSerieSummary {
   lastPoint: [number, number] | null;
 }
 
-let electronApp: ElectronApplication;
-let mainPage: Page;
 let mainPageTest: MainPageTestObject;
 
 test.describe('Chart channel selection', () => {
   test.beforeEach(async () => {
-    ({ electronApp, mainPage } = await setupE2eTestEnvironment());
-    mainPageTest = new MainPageTestObject(electronApp, mainPage);
+    mainPageTest = await MainPageTestObject.create();
     await mainPageTest.openFixtureAndExpandInSidebar('test3.json', 'test3');
   });
 
   test.afterEach(async () => {
-    await electronApp.close();
+    await mainPageTest.close();
   });
 
   test('adds the Voltage serie to the selected chart', async () => {

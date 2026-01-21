@@ -7,6 +7,7 @@ import { ClipboardTestObject } from './ClipboardTestObject';
 import { MenuTestObject } from './MenuTestObject';
 import { PreferencesTestObject } from './PreferencesTestObject';
 import { SidebarTestObject } from './SidebarTestObject';
+import { setupE2eTestEnvironment } from './setupE2eTestEnvironment';
 
 interface WindowFilesApi {
   onChannelFileOpened: (listener: () => void) => () => void;
@@ -19,7 +20,7 @@ export class MainPageTestObject {
   readonly preferences: PreferencesTestObject;
   readonly sidebar: SidebarTestObject;
 
-  constructor(
+  private constructor(
     private readonly app: ElectronApplication,
     private readonly page: Page,
   ) {
@@ -28,6 +29,23 @@ export class MainPageTestObject {
     this.charts = new ChartTestObject(page);
     this.clipboard = new ClipboardTestObject(app);
     this.preferences = new PreferencesTestObject(this.menu, page);
+  }
+
+  static async create(): Promise<MainPageTestObject> {
+    const { electronApp, mainPage } = await setupE2eTestEnvironment();
+    return new MainPageTestObject(electronApp, mainPage);
+  }
+
+  get electronApp(): ElectronApplication {
+    return this.app;
+  }
+
+  get mainPage(): Page {
+    return this.page;
+  }
+
+  async close(): Promise<void> {
+    await this.app.close();
   }
 
   async openFixtureViaImportMenu(fixtureName: string): Promise<void> {

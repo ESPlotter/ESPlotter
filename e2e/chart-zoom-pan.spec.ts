@@ -1,21 +1,17 @@
-import { test, type ElectronApplication, type Page } from '@playwright/test';
+import { test } from '@playwright/test';
 
 import { MainPageTestObject } from './support/MainPageTestObject';
-import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
 
-let electronApp: ElectronApplication;
-let mainPage: Page;
 let mainPageTest: MainPageTestObject;
 
 test.describe('Chart zoom, pan, and reset controls', () => {
   test.beforeEach(async () => {
-    ({ electronApp, mainPage } = await setupE2eTestEnvironment());
-    mainPageTest = new MainPageTestObject(electronApp, mainPage);
+    mainPageTest = await MainPageTestObject.create();
     await mainPageTest.openFixtureAndExpandInSidebar('test3.json', 'test3');
   });
 
   test.afterEach(async () => {
-    await electronApp.close();
+    await mainPageTest.close();
   });
 
   test('shows zoom, pan, and reset buttons on chart', async () => {
