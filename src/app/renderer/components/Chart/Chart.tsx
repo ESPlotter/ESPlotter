@@ -4,6 +4,8 @@ import {
   IconCamera,
   IconHandGrab,
   IconHome,
+  IconLetterX,
+  IconLetterY,
   IconZoomIn,
   IconTrash,
 } from '@tabler/icons-react';
@@ -70,6 +72,8 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
   const chartInstanceRef = useRef<EChartsType | null>(null);
 
   useChartsHotkey(getChart, { key: 'Escape' }, () => resetZoom(), { active: isSelected });
+  useChartsHotkey(getChart, { key: 'x' }, () => resetZoomX(), { active: isSelected });
+  useChartsHotkey(getChart, { key: 'y' }, () => resetZoomY(), { active: isSelected });
 
   useChartsHotkey(
     getChart,
@@ -81,6 +85,9 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
   useChartsHotkey(getChart, { key: 'z' }, () => enableZoomSelect(), { active: isSelected });
   useChartsHotkey(getChart, { key: 'h' }, handleToggleTooltipHotkey, { active: isSelected });
   useChartsHotkey(getChart, { key: 'Delete' }, handleDeleteChart, { active: isSelected });
+  useChartsHotkey(getChart, { key: 's', shift: false }, handleCopyChartImageHotkey, {
+    active: isSelected,
+  });
 
   function getChart(): EChartsType | null {
     const chart = chartInstanceRef.current;
@@ -95,7 +102,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
     enableZoomSelect();
   }
 
-  function resetZoom() {
+  function resetZoomX() {
     const chart = getChart();
     if (!chart) return;
 
@@ -105,6 +112,11 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
       start: 0,
       end: 100,
     });
+  }
+
+  function resetZoomY() {
+    const chart = getChart();
+    if (!chart) return;
 
     chart.dispatchAction({
       type: 'dataZoom',
@@ -112,6 +124,11 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
       start: 0,
       end: 100,
     });
+  }
+
+  function resetZoom() {
+    resetZoomX();
+    resetZoomY();
   }
 
   function enableZoomSelect() {
@@ -152,6 +169,10 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
     void copyChartImageToClipboard();
   }
 
+  function handleCopyChartImageHotkey() {
+    void copyChartImageToClipboard();
+  }
+
   function handleSelectChart() {
     setSelectedChartId(id);
   }
@@ -179,6 +200,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
           size="icon-sm"
           onClick={enableZoomSelect}
           title="Zoom mode (Z key)"
+          aria-label="Zoom mode"
         >
           <IconZoomIn className="size-4" />
         </Button>
@@ -187,10 +209,35 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
           size="icon-sm"
           onClick={enablePan}
           title="Pan mode (Space)"
+          aria-label="Pan mode"
         >
           <IconHandGrab className="size-4" />
         </Button>
-        <Button variant="outline" size="icon-sm" onClick={resetZoom} title="Reset zoom (Escape)">
+        <Button
+          variant="outline"
+          size="icon-sm"
+          onClick={resetZoomX}
+          title="Reset zoom X (X Key)"
+          aria-label="Reset zoom X"
+        >
+          <IconLetterX className="size-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon-sm"
+          onClick={resetZoomY}
+          title="Reset zoom Y (Y Key)"
+          aria-label="Reset zoom Y"
+        >
+          <IconLetterY className="size-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon-sm"
+          onClick={resetZoom}
+          title="Reset zoom (Escape)"
+          aria-label="Reset zoom"
+        >
           <IconHome className="size-4" />
         </Button>
         <Button
@@ -198,6 +245,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
           size="icon-sm"
           onClick={toggleTooltip}
           title={isTooltipVisible ? 'Hide tooltip (H)' : 'Show tooltip (H)'}
+          aria-label={isTooltipVisible ? 'Hide tooltip' : 'Show tooltip'}
         >
           {isTooltipVisible ? <IconEye className="size-4" /> : <IconEyeOff className="size-4" />}
         </Button>
@@ -205,7 +253,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
           variant="outline"
           size="icon-sm"
           onClick={handleCopyChartImage}
-          title="Copy chart image"
+          title="Copy chart image (S)"
           aria-label="Copy chart image"
         >
           <IconCamera className="size-4" />

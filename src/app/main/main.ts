@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { app, BrowserWindow, globalShortcut } from 'electron';
+import { updateElectronApp } from 'update-electron-app';
 
 import { registerMainIpcHandlers } from '@main/shared/infrastructure/ipc/registerMainIpcHandlers';
 import { registerMainMenu } from '@main/shared/infrastructure/menu/registerMainMenu';
@@ -26,6 +27,10 @@ function shouldQuitForSquirrel(): boolean {
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (shouldQuitForSquirrel()) {
   app.quit();
+}
+
+if (app.isPackaged && !process.argv.includes('--disable-auto-update')) {
+  updateElectronApp();
 }
 
 const createWindow = () => {

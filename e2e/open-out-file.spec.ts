@@ -1,65 +1,32 @@
-import { expect, test, type ElectronApplication, type Page } from '@playwright/test';
+import { test } from '@playwright/test';
 
-import { clickMenuItem } from './support/clickMenuItem';
-import { createChart } from './support/createChart';
-import { expectSelectedChart } from './support/expectSelectedChart';
-import { getRenderedSeriesSummary } from './support/getRenderedSeriesSummary';
-import { selectChartByTitle } from './support/selectChartByTitle';
-import { setNextOpenFixturePath } from './support/setNextOpenFixturePath';
-import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
-import { waitForLastOpenedChannelFileChanged } from './support/waitForLastOpenedChannelFileChanged';
+import { MainPageTestObject } from './support/MainPageTestObject';
 
 test.describe('Open .out files', () => {
-  let electronApp: ElectronApplication;
-  let mainPage: Page;
+  let mainPageTest: MainPageTestObject;
 
   test.beforeEach(async () => {
-    ({ electronApp, mainPage } = await setupE2eTestEnvironment());
+    mainPageTest = await MainPageTestObject.create();
   });
 
   test.afterEach(async () => {
-    await electronApp.close();
+    await mainPageTest.close();
   });
 
   test('shows channels and plots a serie from example.out', async () => {
     test.skip(process.env.CI === 'true', 'Skipping in CI because it depends on dyntools');
 
-    await openExampleOutFile(electronApp, mainPage);
+    await mainPageTest.openOutFixture('example.out');
 
-    const channelButton = await getFirstChannelButton(mainPage);
-    const channelLabel = (await channelButton.innerText()).trim();
+    const channelLabel = await mainPageTest.sidebar.getFirstChannelLabel();
 
-    const chartTitle = await createChart(mainPage);
-    await selectChartByTitle(mainPage, chartTitle);
+    const chartTitle = await mainPageTest.charts.createChart();
+    await mainPageTest.charts.selectChartByTitle(chartTitle);
 
-    await channelButton.click();
+    await mainPageTest.sidebar.toggleChannel(channelLabel);
 
-    await expectSelectedChart(mainPage, 'PPOI_MW');
-    await expect
-      .poll(async () => {
-        const renderedSeries = await getRenderedSeriesSummary(mainPage, 'PPOI_MW');
-        return renderedSeries.length > 0 ? renderedSeries[0].dataLength : 0;
-      })
-      .toBeGreaterThan(0);
-
-    await expect(channelButton).toHaveText(channelLabel);
+    await mainPageTest.charts.expectSelectedChart('PPOI_MW');
+    await mainPageTest.charts.expectFirstSeriesDataLengthGreaterThan('PPOI_MW', 0);
+    await mainPageTest.sidebar.expectChannelLabelVisible(channelLabel);
   });
 });
-
-async function openExampleOutFile(app: ElectronApplication, page: Page): Promise<void> {
-  await setNextOpenFixturePath(app, 'example.out');
-
-  const parsedPromise = waitForLastOpenedChannelFileChanged(page);
-  await clickMenuItem(app, ['File', 'Open File (.out)']);
-  await parsedPromise;
-
-  const fileHeading = page.getByRole('heading', { level: 3 }).first();
-  await fileHeading.waitFor({ state: 'visible' });
-  await fileHeading.click();
-}
-
-async function getFirstChannelButton(page: Page) {
-  const channelButtons = page.locator('[data-sidebar="menu-button"]');
-  await expect.poll(async () => channelButtons.count()).toBeGreaterThan(0);
-  return channelButtons.first();
-}

@@ -1,46 +1,39 @@
-import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
+import { test } from '@playwright/test';
 
-import { expandFileInSidebar } from './support/expandFileInSidebar';
-import { openFixtureViaImportMenu } from './support/openFixtureViaImportMenu';
-import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
+import { MainPageTestObject } from './support/MainPageTestObject';
 
-let electronApp: ElectronApplication;
-let mainPage: Page;
+let mainPageTest: MainPageTestObject;
 
 test.describe('Import CSV/TXT files', () => {
   test.beforeEach(async () => {
-    ({ electronApp, mainPage } = await setupE2eTestEnvironment());
+    mainPageTest = await MainPageTestObject.create();
   });
 
   test.afterEach(async () => {
-    if (electronApp) {
-      await electronApp.close();
-    }
+    await mainPageTest.close();
   });
 
   test('imports a valid TXT file (test1.txt) and renders channels', async () => {
-    await openFixtureViaImportMenu(electronApp, mainPage, 'test1.txt');
+    await mainPageTest.openChannelFileViaImportMenu('test1.txt');
 
-    await expectChannelVisible(mainPage, 'test1');
-    await expandFileInSidebar(mainPage, 'test1');
-    await expectChannelsInSidebar(mainPage, ['Voltage ()', 'Active Power ()', 'Reactive Power ()']);
+    await mainPageTest.sidebar.expectFileVisible('test1');
+    await mainPageTest.sidebar.expandChannelFile('test1');
+    await mainPageTest.sidebar.expectChannelsVisible([
+      'Voltage ()',
+      'Active Power ()',
+      'Reactive Power ()',
+    ]);
   });
 
   test('imports a valid CSV file (test4.csv) and renders channels', async () => {
-    await openFixtureViaImportMenu(electronApp, mainPage, 'test4.csv');
+    await mainPageTest.openChannelFileViaImportMenu('test4.csv');
 
-    await expectChannelVisible(mainPage, 'test4');
-    await expandFileInSidebar(mainPage, 'test4');
-    await expectChannelsInSidebar(mainPage, ['Voltage ()', 'Active Power ()', 'Reactive Power ()']);
+    await mainPageTest.sidebar.expectFileVisible('test4');
+    await mainPageTest.sidebar.expandChannelFile('test4');
+    await mainPageTest.sidebar.expectChannelsVisible([
+      'Voltage ()',
+      'Active Power ()',
+      'Reactive Power ()',
+    ]);
   });
 });
-
-async function expectChannelVisible(page: Page, fileName: string): Promise<void> {
-  await expect(page.getByRole('heading', { level: 3, name: fileName })).toBeVisible();
-}
-
-async function expectChannelsInSidebar(page: Page, channelNames: string[]): Promise<void> {
-  for (const channelName of channelNames) {
-    await expect(page.getByRole('button', { name: channelName, exact: true })).toBeVisible();
-  }
-}

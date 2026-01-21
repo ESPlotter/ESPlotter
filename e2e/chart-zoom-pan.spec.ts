@@ -1,442 +1,230 @@
-import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
+import { test } from '@playwright/test';
 
-import { chartContainer } from './support/chartContainer';
-import { getChartTooltipState } from './support/chartHelpers';
-import { chartTitleButton } from './support/chartTitleButton';
-import { clickSidebarChannel } from './support/clickSidebarChannel';
-import { createAndSelectChart } from './support/createAndSelectChart';
-import { createChart } from './support/createChart';
-import { expectSelectedChart } from './support/expectSelectedChart';
-import { getChartIndex } from './support/getChartIndex';
-import { getRenderedSeriesSummary } from './support/getRenderedSeriesSummary';
-import { openFixtureAndExpandInSidebar } from './support/openFixtureAndExpandInSidebar';
-import { selectChartByTitle } from './support/selectChartByTitle';
-import { setupE2eTestEnvironment } from './support/setupE2eTestEnvironment';
+import { MainPageTestObject } from './support/MainPageTestObject';
 
-import type { FiberNode, ReactEChartsComponent } from './support/chartHelpers';
-
-let electronApp: ElectronApplication;
-let mainPage: Page;
+let mainPageTest: MainPageTestObject;
 
 test.describe('Chart zoom, pan, and reset controls', () => {
   test.beforeEach(async () => {
-    ({ electronApp, mainPage } = await setupE2eTestEnvironment());
-    await openFixtureAndExpandInSidebar(electronApp, mainPage, 'test3.json', 'test3');
+    mainPageTest = await MainPageTestObject.create();
+    await mainPageTest.openChannelFileAndExpandInSidebar('test3.json');
   });
 
   test.afterEach(async () => {
-    await electronApp.close();
+    await mainPageTest.close();
   });
 
   test('shows zoom, pan, and reset buttons on chart', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
-    const chartRoot = getChartRoot(mainPage, chartTitle);
-
-    // Check for zoom button (should be highlighted by default)
-    const zoomButton = chartRoot.getByTitle(/Zoom mode/);
-    await expect(zoomButton).toBeVisible();
-
-    // Check for pan button
-    const panButton = chartRoot.getByTitle(/Pan mode/);
-    await expect(panButton).toBeVisible();
-
-    // Check for reset button
-    const resetButton = chartRoot.getByTitle(/Reset zoom/);
-    await expect(resetButton).toBeVisible();
+    const chartTitle = await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.charts.expectZoomControlsVisible(chartTitle);
   });
 
   test('zoom mode is enabled by default', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
-    const chartRoot = getChartRoot(mainPage, chartTitle);
-
-    const zoomButton = chartRoot.getByTitle(/Zoom mode/);
-
-    // Zoom button should have default variant (highlighted)
-    await expect(zoomButton).toHaveClass(/bg-primary/);
+    const chartTitle = await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.charts.expectZoomModeActive(chartTitle, true);
   });
 
   test('can toggle between zoom and pan modes', async () => {
-    const chartTitle = await createAndSelectChart(mainPage);
-    const chartRoot = getChartRoot(mainPage, chartTitle);
+    const chartTitle = await mainPageTest.charts.createAndSelectChart();
 
-    const zoomButton = chartRoot.getByTitle(/Zoom mode/);
-    const panButton = chartRoot.getByTitle(/Pan mode/);
+    await mainPageTest.charts.expectZoomModeActive(chartTitle, true);
 
-    // Initially zoom is active
-    await expect(zoomButton).toHaveClass(/bg-primary/);
+    await mainPageTest.charts.clickPanMode(chartTitle);
+    await mainPageTest.charts.expectPanModeActive(chartTitle, true);
+    await mainPageTest.charts.expectZoomModeActive(chartTitle, false);
 
-    // Click pan button
-    await panButton.click();
-    await expect(panButton).toHaveClass(/bg-primary/);
-
-    // Pan should now be active, zoom inactive
-    await expect(panButton).toHaveClass(/bg-primary/);
-    await expect(zoomButton).not.toHaveClass(/bg-primary/);
-
-    // Click zoom button again
-    await zoomButton.click();
-    await expect(zoomButton).toHaveClass(/bg-primary/);
-
-    // Zoom should be active again
-    await expect(zoomButton).toHaveClass(/bg-primary/);
+    await mainPageTest.charts.clickZoomMode(chartTitle);
+    await mainPageTest.charts.expectZoomModeActive(chartTitle, true);
   });
 
   test('can perform zoom in by dragging right', async () => {
-    await createAndSelectChart(mainPage);
-    await addVoltageChannelToChart(mainPage);
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
     const chartTitle = 'Voltage';
-    await expectSelectedChart(mainPage, chartTitle);
+    await mainPageTest.charts.expectSelectedChart(chartTitle);
+    await mainPageTest.charts.waitForChartData(chartTitle);
 
-    const container = chartContainer(mainPage, chartTitle);
-    const chartElement = container.locator('.echarts-for-react').first();
-
-    await expect(chartElement).toBeVisible();
-    await waitForChartData(mainPage, chartTitle);
-
-    // Get initial axis ranges
-    const initialRanges = await getChartZoomRanges(mainPage, chartTitle);
-
-    // Perform zoom by dragging from left to right
-    const box = await chartElement.boundingBox();
-    if (!box) throw new Error('Chart element not found');
-
-    const startX = box.x + box.width * 0.3;
-    const startY = box.y + box.height * 0.5;
-    const endX = box.x + box.width * 0.7;
-    const endY = box.y + box.height * 0.7;
-
-    await mainPage.mouse.move(startX, startY);
-    await mainPage.mouse.down();
-    await mainPage.mouse.move(endX, endY, { steps: 10 });
-    await mainPage.mouse.up();
-
-    // Wait for zoom to be applied
-    await expect
-      .poll(async () => {
-        const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
-        return (
-          zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
-          zoomedRanges.xAxis.end < initialRanges.xAxis.end
-        );
-      })
-      .toBe(true);
+    const initialRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
+    await mainPageTest.charts.dragOnChartByPercent(chartTitle, {
+      startX: 0.3,
+      startY: 0.5,
+      endX: 0.7,
+      endY: 0.7,
+    });
+    await mainPageTest.charts.expectZoomedIn(chartTitle, initialRanges);
   });
 
   test('can reset zoom using reset button', async () => {
-    await createAndSelectChart(mainPage);
-    await addVoltageChannelToChart(mainPage);
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
     const chartTitle = 'Voltage';
-    await expectSelectedChart(mainPage, chartTitle);
+    await mainPageTest.charts.expectSelectedChart(chartTitle);
+    await mainPageTest.charts.waitForChartData(chartTitle);
 
-    const chartRoot = getChartRoot(mainPage, chartTitle);
-    const chartElement = chartContainer(mainPage, chartTitle).locator('.echarts-for-react').first();
-    const resetButton = chartRoot.getByTitle(/Reset zoom/);
+    const initialRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
 
-    await expect(chartElement).toBeVisible();
-    await waitForChartData(mainPage, chartTitle);
+    await mainPageTest.charts.dragOnChartByPercent(chartTitle, {
+      startX: 0.3,
+      startY: 0.5,
+      endX: 0.7,
+      endY: 0.7,
+    });
+    await mainPageTest.charts.expectZoomedIn(chartTitle, initialRanges);
 
-    // Get initial axis ranges
-    const initialRanges = await getChartZoomRanges(mainPage, chartTitle);
+    await mainPageTest.charts.clickResetZoom(chartTitle);
+    await mainPageTest.charts.expectZoomReset(chartTitle, initialRanges);
+  });
 
-    // Zoom in
-    const box = await chartElement.boundingBox();
-    if (!box) throw new Error('Chart element not found');
+  test('can reset zoom X using reset X button', async () => {
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
+    const chartTitle = 'Voltage';
+    await mainPageTest.charts.expectSelectedChart(chartTitle);
+    await mainPageTest.charts.waitForChartData(chartTitle);
 
-    await mainPage.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5);
-    await mainPage.mouse.down();
-    await mainPage.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.7, { steps: 10 });
-    await mainPage.mouse.up();
-    await expect
-      .poll(async () => {
-        const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
-        return (
-          zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
-          zoomedRanges.xAxis.end < initialRanges.xAxis.end
-        );
-      })
-      .toBe(true);
+    const initialRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
 
-    // Click reset button
-    await resetButton.click();
-    await expect
-      .poll(async () => {
-        const resetRanges = await getChartZoomRanges(mainPage, chartTitle);
-        return (
-          Math.abs(resetRanges.xAxis.start - initialRanges.xAxis.start) < 0.1 &&
-          Math.abs(resetRanges.xAxis.end - initialRanges.xAxis.end) < 0.1
-        );
-      })
-      .toBe(true);
+    await mainPageTest.charts.dragOnChartByPercent(chartTitle, {
+      startX: 0.3,
+      startY: 0.5,
+      endX: 0.7,
+      endY: 0.7,
+    });
+    await mainPageTest.charts.expectZoomedInBothAxes(chartTitle, initialRanges);
+
+    await mainPageTest.charts.clickResetZoomX(chartTitle);
+    await mainPageTest.charts.expectZoomResetX(chartTitle, initialRanges);
+  });
+
+  test('can reset zoom Y using reset Y button', async () => {
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
+    const chartTitle = 'Voltage';
+    await mainPageTest.charts.expectSelectedChart(chartTitle);
+    await mainPageTest.charts.waitForChartData(chartTitle);
+
+    const initialRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
+
+    await mainPageTest.charts.dragOnChartByPercent(chartTitle, {
+      startX: 0.3,
+      startY: 0.5,
+      endX: 0.7,
+      endY: 0.7,
+    });
+    await mainPageTest.charts.expectZoomedInBothAxes(chartTitle, initialRanges);
+
+    await mainPageTest.charts.clickResetZoomY(chartTitle);
+    await mainPageTest.charts.expectZoomResetY(chartTitle, initialRanges);
   });
 
   test('can pan chart in pan mode', async () => {
-    await createAndSelectChart(mainPage);
-    await addVoltageChannelToChart(mainPage);
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
     const chartTitle = 'Voltage';
-    await expectSelectedChart(mainPage, chartTitle);
+    await mainPageTest.charts.expectSelectedChart(chartTitle);
+    await mainPageTest.charts.waitForChartData(chartTitle);
 
-    const chartRoot = getChartRoot(mainPage, chartTitle);
-    const chartElement = chartContainer(mainPage, chartTitle).locator('.echarts-for-react').first();
-    const panButton = chartRoot.getByTitle(/Pan mode/);
+    const initialRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
+    await mainPageTest.charts.dragOnChartByPercent(chartTitle, {
+      startX: 0.3,
+      startY: 0.5,
+      endX: 0.7,
+      endY: 0.7,
+    });
+    await mainPageTest.charts.expectZoomedIn(chartTitle, initialRanges);
+    const zoomedRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
 
-    await expect(chartElement).toBeVisible();
-    await waitForChartData(mainPage, chartTitle);
+    await mainPageTest.charts.clickPanMode(chartTitle);
+    await mainPageTest.charts.expectPanModeActive(chartTitle, true);
 
-    // First zoom in so we can pan
-    const box = await chartElement.boundingBox();
-    if (!box) throw new Error('Chart element not found');
-    const initialRanges = await getChartZoomRanges(mainPage, chartTitle);
+    await mainPageTest.charts.dragOnChartByPercent(chartTitle, {
+      startX: 0.5,
+      startY: 0.5,
+      endX: 0.3,
+      endY: 0.3,
+    });
 
-    await mainPage.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5);
-    await mainPage.mouse.down();
-    await mainPage.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.7, { steps: 10 });
-    await mainPage.mouse.up();
-    await expect
-      .poll(async () => {
-        const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
-        return (
-          zoomedRanges.xAxis.start > initialRanges.xAxis.start &&
-          zoomedRanges.xAxis.end < initialRanges.xAxis.end
-        );
-      })
-      .toBe(true);
-    const zoomedRanges = await getChartZoomRanges(mainPage, chartTitle);
-
-    // Switch to pan mode
-    await panButton.click();
-    await expect(panButton).toHaveClass(/bg-primary/);
-
-    // Perform pan by dragging
-    await mainPage.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.5);
-    await mainPage.mouse.down();
-    await mainPage.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.3, { steps: 10 });
-    await mainPage.mouse.up();
-    const zoomedRangeX = zoomedRanges.xAxis.end - zoomedRanges.xAxis.start;
-
-    await expect
-      .poll(async () => {
-        const pannedRanges = await getChartZoomRanges(mainPage, chartTitle);
-        const pannedRangeX = pannedRanges.xAxis.end - pannedRanges.xAxis.start;
-        return (
-          Math.abs(pannedRangeX - zoomedRangeX) < 0.5 &&
-          Math.abs(pannedRanges.xAxis.start - zoomedRanges.xAxis.start) > 0.1
-        );
-      })
-      .toBe(true);
+    await mainPageTest.charts.expectPanned(chartTitle, zoomedRanges);
   });
 
   test('can toggle tooltip visibility on chart', async () => {
-    await createAndSelectChart(mainPage);
-    await addVoltageChannelToChart(mainPage);
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
     const chartTitle = 'Voltage';
-    await expectSelectedChart(mainPage, chartTitle);
+    await mainPageTest.charts.expectSelectedChart(chartTitle);
 
-    const chartRoot = getChartRoot(mainPage, chartTitle);
-    const tooltipToggle = chartRoot.getByTitle(/Hide tooltip/);
+    await mainPageTest.charts.expectTooltipToggleVisible(chartTitle, 'hide');
 
-    await expect(tooltipToggle).toBeVisible();
+    await mainPageTest.charts.expectTooltipState(chartTitle, {
+      show: true,
+      axisPointerTriggersTooltip: true,
+    });
 
-    const initialState = await getChartTooltipState(mainPage, chartTitle);
-    expect(initialState.show).toBe(true);
-    expect(initialState.axisPointerTriggersTooltip).toBe(true);
+    await mainPageTest.charts.clickHideTooltip(chartTitle);
+    await mainPageTest.charts.expectTooltipToggleVisible(chartTitle, 'show');
+    await mainPageTest.charts.expectTooltipState(chartTitle, {
+      show: false,
+      axisPointerTriggersTooltip: false,
+    });
 
-    await tooltipToggle.click();
-    await expect(chartRoot.getByTitle(/Show tooltip/)).toBeVisible();
-
-    await expect
-      .poll(async () => await getChartTooltipState(mainPage, chartTitle))
-      .toEqual({ show: false, axisPointerTriggersTooltip: false });
-
-    await chartRoot.getByTitle(/Show tooltip/).click();
-    await expect(chartRoot.getByTitle(/Hide tooltip/)).toBeVisible();
-
-    await expect
-      .poll(async () => await getChartTooltipState(mainPage, chartTitle))
-      .toEqual({ show: true, axisPointerTriggersTooltip: true });
+    await mainPageTest.charts.clickShowTooltip(chartTitle);
+    await mainPageTest.charts.expectTooltipToggleVisible(chartTitle, 'hide');
+    await mainPageTest.charts.expectTooltipState(chartTitle, {
+      show: true,
+      axisPointerTriggersTooltip: true,
+    });
   });
 
   test('can toggle tooltip with H shortcut', async () => {
-    await createAndSelectChart(mainPage);
-    await addVoltageChannelToChart(mainPage);
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
     const chartTitle = 'Voltage';
-    await expectSelectedChart(mainPage, chartTitle);
+    await mainPageTest.charts.expectSelectedChart(chartTitle);
 
-    const chartRoot = getChartRoot(mainPage, chartTitle);
-    await expect(chartRoot.getByTitle(/Hide tooltip/)).toBeVisible();
+    await mainPageTest.charts.expectTooltipToggleVisible(chartTitle, 'hide');
 
-    await mainPage.keyboard.press('h');
-    await expect(chartRoot.getByTitle(/Show tooltip/)).toBeVisible();
+    await mainPageTest.charts.pressTooltipShortcut();
+    await mainPageTest.charts.expectTooltipToggleVisible(chartTitle, 'show');
+    await mainPageTest.charts.expectTooltipState(chartTitle, {
+      show: false,
+      axisPointerTriggersTooltip: false,
+    });
 
-    await expect
-      .poll(async () => await getChartTooltipState(mainPage, chartTitle))
-      .toEqual({ show: false, axisPointerTriggersTooltip: false });
-
-    await mainPage.keyboard.press('h');
-    await expect(chartRoot.getByTitle(/Hide tooltip/)).toBeVisible();
-
-    await expect
-      .poll(async () => await getChartTooltipState(mainPage, chartTitle))
-      .toEqual({ show: true, axisPointerTriggersTooltip: true });
+    await mainPageTest.charts.pressTooltipShortcut();
+    await mainPageTest.charts.expectTooltipToggleVisible(chartTitle, 'hide');
+    await mainPageTest.charts.expectTooltipState(chartTitle, {
+      show: true,
+      axisPointerTriggersTooltip: true,
+    });
   });
 
   test('chart activation still works after zoom/pan implementation', async () => {
-    const firstChartTitle = await createChart(mainPage);
-    const secondChartTitle = await createChart(mainPage);
+    const firstChartTitle = await mainPageTest.charts.createChart();
+    const secondChartTitle = await mainPageTest.charts.createChart();
 
-    // The newest chart should be selected after creation
-    await expectSelectedChart(mainPage, secondChartTitle);
+    await mainPageTest.charts.expectSelectedChart(secondChartTitle);
 
-    // Selecting another chart still works
-    await selectChartByTitle(mainPage, firstChartTitle);
-    await expectSelectedChart(mainPage, firstChartTitle);
+    await mainPageTest.charts.selectChartByTitle(firstChartTitle);
+    await mainPageTest.charts.expectSelectedChart(firstChartTitle);
 
-    // Switching back keeps the selection stable even after repeated clicks
-    await selectChartByTitle(mainPage, secondChartTitle);
-    await expectSelectedChart(mainPage, secondChartTitle);
+    await mainPageTest.charts.selectChartByTitle(secondChartTitle);
+    await mainPageTest.charts.expectSelectedChart(secondChartTitle);
 
-    await chartContainer(mainPage, secondChartTitle).click();
-    await expectSelectedChart(mainPage, secondChartTitle);
+    await mainPageTest.charts.clickChartContainer(secondChartTitle);
+    await mainPageTest.charts.expectSelectedChart(secondChartTitle);
   });
 
   test('dragging to zoom keeps the chart selected', async () => {
-    const chartTitle = await createChart(mainPage);
-    const container = chartContainer(mainPage, chartTitle);
-    const chartElement = container.locator('.echarts-for-react').first();
+    const chartTitle = await mainPageTest.charts.createChart();
+    await mainPageTest.charts.expectSelectedChart(chartTitle);
 
-    await expectSelectedChart(mainPage, chartTitle);
+    await mainPageTest.charts.dragOnChartByPercent(chartTitle, {
+      startX: 0.3,
+      startY: 0.5,
+      endX: 0.6,
+      endY: 0.7,
+    });
 
-    // Perform a drag (zoom action)
-    await expect(chartElement).toBeVisible();
-    const box = await chartElement.boundingBox();
-    if (!box) throw new Error('Chart element not found');
-
-    await mainPage.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5);
-    await mainPage.mouse.down();
-    await mainPage.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.7, { steps: 10 });
-    await mainPage.mouse.up();
-
-    // Dragging should not clear or change the selection
-    await expectSelectedChart(mainPage, chartTitle);
+    await mainPageTest.charts.expectSelectedChart(chartTitle);
   });
 });
-
-// Helper functions
-async function addVoltageChannelToChart(page: Page) {
-  await clickSidebarChannel(page, 'Voltage (V)');
-}
-
-async function waitForChartData(page: Page, chartTitle: string): Promise<void> {
-  await expect
-    .poll(
-      async () => {
-        const series = await getRenderedSeriesSummary(page, chartTitle);
-        return series.some((serie) => serie.dataLength > 0);
-      },
-      { timeout: 10000 },
-    )
-    .toBe(true);
-}
-
-async function getChartZoomRanges(page: Page, chartTitle: string): Promise<ZoomRanges> {
-  const chartIndex = await getChartIndex(page, chartTitle);
-
-  return page.evaluate(
-    async ({ chartIndex: idx }) => {
-      const containers = Array.from(
-        document.querySelectorAll<HTMLDivElement>('.echarts-for-react'),
-      );
-      const target = containers[idx];
-      if (!target) {
-        throw new Error('Chart container not found');
-      }
-
-      // Find ECharts instance
-      const fiberKey = Object.getOwnPropertyNames(target).find((key: string) =>
-        key.startsWith('__reactFiber'),
-      );
-      const host = target as unknown as Record<string, unknown>;
-      const rootFiber = fiberKey ? (host[fiberKey] as FiberNode | null) : null;
-
-      let current: FiberNode | null = rootFiber;
-      let echartsInstance: ReactEChartsComponent | null = null;
-
-      while (current && !echartsInstance) {
-        const component = current.stateNode as ReactEChartsComponent | null | undefined;
-        if (component?.getEchartsInstance) {
-          const instance = component.getEchartsInstance();
-          if (instance) {
-            echartsInstance = component;
-            break;
-          }
-        }
-        current = current.return ?? null;
-      }
-
-      if (!echartsInstance) {
-        throw new Error('ECharts instance not found');
-      }
-
-      const instance = echartsInstance.getEchartsInstance();
-      if (!instance) {
-        throw new Error('ECharts instance not available');
-      }
-
-      const model = (instance as unknown as EChartsInstanceWithModel).getModel?.();
-      if (!model) {
-        throw new Error('ECharts model not available');
-      }
-      const resolvedModel = model;
-
-      function getRange(id: string): AxisRange {
-        const zoomModels = resolvedModel.findComponents({
-          mainType: 'dataZoom',
-          query: { dataZoomId: id },
-        });
-        const zoomModel = zoomModels[0] as DataZoomModel | undefined;
-        const percentRange = zoomModel?.getPercentRange?.();
-        if (percentRange && percentRange.length === 2) {
-          return {
-            start: typeof percentRange[0] === 'number' ? percentRange[0] : 0,
-            end: typeof percentRange[1] === 'number' ? percentRange[1] : 100,
-          };
-        }
-        return { start: 0, end: 100 };
-      }
-
-      return {
-        xAxis: getRange('datazoom-inside-x'),
-        yAxis: getRange('datazoom-inside-y'),
-      };
-    },
-    { chartIndex },
-  );
-}
-
-function getChartRoot(page: Page, chartTitle: string) {
-  return page.locator('article').filter({ has: chartTitleButton(page, chartTitle) });
-}
-
-interface AxisRange {
-  start: number;
-  end: number;
-}
-
-interface ZoomRanges {
-  xAxis: AxisRange;
-  yAxis: AxisRange;
-}
-
-interface DataZoomModel {
-  getPercentRange?: () => [number, number] | undefined;
-}
-
-interface GlobalModel {
-  findComponents: (condition: {
-    mainType: string;
-    query?: Record<string, unknown>;
-  }) => DataZoomModel[];
-}
-
-interface EChartsInstanceWithModel {
-  getModel?: () => GlobalModel;
-}

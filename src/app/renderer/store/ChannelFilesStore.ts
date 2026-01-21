@@ -27,5 +27,6 @@ const useChannelFilesStore = create<ChannelFilesState>()((set) => ({
   },
 }));
 
+export { useChannelFilesStore };
 export const useChannelFiles = () => useChannelFilesStore((state) => state.files);
 export const useChannelFilesActions = () => useChannelFilesStore((state) => state.actions);

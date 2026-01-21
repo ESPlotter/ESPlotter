@@ -1,3 +1,4 @@
+import { XIcon } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { useOpenedChannelFiles } from '@renderer/hooks/useOpenedChannelFiles';
@@ -6,6 +7,7 @@ import {
   useCharts,
   useChannelChartsActions,
 } from '@renderer/store/ChannelChartsStore';
+import { useChannelFilesActions } from '@renderer/store/ChannelFilesStore';
 import {
   Accordion,
   AccordionItem,
@@ -38,7 +40,9 @@ export function AppSidebar() {
   const openedChannelFiles = useOpenedChannelFiles();
   const selectedChartId = useSelectedChartId();
   const charts = useCharts();
-  const { addChannelToChart, removeChannelFromChart } = useChannelChartsActions();
+  const { addChannelToChart, removeChannelFromChart, removeChannelsFromAllCharts } =
+    useChannelChartsActions();
+  const { removeFile } = useChannelFilesActions();
 
   const allItems = useMemo(() => {
     return openedChannelFiles.map(mapToMenuItems);
@@ -72,6 +76,11 @@ export function AppSidebar() {
     addChannelToChart(selectedChartId, channelKey, serie);
   }
 
+  function handleCloseFile(filePath: string) {
+    removeChannelsFromAllCharts(filePath);
+    removeFile(filePath);
+  }
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -82,9 +91,20 @@ export function AppSidebar() {
               {allItems.map((item) => (
                 <Accordion type="single" collapsible key={item.filePath}>
                   <AccordionItem value={item.filePath}>
-                    <AccordionTrigger className="text-sm font-medium">
-                      <span className="block w-full truncate">{item.fileName}</span>
-                    </AccordionTrigger>
+                    <div className="flex w-full items-center gap-2">
+                      <AccordionTrigger className="flex-1 text-sm font-medium">
+                        <span className="block flex-1 truncate text-left">{item.fileName}</span>
+                      </AccordionTrigger>
+                      <button
+                        onClick={() => handleCloseFile(item.filePath)}
+                        className="rounded p-1 hover:bg-muted"
+                        aria-label="Close file"
+                        title="Close"
+                        type="button"
+                      >
+                        <XIcon className="size-4" />
+                      </button>
+                    </div>
                     <AccordionContent>
                       {item.channels?.map((channel) => {
                         const channelKey = buildChannelKey(item.filePath, channel.id);
