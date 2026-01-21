@@ -114,6 +114,24 @@ export class ChartTestObject {
     return chartTitle;
   }
 
+  async deleteChart(chartTitle: string): Promise<void> {
+    await this.ensureChartToolbarReady(chartTitle);
+    await this.getChartDeleteButton(chartTitle).click({ trial: true });
+    await this.getChartDeleteButton(chartTitle).click();
+  }
+
+  async deleteAllCharts(): Promise<void> {
+    await this.getDeleteAllChartsButton().click();
+  }
+
+  async pressDeleteChartShortcut(): Promise<void> {
+    await this.page.keyboard.press('Delete');
+  }
+
+  async pressDeleteAllChartsShortcut(): Promise<void> {
+    await this.page.keyboard.press('Control+Delete');
+  }
+
   async selectChartByTitle(
     chartTitle: string,
     expectedSelection: string | null = chartTitle,
@@ -140,6 +158,14 @@ export class ChartTestObject {
       .filter((title) => title.length > 0 && title !== 'New Chart');
   }
 
+  async expectChartTitlesCount(expectedCount: number): Promise<void> {
+    await expect.poll(async () => (await this.getChartTitles()).length).toBe(expectedCount);
+  }
+
+  async expectChartTitlesEqual(expectedTitles: string[]): Promise<void> {
+    await expect.poll(async () => this.getChartTitles()).toEqual(expectedTitles);
+  }
+
   async expectChartTitlesContain(expectedTitles: string[]): Promise<void> {
     const titles = await this.getChartTitles();
     for (const expectedTitle of expectedTitles) {
@@ -152,6 +178,12 @@ export class ChartTestObject {
     for (const unexpectedTitle of unexpectedTitles) {
       expect(titles).not.toContain(unexpectedTitle);
     }
+  }
+
+  async expectChartTitlesRenumbered(count: number): Promise<void> {
+    await expect
+      .poll(async () => this.getChartTitles())
+      .toEqual(Array.from({ length: count }, (_, index) => `Chart ${index + 1}`));
   }
 
   async expectTitleHeadingVisible(title: string, index = 0): Promise<void> {
@@ -792,6 +824,30 @@ export class ChartTestObject {
 
   private getScrollContainer(): Locator {
     return this.page.getByTestId('chart-scroll-container');
+  }
+
+  private getDeleteAllChartsButton(): Locator {
+    return this.page
+      .getByRole('main')
+      .getByRole('button', { name: 'Delete all charts (Ctrl+Delete)' });
+  }
+
+  private async ensureChartToolbarReady(chartTitle: string): Promise<void> {
+    const chartCard = this.getChartCardByTitle(chartTitle);
+    await chartCard.waitFor({ state: 'visible' });
+
+    const zoomButton = chartCard.getByRole('button', { name: 'Zoom mode' });
+    await zoomButton.waitFor({ state: 'visible' });
+    await zoomButton.scrollIntoViewIfNeeded();
+
+    await chartCard.hover();
+    await this.page.waitForTimeout(50);
+  }
+
+  private getChartDeleteButton(chartTitle: string): Locator {
+    return this.getChartCardByTitle(chartTitle).getByRole('button', {
+      name: 'Delete chart (Delete key)',
+    });
   }
 
   private async getChartIndex(chartTitle: string): Promise<number> {
