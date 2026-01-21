@@ -55,8 +55,9 @@ export class MainPageTestObject {
     await parsedPromise;
   }
 
-  async openFixtureAndExpandInSidebar(fixtureName: string, fileLabel: string): Promise<void> {
+  async openFixtureAndExpandInSidebar(fixtureName: string): Promise<void> {
     await this.openFixtureViaImportMenu(fixtureName);
+    const fileLabel = fixtureName.split('.')[0];
     await this.sidebar.expandFile(fileLabel);
   }
 

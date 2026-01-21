@@ -14,14 +14,14 @@ test.describe('Close channel files', () => {
   });
 
   test('should close a channel file and remove it from the sidebar', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test1.txt', 'test1');
+    await mainPageTest.openFixtureAndExpandInSidebar('test1.txt');
     await mainPageTest.sidebar.expectFileVisible('test1');
     await mainPageTest.sidebar.closeChannelFile('test1');
     await mainPageTest.sidebar.expectFileNotVisible('test1');
   });
 
   test('should remove channels from chart when closing the file', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test1.txt', 'test1');
+    await mainPageTest.openFixtureAndExpandInSidebar('test1.txt');
     await mainPageTest.charts.createChart();
     await mainPageTest.sidebar.toggleChannel('Voltage ()');
 
@@ -49,7 +49,7 @@ test.describe('Close channel files', () => {
   });
 
   test('should reset chart title to default when closing file makes chart empty and title matched channel', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test1.txt', 'test1');
+    await mainPageTest.openFixtureAndExpandInSidebar('test1.txt');
     await mainPageTest.charts.createChart();
     await mainPageTest.sidebar.toggleChannel('Voltage ()');
 

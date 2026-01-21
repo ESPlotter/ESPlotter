@@ -25,7 +25,7 @@ test.describe('Chart title initialization', () => {
   });
 
   test('renames chart to channel name when adding first channel', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test3.json', 'test3');
+    await mainPageTest.openFixtureAndExpandInSidebar('test3.json');
 
     const chartTitle = await mainPageTest.charts.createChart();
 
@@ -37,7 +37,7 @@ test.describe('Chart title initialization', () => {
   });
 
   test('does not rename chart when adding second channel', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test3.json', 'test3');
+    await mainPageTest.openFixtureAndExpandInSidebar('test3.json');
 
     const chartTitle = await mainPageTest.charts.createChart();
     await mainPageTest.charts.selectChartByTitle(chartTitle);
@@ -53,7 +53,7 @@ test.describe('Chart title initialization', () => {
   });
 
   test('does not rename chart if user has manually changed the title', async () => {
-    await mainPageTest.openFixtureAndExpandInSidebar('test3.json', 'test3');
+    await mainPageTest.openFixtureAndExpandInSidebar('test3.json');
 
     const chartTitle = await mainPageTest.charts.createChart();
     const customTitle = 'My Custom Chart';

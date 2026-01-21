@@ -35,7 +35,7 @@ let mainPageTest: MainPageTestObject;
 test.describe('Chart channel selection', () => {
   test.beforeEach(async () => {
     mainPageTest = await MainPageTestObject.create();
-    await mainPageTest.openFixtureAndExpandInSidebar('test3.json', 'test3');
+    await mainPageTest.openFixtureAndExpandInSidebar('test3.json');
   });
 
   test.afterEach(async () => {
@@ -108,15 +108,21 @@ test.describe('Chart channel selection', () => {
     const channelChartTitleFirstChart = 'Voltage';
     await mainPageTest.charts.createAndSelectChart();
     await mainPageTest.sidebar.toggleChannel(channelTitleFirstChart);
-    await mainPageTest.charts.expectSeriesSummary(channelChartTitleFirstChart, [expectedVoltageSummary]);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitleFirstChart, [
+      expectedVoltageSummary,
+    ]);
 
     const channelTitleSecondChart = 'Frequency (Hz)';
     const channelChartTitleSecondChart = 'Frequency';
     await mainPageTest.charts.createAndSelectChart();
     await mainPageTest.sidebar.toggleChannel(channelTitleSecondChart);
 
-    await mainPageTest.charts.expectSeriesSummary(channelChartTitleFirstChart, [expectedVoltageSummary]);
-    await mainPageTest.charts.expectSeriesSummary(channelChartTitleSecondChart, [expectedFrequencySummary]);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitleFirstChart, [
+      expectedVoltageSummary,
+    ]);
+    await mainPageTest.charts.expectSeriesSummary(channelChartTitleSecondChart, [
+      expectedFrequencySummary,
+    ]);
   });
 
   test('creates new charts from the New Chart button', async () => {
