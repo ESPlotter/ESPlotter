@@ -862,8 +862,7 @@ export class ChartTestObject {
     await expect(this.getChartDeleteButton(chartTitle)).toHaveCount(0);
   }
 
-    async expectShowDeletedButton(chartTitle: string): Promise<void> {
+  async expectShowDeletedButton(chartTitle: string): Promise<void> {
     await expect(this.getChartDeleteButton(chartTitle)).toHaveCount(1);
   }
-
 }

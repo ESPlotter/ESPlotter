@@ -71,5 +71,4 @@ test.describe('Chart deletion', () => {
     await mainPageTest.sidebar.toggleChannel(channelTitle);
     await mainPageTest.charts.expectShowDeletedButton('Voltage');
   });
-
 });
