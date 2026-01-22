@@ -20,7 +20,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTypingTarget(e.target)) return;
-      if (e.ctrlKey && e.key === 'Delete') {
+      if (e.shiftKey && e.key === 'Delete') {
         e.preventDefault();
         removeAllCharts();
       }

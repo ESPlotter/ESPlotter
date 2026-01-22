@@ -25,7 +25,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import ReactEChartsCore from 'echarts-for-react/lib/core';
 import { useMemo, useRef, useState } from 'react';
 
-import { useChannelChartsActions } from '@renderer/store/ChannelChartsStore';
+import { useChannelChartsActions, useCharts } from '@renderer/store/ChannelChartsStore';
 import { useUserPreferencesChartSeriesPalette } from '@renderer/store/UserPreferencesStore';
 import { Button } from '@shadcn/components/ui/button';
 import { generateRandomHexColor } from '@shared/utils/generateRandomHexColor';
@@ -64,11 +64,16 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
   const [mode, setMode] = useState<ChartMode>('zoom');
   const [isTooltipVisible, setIsTooltipVisible] = useState(true);
   const chartSeriesPalette = useUserPreferencesChartSeriesPalette();
+  const charts = useCharts();
+  const chartCount = Object.keys(charts).length;
+  const currentChartHasNoChannels = series.length === 0;
+  const shouldHideDeleteButton = chartCount === 1 && currentChartHasNoChannels;
+
   const options = useMemo(
     () => mergeSeriesWithDefaultParams(series, chartSeriesPalette, isTooltipVisible),
     [series, chartSeriesPalette, isTooltipVisible],
   );
-  const { setSelectedChartId, removeChart } = useChannelChartsActions();
+  const { setSelectedChartId, removeChart, removeAllCharts } = useChannelChartsActions();
   const chartInstanceRef = useRef<EChartsType | null>(null);
 
   useChartsHotkey(getChart, { key: 'Escape' }, () => resetZoom(), { active: isSelected });
@@ -180,7 +185,11 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
   }
 
   function handleDeleteChart() {
-    removeChart(id);
+    if (chartCount === 1) {
+      removeAllCharts();
+    } else {
+      removeChart(id);
+    }
   }
   function toggleTooltip() {
     setIsTooltipVisible((current) => !current);
@@ -260,15 +269,17 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
         >
           <IconCamera className="size-4" />
         </Button>
-        <Button
-          variant="outline"
-          size="icon-sm"
-          onClick={handleDeleteChart}
-          title="Delete chart (Delete key)"
-          aria-label="Delete chart"
-        >
-          <IconTrash className="size-4 text-red-600" />
-        </Button>
+        {!shouldHideDeleteButton && (
+          <Button
+            variant="outline"
+            size="icon-sm"
+            onClick={handleDeleteChart}
+            title="Delete chart (Delete key)"
+            aria-label="Delete chart"
+          >
+            <IconTrash className="size-4 text-red-600" />
+          </Button>
+        )}
       </div>
       <div
         className={`relative flex min-h-0 flex-1 rounded-sm border-2 ${isSelected ? 'border-slate-900/35' : 'border-transparent'}`}
