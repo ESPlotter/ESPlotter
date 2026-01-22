@@ -275,7 +275,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
             size="icon-sm"
             onClick={handleDeleteChart}
             title="Delete chart (Delete key)"
-            aria-label="Delete chart"
+            aria-label="Delete chart (Delete key)"
           >
             <IconTrash className="size-4 text-red-600" />
           </Button>

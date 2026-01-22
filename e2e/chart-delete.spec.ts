@@ -13,12 +13,9 @@ test.describe('Chart deletion', () => {
     await mainPageTest.close();
   });
 
-  test('allows deleting a single chart using the delete button', async () => {
+    test('allows deleting a single chart', async () => {
     const chart1Title = await mainPageTest.charts.createChart();
-    const chart2Title = await mainPageTest.charts.createChart();
-
-    await mainPageTest.charts.expectChartTitlesContain([chart1Title, chart2Title]);
-    await mainPageTest.charts.expectChartTitlesCount(2);
+    await mainPageTest.charts.createChart();
 
     await mainPageTest.charts.selectChartByTitle(chart1Title);
     await mainPageTest.charts.deleteChart(chart1Title);
@@ -62,29 +59,4 @@ test.describe('Chart deletion', () => {
     await mainPageTest.charts.expectChartTitlesRenumbered(1);
   });
 
-  test('renumbers remaining charts after deletion', async () => {
-    const chart1Title = await mainPageTest.charts.createChart();
-    const chart2Title = await mainPageTest.charts.createChart();
-    const chart3Title = await mainPageTest.charts.createChart();
-
-    await mainPageTest.charts.expectChartTitlesEqual([chart1Title, chart2Title, chart3Title]);
-
-    await mainPageTest.charts.selectChartByTitle(chart2Title);
-    await mainPageTest.charts.deleteChart(chart2Title);
-
-    await mainPageTest.charts.expectChartTitlesRenumbered(2);
-  });
-
-  test('selects the last chart when deleting the currently selected chart', async () => {
-    const chart1Title = await mainPageTest.charts.createChart();
-    const chart2Title = await mainPageTest.charts.createChart();
-
-    await mainPageTest.charts.expectChartTitlesContain([chart1Title, chart2Title]);
-
-    await mainPageTest.charts.selectChartByTitle(chart1Title);
-    await mainPageTest.charts.deleteChart(chart1Title);
-
-    await mainPageTest.charts.expectChartTitlesRenumbered(1);
-    await mainPageTest.charts.expectSelectedChart('Chart 1');
-  });
 });

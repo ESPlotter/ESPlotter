@@ -116,7 +116,6 @@ export class ChartTestObject {
 
   async deleteChart(chartTitle: string): Promise<void> {
     await this.ensureChartToolbarReady(chartTitle);
-    await this.getChartDeleteButton(chartTitle).click({ trial: true });
     await this.getChartDeleteButton(chartTitle).click();
   }
 
