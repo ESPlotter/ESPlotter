@@ -129,7 +129,7 @@ export class ChartTestObject {
   }
 
   async pressDeleteAllChartsShortcut(): Promise<void> {
-    await this.page.keyboard.press('Control+Delete');
+    await this.page.keyboard.press('Shift+Delete');
   }
 
   async selectChartByTitle(
