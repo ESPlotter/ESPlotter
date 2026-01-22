@@ -63,4 +63,13 @@ test.describe('Chart deletion', () => {
     const chartTitle = await mainPageTest.charts.createChart();
     await mainPageTest.charts.expectDeleteButtonHidden(chartTitle);
   });
+
+  test('check if delete button is not hidden when is first chart and there is channel', async () => {
+    const channelTitle = 'Voltage (V)';
+    await mainPageTest.openChannelFileAndExpandInSidebar('test3.json');
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel(channelTitle);
+    await mainPageTest.charts.expectShowDeletedButton('Voltage');
+  });
+
 });
