@@ -828,7 +828,7 @@ export class ChartTestObject {
   private getDeleteAllChartsButton(): Locator {
     return this.page
       .getByRole('main')
-      .getByRole('button', { name: 'Delete all charts (Ctrl+Delete)' });
+      .getByRole('button', { name: 'Delete all charts (Shift+Delete)' });
   }
 
   private async ensureChartToolbarReady(chartTitle: string): Promise<void> {
@@ -857,4 +857,9 @@ export class ChartTestObject {
     }
     return index;
   }
+
+  async expectDeleteButtonHidden(chartTitle: string): Promise<void> {
+    await expect(this.getChartDeleteButton(chartTitle)).toHaveCount(0);
+  }
+
 }

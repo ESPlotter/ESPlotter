@@ -58,4 +58,9 @@ test.describe('Chart deletion', () => {
     await mainPageTest.charts.expectChartTitlesNotContain([chart3Title]);
     await mainPageTest.charts.expectChartTitlesRenumbered(1);
   });
+
+  test('check if delete button is hidden when is first chart and there is no channel', async () => {
+    const chartTitle = await mainPageTest.charts.createChart();
+    await mainPageTest.charts.expectDeleteButtonHidden(chartTitle);
+  });
 });
