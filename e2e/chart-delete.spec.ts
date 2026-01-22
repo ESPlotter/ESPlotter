@@ -49,7 +49,7 @@ test.describe('Chart deletion', () => {
     await mainPageTest.charts.expectChartTitlesRenumbered(1);
   });
 
-  test('deletes all charts using the Shift+Delete hotkey', async () => {
+  test('deletes all charts using the Ctrl+Delete hotkey', async () => {
     await mainPageTest.charts.createChart();
     await mainPageTest.charts.createChart();
     const chart3Title = await mainPageTest.charts.createChart();

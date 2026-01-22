@@ -13,7 +13,7 @@ test.describe('Open .out files', () => {
     await mainPageTest.close();
   });
 
-  test.skip('shows channels and plots a serie from example.out', async () => {
+  test('shows channels and plots a serie from example.out', async () => {
     test.skip(process.env.CI === 'true', 'Skipping in CI because it depends on dyntools');
 
     await mainPageTest.openOutFixture('example.out');
