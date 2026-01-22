@@ -9,6 +9,11 @@ interface ElectronLaunchEnv {
   [key: string]: string;
 }
 
+const DEFAULT_E2E_WINDOW_SIZE = {
+  width: 1400,
+  height: 900,
+};
+
 export async function setupE2eTestEnvironment(): Promise<{
   electronApp: ElectronApplication;
   mainPage: Page;
@@ -23,6 +28,7 @@ export async function setupE2eTestEnvironment(): Promise<{
   const electronApp = await getElectronAppForE2eTest();
   const mainPage = await electronApp.firstWindow();
 
+  await applyE2eWindowSizing(electronApp);
   await mainPage.waitForLoadState('domcontentloaded');
 
   try {
@@ -95,6 +101,20 @@ function normalizeEnv(env: NodeJS.ProcessEnv): ElectronLaunchEnv {
     .map(([key, value]) => [key, value]);
 
   return Object.fromEntries(entries);
+}
+
+async function applyE2eWindowSizing(electronApp: ElectronApplication): Promise<void> {
+  await electronApp.evaluate(
+    (electron, { nextWidth, nextHeight }) => {
+      const mainWindow = electron.BrowserWindow.getAllWindows()[0];
+      mainWindow.setSize(nextWidth, nextHeight);
+      mainWindow.center();
+    },
+    {
+      nextWidth: DEFAULT_E2E_WINDOW_SIZE.width,
+      nextHeight: DEFAULT_E2E_WINDOW_SIZE.height,
+    },
+  );
 }
 
 async function waitForPreloadScript(page: Page): Promise<void> {

@@ -1,4 +1,4 @@
-import { IconCamera, IconPlus } from '@tabler/icons-react';
+import { IconCamera, IconPlus, IconTrash } from '@tabler/icons-react';
 import { nanoid } from 'nanoid';
 import { useCallback, useEffect } from 'react';
 
@@ -11,10 +11,24 @@ import { SidebarProvider } from '@shadcn/components/ui/sidebar';
 import { isTypingTarget } from '../Chart/useChartHotKey';
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
-  const { addChart } = useChannelChartsActions();
+  const { addChart, removeAllCharts } = useChannelChartsActions();
   const charts = useCharts();
   const chartCount = Object.keys(charts).length;
   const shouldShowCaptureButton = chartCount > 1;
+  const shouldShowDeleteAllButton = chartCount > 1;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isTypingTarget(e.target)) return;
+      if (e.shiftKey && e.key === 'Delete') {
+        e.preventDefault();
+        removeAllCharts();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, { passive: false });
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [removeAllCharts]);
 
   const handleCopyVisibleCharts = useCallback(function handleCopyVisibleCharts() {
     void captureVisibleChartsToClipboard();
@@ -55,6 +69,16 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           <Button variant="outline" onClick={() => addChart(nanoid())}>
             <IconPlus /> New Chart
           </Button>
+          {shouldShowDeleteAllButton ? (
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={removeAllCharts}
+              title="Delete all charts (Shift+Delete)"
+            >
+              <IconTrash className="size-4 text-red-600" />
+            </Button>
+          ) : null}
         </div>
         <section className="flex-1 overflow-auto p-4" data-testid="chart-scroll-container">
           {children}

@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import { create } from 'zustand';
 
 import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
@@ -23,6 +24,7 @@ interface ChannelChartsState {
     removeChannelFromChart: (chartId: string, channelId: string) => void;
     removeChannelsFromAllCharts: (filePath: string) => void;
     changeNameOfChart: (chartId: string, newName: string) => void;
+    removeAllCharts: () => void;
   };
 }
 
@@ -35,29 +37,67 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
       set(() => ({
         selectedChartId: chartId,
       })),
+
     addChart: (chartId: string) =>
       set((state) => {
         if (state.charts[chartId]) {
           throw new Error(`Chart with id ${chartId} already exists.`);
         }
-        const nextCounter = state.chartCounter + 1;
+
+        const name = getNextChartName(state.charts);
+
         return {
           charts: {
             ...state.charts,
             [chartId]: {
-              name: `Chart ${nextCounter}`,
+              name,
               channels: {},
             },
           },
-          chartCounter: nextCounter,
           selectedChartId: chartId,
         };
       }),
+
     removeChart: (chartId: string) =>
       set((state) => {
-        const { [chartId]: _removedChart, ...remainingCharts } = state.charts;
-        return { charts: remainingCharts };
+        const { [chartId]: removedChart, ...remainingCharts } = state.charts;
+
+        const newCharts: typeof remainingCharts = {};
+
+        const deletedNumber =
+          removedChart && /^Chart \d+$/.test(removedChart.name)
+            ? Number(removedChart.name.replace('Chart ', ''))
+            : null;
+
+        Object.entries(remainingCharts).forEach(([id, chart], index) => {
+          if (!/^Chart \d+$/.test(chart.name)) {
+            newCharts[id] = chart;
+            return;
+          }
+
+          const currentNumber = Number(chart.name.replace('Chart ', ''));
+          let newNumber: number;
+
+          if (deletedNumber) {
+            // borrado automático → solo bajan los posteriores
+            newNumber = currentNumber > deletedNumber ? currentNumber - 1 : currentNumber;
+          } else {
+            newNumber = index + 1;
+          }
+
+          newCharts[id] = { ...chart, name: `Chart ${newNumber}` };
+        });
+        const nextSelectedChartId =
+          state.selectedChartId === chartId
+            ? (Object.keys(newCharts)[Object.keys(newCharts).length - 1] ?? null)
+            : state.selectedChartId;
+
+        return {
+          charts: newCharts,
+          selectedChartId: nextSelectedChartId,
+        };
       }),
+
     addChannelToChart: (chartId: string, channelId: string, serie: ChartSerie) =>
       set((state) => {
         const chart = state.charts[chartId];
@@ -86,6 +126,7 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
           },
         };
       }),
+
     removeChannelFromChart: (chartId: string, channelId: string) =>
       set((state) => {
         const chart = state.charts[chartId];
@@ -159,9 +200,28 @@ export const useChannelChartsStore = create<ChannelChartsState>()((set) => ({
           },
         };
       }),
+
+    removeAllCharts: () =>
+      set(() => {
+        const defaultChartId = nanoid();
+        return {
+          charts: {
+            [defaultChartId]: {
+              name: 'Chart 1',
+              channels: {},
+            },
+          },
+          selectedChartId: defaultChartId,
+        };
+      }),
   },
 }));
 
 export const useSelectedChartId = () => useChannelChartsStore((state) => state.selectedChartId);
 export const useCharts = () => useChannelChartsStore((state) => state.charts);
 export const useChannelChartsActions = () => useChannelChartsStore((state) => state.actions);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getNextChartName(charts: Record<string, any>): string {
+  return `Chart ${Object.keys(charts).length + 1}`;
+}
