@@ -13,7 +13,7 @@ test.describe('Chart deletion', () => {
     await mainPageTest.close();
   });
 
-    test('allows deleting a single chart', async () => {
+  test('allows deleting a single chart', async () => {
     const chart1Title = await mainPageTest.charts.createChart();
     await mainPageTest.charts.createChart();
 
@@ -58,5 +58,4 @@ test.describe('Chart deletion', () => {
     await mainPageTest.charts.expectChartTitlesNotContain([chart3Title]);
     await mainPageTest.charts.expectChartTitlesRenumbered(1);
   });
-
 });
