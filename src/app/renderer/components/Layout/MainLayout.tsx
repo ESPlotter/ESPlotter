@@ -74,7 +74,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               variant="outline"
               size="icon-sm"
               onClick={removeAllCharts}
-              title="Delete all charts (Ctrl+Delete)"
+              title="Delete all charts (Shift+Delete)"
             >
               <IconTrash className="size-4 text-red-600" />
             </Button>
