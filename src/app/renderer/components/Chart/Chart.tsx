@@ -89,7 +89,7 @@ export function Chart({ id, isSelected, series, title }: ChartProps) {
 
   useChartsHotkey(getChart, { key: 'z' }, () => enableZoomSelect(), { active: isSelected });
   useChartsHotkey(getChart, { key: 'h' }, handleToggleTooltipHotkey, { active: isSelected });
-  useChartsHotkey(getChart, { key: 'Delete', ctrl: false }, handleDeleteChart, {
+  useChartsHotkey(getChart, { key: 'Delete', shift: false }, handleDeleteChart, {
     active: isSelected,
   });
   useChartsHotkey(getChart, { key: 's', shift: false }, handleCopyChartImageHotkey, {
