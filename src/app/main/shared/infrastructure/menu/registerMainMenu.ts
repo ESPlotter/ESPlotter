@@ -1,13 +1,15 @@
 import { app, BrowserWindow, Menu, type MenuItemConstructorOptions } from 'electron';
 
-import {
-  channelFileRepository,
-  jsonChannelFileGetterService,
-  csvChannelFileGetterService,
-  psseOutFilePreviewService,
-} from '@main/channel-file/infrastructure/repositories/channelFileRepository';
+import { ChannelFileStructureChecker } from '@main/channel-file/domain/services/ChannelFileStructureChecker';
+import { FileChannelFileRepository } from '@main/channel-file/infrastructure/repositories/FileChannelFileRepository';
+import { NodeCsvChannelFileParserService } from '@main/channel-file/infrastructure/services/NodeCsvChannelFileParserService';
+import { NodeJsonChannelFileParserService } from '@main/channel-file/infrastructure/services/NodeJsonChannelFileParserService';
+import { NodeOutChannelFileParserService } from '@main/channel-file/infrastructure/services/NodeOutChannelFileParserService';
 import { webContentsBroadcast } from '@main/shared/infrastructure/ipc/webContentsBroadcast';
 import { webContentsSend } from '@main/shared/infrastructure/ipc/webContentsSend';
+import { GetUserPreferences } from '@main/user-preferences/application/use-cases/GetUserPreferences';
+import { ElectronStoreUserPreferencesRepository } from '@main/user-preferences/infrastructure/repositories/ElectronStoreUserPreferencesRepository';
+import { ElectronStoreStateRepository } from '@shared/infrastructure/repositories/ElectronStoreStateRepository';
 
 export function registerMainMenu(): void {
   const isMac = process.platform === 'darwin';
@@ -86,12 +88,20 @@ async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
 
 async function openChannelFile(win: BrowserWindow, path: string): Promise<void> {
   webContentsSend(win, 'channelFileOpenStarted', { path });
+  const stateRepository = new ElectronStoreStateRepository();
+  const channelFileRepository = new FileChannelFileRepository(stateRepository);
+  const userPreferencesRepository = new ElectronStoreUserPreferencesRepository();
+  const getUserPreferences = new GetUserPreferences(userPreferencesRepository);
+
+  const preferences = await getUserPreferences.run();
+
+  const psseOutFilePreviewService = new NodeOutChannelFileParserService(preferences.general.paths);
   const openChannelFile = new (
     await import('@main/channel-file/application/use-cases/OpenChannelFile')
   ).OpenChannelFile(
     channelFileRepository,
-    jsonChannelFileGetterService,
-    csvChannelFileGetterService,
+    new NodeJsonChannelFileParserService(new ChannelFileStructureChecker()),
+    new NodeCsvChannelFileParserService(),
     psseOutFilePreviewService,
   );
 

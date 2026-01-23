@@ -16,11 +16,10 @@ interface ParsedOutFilePreviewResult {
 }
 
 export class NodeOutChannelFileParserService implements OutChannelFileParserService {
-  constructor(private readonly resolvePaths: () => Promise<NodePsseOutFilePreviewServicePaths>) {}
+  constructor(private readonly paths: NodePsseOutFilePreviewServicePaths) {}
 
   public async parse(filePath: string, cacheDir: string): Promise<ChannelFilePreviewPrimitive> {
-    const paths = await this.resolvePaths();
-    return this.callDynToolsToParseOutFile(filePath, cacheDir, paths);
+    return this.callDynToolsToParseOutFile(filePath, cacheDir, this.paths);
   }
 
   private async callDynToolsToParseOutFile(
