@@ -19,21 +19,7 @@ export function registerMainMenu(): void {
       label: 'File',
       submenu: [
         {
-          label: 'Import',
-          click: async () => {
-            const win = BrowserWindow.getFocusedWindow();
-            if (!win) {
-              return;
-            }
-            const selected = await showOpenFileDialog(win);
-            if (!selected) {
-              return;
-            }
-            await openChannelFile(win, selected);
-          },
-        },
-        {
-          label: 'Open File (.out)',
+          label: 'Open File',
           accelerator: 'CmdOrCtrl+O',
           click: async () => {
             const win = BrowserWindow.getFocusedWindow();
@@ -81,7 +67,10 @@ async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
   }
 
   const { dialog } = await import('electron');
-  const { canceled, filePaths } = await dialog.showOpenDialog(win, { properties: ['openFile'] });
+  const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+    properties: ['openFile'],
+    filters: [{ name: 'Channel files', extensions: ['txt', 'json', 'csv', 'out'] }],
+  });
   if (canceled) return null;
   return filePaths[0] ?? null;
 }
