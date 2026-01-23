@@ -12,7 +12,7 @@ export class OpenChannelFile {
   ) {}
 
   async run(path: string): Promise<ChannelFilePreviewPrimitive> {
-    const cachedPreview = await this.repository.readPreview(path);
+    const cachedPreview = await this.repository.readChannels(path);
     if (cachedPreview) {
       return cachedPreview;
     }
@@ -27,17 +27,17 @@ export class OpenChannelFile {
 
       if (extension === 'csv' || extension === 'txt') {
         const channelFile = await this.csvChannelFileParserService.parse(path);
-        return await this.repository.writeFromChannelFile(cacheDir, channelFile);
+        return await this.repository.save(cacheDir, channelFile);
       }
 
       if (extension === 'json') {
         const channelFile = await this.jsonChannelFileParserService.parse(path);
-        return await this.repository.writeFromChannelFile(cacheDir, channelFile);
+        return await this.repository.save(cacheDir, channelFile);
       }
 
       throw new Error('Unsupported file extension');
     } catch (error) {
-      await this.repository.removeCache(path);
+      await this.repository.remove(path);
       throw error;
     }
   }

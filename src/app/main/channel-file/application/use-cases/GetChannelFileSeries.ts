@@ -5,6 +5,6 @@ export class GetChannelFileSeries {
   constructor(private readonly repository: ChannelFileRepository) {}
 
   public async run(path: string, channelId: string): Promise<ChannelFileSeriesPrimitive> {
-    return this.repository.readSeries(path, channelId);
+    return this.repository.readChannelSerie(path, channelId);
   }
 }

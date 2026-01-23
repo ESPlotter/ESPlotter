@@ -12,7 +12,7 @@ import { StateRepository } from '@shared/domain/repositories/StateRepository';
 export class FileChannelFileRepository implements ChannelFileRepository {
   constructor(private readonly stateRepository: StateRepository) {}
 
-  public async readPreview(filePath: string): Promise<ChannelFilePreviewPrimitive | null> {
+  public async readChannels(filePath: string): Promise<ChannelFilePreviewPrimitive | null> {
     const cacheDir = this.getCacheDir(filePath);
     if (!cacheDir) {
       return null;
@@ -27,12 +27,12 @@ export class FileChannelFileRepository implements ChannelFileRepository {
     return preview;
   }
 
-  public async readSeries(
+  public async readChannelSerie(
     filePath: string,
     channelId: string,
   ): Promise<ChannelFileSeriesPrimitive> {
     const cacheDir = this.getCacheDirOrThrow(filePath);
-    const preview = await this.readPreview(filePath);
+    const preview = await this.readChannels(filePath);
     if (!preview) {
       throw new Error(`Cache preview not found for path ${filePath}.`);
     }
@@ -78,7 +78,7 @@ export class FileChannelFileRepository implements ChannelFileRepository {
     return cacheDir;
   }
 
-  public async writeFromChannelFile(
+  public async save(
     cacheDir: string,
     channelFile: ChannelFile,
   ): Promise<ChannelFilePreviewPrimitive> {
@@ -97,7 +97,7 @@ export class FileChannelFileRepository implements ChannelFileRepository {
     return preview;
   }
 
-  public async removeCache(filePath: string): Promise<void> {
+  public async remove(filePath: string): Promise<void> {
     const cacheDir = this.getCacheDir(filePath);
     if (!cacheDir) {
       return;
