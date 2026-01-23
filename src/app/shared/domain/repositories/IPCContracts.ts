@@ -1,4 +1,6 @@
-import { ChannelFilePrimitive } from '../primitives/ChannelFilePrimitive';
+import { ChannelFileOpenStatusPrimitive } from '../primitives/ChannelFileOpenStatusPrimitive';
+import { ChannelFilePreviewPrimitive } from '../primitives/ChannelFilePreviewPrimitive';
+import { ChannelFileSeriesPrimitive } from '../primitives/ChannelFileSeriesPrimitive';
 import { UserPreferencesPrimitive } from '../primitives/UserPreferencesPrimitive';
 
 export interface RendererExposureMap {
@@ -8,7 +10,15 @@ export interface RendererExposureMap {
     electron: () => string;
   };
   files: {
-    onChannelFileOpened: (listener: (file: ChannelFilePrimitive) => void) => () => void;
+    onChannelFileOpenStarted: (
+      listener: (payload: ChannelFileOpenStatusPrimitive) => void,
+    ) => () => void;
+    onChannelFileOpenFailed: (
+      listener: (payload: ChannelFileOpenStatusPrimitive) => void,
+    ) => () => void;
+    onChannelFileOpened: (listener: (file: ChannelFilePreviewPrimitive) => void) => () => void;
+    getChannelFileSeries: (path: string, channelId: string) => Promise<ChannelFileSeriesPrimitive>;
+    closeChannelFile: (path: string) => Promise<void>;
   };
   userPreferences: {
     getChartSeriesPalette: () => Promise<string[]>;
@@ -34,6 +44,8 @@ export interface IpcChannelMap {
   getChartSeriesPalette: () => Promise<string[]>;
   updateChartSeriesPalette: (colors: string[]) => Promise<UserPreferencesPrimitive>;
   writeClipboardImage: (dataUrl: string) => Promise<void>;
+  getChannelFileSeries: (path: string, channelId: string) => Promise<ChannelFileSeriesPrimitive>;
+  closeChannelFile: (path: string) => Promise<void>;
   getDyntoolsPath: () => Promise<string>;
   updateDyntoolsPath: (path: string) => Promise<UserPreferencesPrimitive>;
   selectDyntoolsPath: () => Promise<string | null>;
@@ -43,7 +55,9 @@ export interface IpcChannelMap {
 }
 
 export interface IpcEventMap {
-  channelFileOpened: (payload: ChannelFilePrimitive) => void;
+  channelFileOpenStarted: (payload: ChannelFileOpenStatusPrimitive) => void;
+  channelFileOpenFailed: (payload: ChannelFileOpenStatusPrimitive) => void;
+  channelFileOpened: (payload: ChannelFilePreviewPrimitive) => void;
   chartSeriesPaletteChanged: (payload: string[]) => void;
   dyntoolsPathChanged: (payload: string) => void;
   pythonPathChanged: (payload: string) => void;

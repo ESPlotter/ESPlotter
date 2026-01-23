@@ -3,7 +3,7 @@ import { describe, expect, test, beforeEach } from 'vitest';
 import { ChartSerie } from '@renderer/components/Chart/ChartSerie';
 import { useChannelChartsStore } from '@renderer/store/ChannelChartsStore';
 import { useChannelFilesStore } from '@renderer/store/ChannelFilesStore';
-import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
+import { ChannelFilePreviewPrimitive } from '@shared/domain/primitives/ChannelFilePreviewPrimitive';
 
 function createMockSerie(name: string): ChartSerie {
   return {
@@ -16,7 +16,7 @@ function createMockSerie(name: string): ChartSerie {
   };
 }
 
-function createMockChannelFile(path: string): ChannelFilePrimitive {
+function createMockChannelFile(path: string): ChannelFilePreviewPrimitive {
   return {
     path,
     content: {
@@ -28,20 +28,17 @@ function createMockChannelFile(path: string): ChannelFilePrimitive {
         id: 'time',
         label: 'Time',
         unit: 's',
-        values: [0, 1, 2],
       },
       series: [
         {
           id: 'channel-1',
           label: 'Voltage',
           unit: 'V',
-          values: [10, 20, 30],
         },
         {
           id: 'channel-2',
           label: 'Current',
           unit: 'A',
-          values: [1, 2, 3],
         },
       ],
     },

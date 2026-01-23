@@ -1,3 +1,4 @@
+import { ChannelFileContentPreviewPrimitive } from '@shared/domain/primitives/ChannelFileContentPreviewPrimitive';
 import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFileContentPrimitive';
 
 import { ChannelFileContentMetadata } from './ChannelFileContentMetadata';
@@ -27,5 +28,18 @@ export class ChannelFileContent {
       x: this.x.toPrimitives(),
       series: this.series.map((serie) => serie.toPrimitives()),
     };
+  }
+
+  public toPreviewPrimitives(): ChannelFileContentPreviewPrimitive {
+    return {
+      schemaVersion: this.schemaVersion,
+      metadata: this.metadata.toPrimitives(),
+      x: this.x.toDescriptorPrimitives(),
+      series: this.series.map((serie) => serie.toDescriptorPrimitives()),
+    };
+  }
+
+  public getSeriesById(seriesId: string): ChannelFileContentSerie | null {
+    return this.series.find((serie) => serie.id === seriesId) ?? null;
   }
 }

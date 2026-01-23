@@ -1,3 +1,4 @@
+import { ChannelFileContentSerieDescriptorPrimitive } from '@shared/domain/primitives/ChannelFileContentSerieDescriptorPrimitive';
 import { ChannelFileContentSeriePrimitive } from '@shared/domain/primitives/ChannelFileContentSeriePrimitive';
 
 export class ChannelFileContentSerie {
@@ -11,9 +12,12 @@ export class ChannelFileContentSerie {
   public static fromPrimitives(
     primitives: ChannelFileContentSeriePrimitive,
   ): ChannelFileContentSerie {
-    return new ChannelFileContentSerie(primitives.id, primitives.label, primitives.unit, [
-      ...primitives.values,
-    ]);
+    return new ChannelFileContentSerie(
+      primitives.id,
+      primitives.label,
+      primitives.unit,
+      primitives.values,
+    );
   }
 
   public toPrimitives(): ChannelFileContentSeriePrimitive {
@@ -22,6 +26,14 @@ export class ChannelFileContentSerie {
       label: this.label,
       unit: this.unit,
       values: this.values,
+    };
+  }
+
+  public toDescriptorPrimitives(): ChannelFileContentSerieDescriptorPrimitive {
+    return {
+      id: this.id,
+      label: this.label,
+      unit: this.unit,
     };
   }
 }

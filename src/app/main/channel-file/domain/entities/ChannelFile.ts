@@ -1,3 +1,4 @@
+import { ChannelFilePreviewPrimitive } from '@shared/domain/primitives/ChannelFilePreviewPrimitive';
 import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
 
 import { ChannelFileContent } from '../vos/ChannelFileContent';
@@ -16,6 +17,13 @@ export class ChannelFile {
     return {
       path: this.path,
       content: this.content.toPrimitives(),
+    };
+  }
+
+  public toPreviewPrimitives(): ChannelFilePreviewPrimitive {
+    return {
+      path: this.path,
+      content: this.content.toPreviewPrimitives(),
     };
   }
 }

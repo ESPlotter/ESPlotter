@@ -1,9 +1,9 @@
 import { describe, expect, test, beforeEach } from 'vitest';
 
 import { useChannelFilesStore } from '@renderer/store/ChannelFilesStore';
-import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
+import { ChannelFilePreviewPrimitive } from '@shared/domain/primitives/ChannelFilePreviewPrimitive';
 
-function createMockChannelFile(path: string): ChannelFilePrimitive {
+function createMockChannelFile(path: string): ChannelFilePreviewPrimitive {
   return {
     path,
     content: {
@@ -15,14 +15,12 @@ function createMockChannelFile(path: string): ChannelFilePrimitive {
         id: 'time',
         label: 'Time',
         unit: 's',
-        values: [0, 1, 2],
       },
       series: [
         {
           id: 'channel-1',
           label: 'Voltage',
           unit: 'V',
-          values: [10, 20, 30],
         },
       ],
     },
