@@ -1,17 +1,17 @@
 import { ChannelFileStructureChecker } from '@main/channel-file/domain/services/ChannelFileStructureChecker';
-import { NodeCsvChannelFileGetterService } from '@main/channel-file/infrastructure/services/NodeCsvChannelFileGetterService';
-import { NodePsseOutFilePreviewService } from '@main/channel-file/infrastructure/services/NodePsseOutFilePreviewService';
+import { NodeCsvChannelFileParserService } from '@main/channel-file/infrastructure/services/NodeCsvChannelFileParserService';
+import { NodeOutChannelFileParserService } from '@main/channel-file/infrastructure/services/NodeOutChannelFileParserService';
 import { GetUserPreferences } from '@main/user-preferences/application/use-cases/GetUserPreferences';
 import { ElectronStoreUserPreferencesRepository } from '@main/user-preferences/infrastructure/repositories/ElectronStoreUserPreferencesRepository';
 import { ElectronStoreStateRepository } from '@shared/infrastructure/repositories/ElectronStoreStateRepository';
 
-import { NodeJsonChannelFileGetterService } from '../services/NodeJsonChannelFileGetterService';
+import { NodeJsonChannelFileParserService } from '../services/NodeJsonChannelFileParserService';
 
 import { FileChannelFileRepository } from './FileChannelFileRepository';
 
 const structureChecker = new ChannelFileStructureChecker();
-const jsonChannelFileGetterService = new NodeJsonChannelFileGetterService(structureChecker);
-const csvChannelFileGetterService = new NodeCsvChannelFileGetterService();
+const jsonChannelFileGetterService = new NodeJsonChannelFileParserService(structureChecker);
+const csvChannelFileGetterService = new NodeCsvChannelFileParserService();
 
 const userPreferencesRepository = new ElectronStoreUserPreferencesRepository();
 const getUserPreferences = new GetUserPreferences(userPreferencesRepository);
@@ -27,5 +27,5 @@ async function resolveOutFilePaths() {
 }
 
 export const channelFileRepository = new FileChannelFileRepository(stateRepository);
-export const psseOutFilePreviewService = new NodePsseOutFilePreviewService(resolveOutFilePaths);
+export const psseOutFilePreviewService = new NodeOutChannelFileParserService(resolveOutFilePaths);
 export { jsonChannelFileGetterService, csvChannelFileGetterService };

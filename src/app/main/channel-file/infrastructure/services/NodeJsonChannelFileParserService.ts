@@ -5,7 +5,7 @@ import { ChannelFileStructureDoesNotHaveAllowedStructure } from '@main/channel-f
 import { ChannelFileParserService } from '@main/channel-file/domain/services/ChannelFileParserService';
 import { ChannelFileStructureChecker } from '@main/channel-file/domain/services/ChannelFileStructureChecker';
 
-export class NodeJsonChannelFileGetterService implements ChannelFileParserService {
+export class NodeJsonChannelFileParserService implements ChannelFileParserService {
   constructor(private readonly structureChecker: ChannelFileStructureChecker) {}
 
   public async parse(path: string): Promise<ChannelFile> {

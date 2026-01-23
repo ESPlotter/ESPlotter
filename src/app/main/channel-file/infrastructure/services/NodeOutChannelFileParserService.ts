@@ -3,7 +3,7 @@ import path from 'node:path';
 import { app } from 'electron';
 import { Options as PythonShellOptions, PythonShell } from 'python-shell';
 
-import { PsseOutFilePreviewService } from '@main/channel-file/domain/services/PsseOutFilePreviewService';
+import { OutChannelFileParserService } from '@main/channel-file/domain/services/OutChannelFileParserService';
 import { ChannelFilePreviewPrimitive } from '@shared/domain/primitives/ChannelFilePreviewPrimitive';
 
 interface NodePsseOutFilePreviewServicePaths {
@@ -15,13 +15,10 @@ interface ParsedOutFilePreviewResult {
   preview: ChannelFilePreviewPrimitive;
 }
 
-export class NodePsseOutFilePreviewService implements PsseOutFilePreviewService {
+export class NodeOutChannelFileParserService implements OutChannelFileParserService {
   constructor(private readonly resolvePaths: () => Promise<NodePsseOutFilePreviewServicePaths>) {}
 
-  public async parsePreview(
-    filePath: string,
-    cacheDir: string,
-  ): Promise<ChannelFilePreviewPrimitive> {
+  public async parse(filePath: string, cacheDir: string): Promise<ChannelFilePreviewPrimitive> {
     const paths = await this.resolvePaths();
     return this.callDynToolsToParseOutFile(filePath, cacheDir, paths);
   }

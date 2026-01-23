@@ -1,6 +1,6 @@
 import { ChannelFileRepository } from '@main/channel-file/domain/repositories/ChannelFileRepository';
 import { ChannelFileParserService } from '@main/channel-file/domain/services/ChannelFileParserService';
-import { PsseOutFilePreviewService } from '@main/channel-file/domain/services/PsseOutFilePreviewService';
+import { OutChannelFileParserService } from '@main/channel-file/domain/services/OutChannelFileParserService';
 import { ChannelFilePreviewPrimitive } from '@shared/domain/primitives/ChannelFilePreviewPrimitive';
 
 export class OpenChannelFile {
@@ -8,7 +8,7 @@ export class OpenChannelFile {
     private readonly repository: ChannelFileRepository,
     private readonly jsonChannelFileParserService: ChannelFileParserService,
     private readonly csvChannelFileParserService: ChannelFileParserService,
-    private readonly psseOutFilePreviewService: PsseOutFilePreviewService,
+    private readonly psseOutFilePreviewService: OutChannelFileParserService,
   ) {}
 
   async run(path: string): Promise<ChannelFilePreviewPrimitive> {
@@ -22,10 +22,15 @@ export class OpenChannelFile {
 
     try {
       if (extension === 'out') {
-        return await this.psseOutFilePreviewService.parsePreview(path, cacheDir);
+        return await this.psseOutFilePreviewService.parse(path, cacheDir); // This parse also saves the data in the cache
       }
 
-      if (extension === 'csv' || extension === 'txt') {
+      if (extension === 'csv') {
+        const channelFile = await this.csvChannelFileParserService.parse(path);
+        return await this.repository.save(cacheDir, channelFile);
+      }
+
+      if (extension === 'txt') {
         const channelFile = await this.csvChannelFileParserService.parse(path);
         return await this.repository.save(cacheDir, channelFile);
       }

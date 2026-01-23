@@ -6,7 +6,7 @@ import { ChannelFileContent } from '@main/channel-file/domain/vos/ChannelFileCon
 import { ChannelFileContentPrimitive } from '@shared/domain/primitives/ChannelFileContentPrimitive';
 import { ChannelFileContentSeriePrimitive } from '@shared/domain/primitives/ChannelFileContentSeriePrimitive';
 
-export class NodeCsvChannelFileGetterService implements ChannelFileParserService {
+export class NodeCsvChannelFileParserService implements ChannelFileParserService {
   constructor() {}
 
   public async parse(filePath: string): Promise<ChannelFile> {
