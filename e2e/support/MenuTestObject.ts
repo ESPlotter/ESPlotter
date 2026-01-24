@@ -7,14 +7,9 @@ export class MenuTestObject {
     private readonly page: Page,
   ) {}
 
-  async openImportMenu(): Promise<void> {
+  async openFileMenu(): Promise<void> {
     await this.page.bringToFront();
-    await this.clickMenuItem(['File', 'Import']);
-  }
-
-  async openOutFileMenu(): Promise<void> {
-    await this.page.bringToFront();
-    await this.clickMenuItem(['File', 'Open File (.out)']);
+    await this.clickMenuItem(['File', 'Open File']);
   }
 
   async openPreferencesMenu(): Promise<void> {
