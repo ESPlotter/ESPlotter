@@ -1,9 +1,9 @@
 import { describe, expect, test, beforeEach } from 'vitest';
 
 import { useChannelFilesStore } from '@renderer/store/ChannelFilesStore';
-import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
+import { ChannelFilePreviewPrimitive } from '@shared/domain/primitives/ChannelFilePreviewPrimitive';
 
-function createMockChannelFile(path: string): ChannelFilePrimitive {
+function createMockChannelFile(path: string): ChannelFilePreviewPrimitive {
   return {
     path,
     content: {
@@ -15,14 +15,12 @@ function createMockChannelFile(path: string): ChannelFilePrimitive {
         id: 'time',
         label: 'Time',
         unit: 's',
-        values: [0, 1, 2],
       },
       series: [
         {
           id: 'channel-1',
           label: 'Voltage',
           unit: 'V',
-          values: [10, 20, 30],
         },
       ],
     },
@@ -37,6 +35,31 @@ describe('ChannelFilesStore', () => {
     });
   });
 
+  describe('startFileOpen', () => {
+    test('should add a loading entry', () => {
+      const { startFileOpen } = useChannelFilesStore.getState().actions;
+
+      startFileOpen('/path/to/file1.csv');
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      expect(files[0].path).toBe('/path/to/file1.csv');
+      expect(files[0].status).toBe('loading');
+    });
+
+    test('should replace existing entry with same path', () => {
+      const { addFile, startFileOpen } = useChannelFilesStore.getState().actions;
+
+      addFile(createMockChannelFile('/path/to/file.csv'));
+      startFileOpen('/path/to/file.csv');
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      expect(files[0].path).toBe('/path/to/file.csv');
+      expect(files[0].status).toBe('loading');
+    });
+  });
+
   describe('addFile', () => {
     test('should add a new file', () => {
       const { addFile } = useChannelFilesStore.getState().actions;
@@ -47,6 +70,10 @@ describe('ChannelFilesStore', () => {
       const { files } = useChannelFilesStore.getState();
       expect(files).toHaveLength(1);
       expect(files[0].path).toBe('/path/to/file1.csv');
+      expect(files[0].status).toBe('ready');
+      if (files[0].status === 'ready') {
+        expect(files[0].file).toEqual(file);
+      }
     });
 
     test('should add file at the beginning of the list', () => {
@@ -73,6 +100,44 @@ describe('ChannelFilesStore', () => {
       const { files } = useChannelFilesStore.getState();
       expect(files).toHaveLength(1);
       expect(files[0].path).toBe('/path/to/file.csv');
+      expect(files[0].status).toBe('ready');
+    });
+
+    test('should upgrade a loading entry to ready', () => {
+      const { startFileOpen, addFile } = useChannelFilesStore.getState().actions;
+      const file = createMockChannelFile('/path/to/file.csv');
+
+      startFileOpen(file.path);
+      addFile(file);
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      expect(files[0].status).toBe('ready');
+      if (files[0].status === 'ready') {
+        expect(files[0].file).toEqual(file);
+      }
+    });
+  });
+
+  describe('markFileOpenFailed', () => {
+    test('should remove the loading entry', () => {
+      const { startFileOpen, markFileOpenFailed } = useChannelFilesStore.getState().actions;
+
+      startFileOpen('/path/to/file.csv');
+      markFileOpenFailed('/path/to/file.csv');
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(0);
+    });
+
+    test('should remove ready entries with the same path', () => {
+      const { addFile, markFileOpenFailed } = useChannelFilesStore.getState().actions;
+
+      addFile(createMockChannelFile('/path/to/file.csv'));
+      markFileOpenFailed('/path/to/file.csv');
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(0);
     });
   });
 

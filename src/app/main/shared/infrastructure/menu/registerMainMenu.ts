@@ -1,7 +1,15 @@
 import { app, BrowserWindow, Menu, type MenuItemConstructorOptions } from 'electron';
 
+import { ChannelFileStructureChecker } from '@main/channel-file/domain/services/ChannelFileStructureChecker';
+import { FileChannelFileRepository } from '@main/channel-file/infrastructure/repositories/FileChannelFileRepository';
+import { NodeCsvChannelFileParserService } from '@main/channel-file/infrastructure/services/NodeCsvChannelFileParserService';
+import { NodeJsonChannelFileParserService } from '@main/channel-file/infrastructure/services/NodeJsonChannelFileParserService';
+import { NodeOutChannelFileParserService } from '@main/channel-file/infrastructure/services/NodeOutChannelFileParserService';
 import { webContentsBroadcast } from '@main/shared/infrastructure/ipc/webContentsBroadcast';
 import { webContentsSend } from '@main/shared/infrastructure/ipc/webContentsSend';
+import { GetUserPreferences } from '@main/user-preferences/application/use-cases/GetUserPreferences';
+import { ElectronStoreUserPreferencesRepository } from '@main/user-preferences/infrastructure/repositories/ElectronStoreUserPreferencesRepository';
+import { ElectronStoreStateRepository } from '@shared/infrastructure/repositories/ElectronStoreStateRepository';
 
 export function registerMainMenu(): void {
   const isMac = process.platform === 'darwin';
@@ -11,21 +19,7 @@ export function registerMainMenu(): void {
       label: 'File',
       submenu: [
         {
-          label: 'Import',
-          click: async () => {
-            const win = BrowserWindow.getFocusedWindow();
-            if (!win) {
-              return;
-            }
-            const selected = await showOpenFileDialog(win);
-            if (!selected) {
-              return;
-            }
-            await openChannelFile(win, selected);
-          },
-        },
-        {
-          label: 'Open File (.out)',
+          label: 'Open File',
           accelerator: 'CmdOrCtrl+O',
           click: async () => {
             const win = BrowserWindow.getFocusedWindow();
@@ -36,7 +30,7 @@ export function registerMainMenu(): void {
             if (!selected) {
               return;
             }
-            await openPsseOutFile(win, selected);
+            await openChannelFile(win, selected);
           },
         },
         ...(isMac
@@ -73,97 +67,38 @@ async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
   }
 
   const { dialog } = await import('electron');
-  const { canceled, filePaths } = await dialog.showOpenDialog(win, { properties: ['openFile'] });
+  const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+    properties: ['openFile'],
+    filters: [{ name: 'Channel files', extensions: ['txt', 'json', 'csv', 'out'] }],
+  });
   if (canceled) return null;
   return filePaths[0] ?? null;
 }
 
 async function openChannelFile(win: BrowserWindow, path: string): Promise<void> {
-  const fileExtension = path.toLowerCase().split('.').pop();
+  webContentsSend(win, 'channelFileOpenStarted', { path });
+  const stateRepository = new ElectronStoreStateRepository();
+  const channelFileRepository = new FileChannelFileRepository(stateRepository);
+  const userPreferencesRepository = new ElectronStoreUserPreferencesRepository();
+  const getUserPreferences = new GetUserPreferences(userPreferencesRepository);
 
-  if (fileExtension === 'csv' || fileExtension === 'txt') {
-    await openCsvTxtFile(win, path);
-    return;
-  }
-
-  const { channelFileService } = await createChannelFileDependencies();
-  const openChannelFile = new (
-    await import('@main/channel-file/application/use-cases/OpenChannelFile')
-  ).OpenChannelFile(channelFileService);
-
-  try {
-    const channelFile = await openChannelFile.run(path);
-    webContentsSend(win, 'channelFileOpened', channelFile);
-  } catch {
-    // file has invalid structure
-  }
-}
-
-async function openPsseOutFile(win: BrowserWindow, path: string): Promise<void> {
-  const { psseOutFileService } = await createIngestionDependencies();
-  const readPsseOutFilePath = new (
-    await import('@main/channel-file/application/use-cases/ReadPsseOutFilePath')
-  ).ReadPsseOutFilePath(psseOutFileService);
-
-  try {
-    const channelFile = await readPsseOutFilePath.run(path);
-    webContentsSend(win, 'channelFileOpened', channelFile);
-  } catch {
-    // file has invalid structure or parsing failed
-  }
-}
-
-async function openCsvTxtFile(win: BrowserWindow, path: string): Promise<void> {
-  const { csvTxtFileService } = await createCsvTxtDependencies();
-  const readCsvTxtFilePath = new (
-    await import('@main/channel-file/application/use-cases/ReadCsvTxtFilePath')
-  ).ReadCsvTxtFilePath(csvTxtFileService);
-
-  try {
-    const channelFile = await readCsvTxtFilePath.run(path);
-    webContentsSend(win, 'channelFileOpened', channelFile);
-  } catch {
-    // file has invalid structure or parsing failed
-  }
-}
-
-async function createChannelFileDependencies() {
-  const { ChannelFileStructureChecker } =
-    await import('@main/channel-file/domain/services/ChannelFileStructureChecker');
-  const { NodeChannelFileService } =
-    await import('@main/channel-file/infrastructure/services/NodeChannelFileService');
-
-  const structureChecker = new ChannelFileStructureChecker();
-  const channelFileService = new NodeChannelFileService(structureChecker);
-
-  return { channelFileService };
-}
-
-async function createIngestionDependencies() {
-  const { NodePsseOutFileService } =
-    await import('@main/channel-file/infrastructure/services/NodePsseOutFileService');
-  const { ElectronStoreUserPreferencesRepository } =
-    await import('@main/user-preferences/infrastructure/repositories/ElectronStoreUserPreferencesRepository');
-  const { GetUserPreferences } =
-    await import('@main/user-preferences/application/use-cases/GetUserPreferences');
-
-  const repository = new ElectronStoreUserPreferencesRepository();
-  const getUserPreferences = new GetUserPreferences(repository);
   const preferences = await getUserPreferences.run();
 
-  const psseOutFileService = new NodePsseOutFileService({
-    dyntoolsPath: preferences.general.paths.dyntoolsPath,
-    pythonPath: preferences.general.paths.pythonPath,
-  });
+  const psseOutFilePreviewService = new NodeOutChannelFileParserService(preferences.general.paths);
+  const openChannelFile = new (
+    await import('@main/channel-file/application/use-cases/OpenChannelFile')
+  ).OpenChannelFile(
+    channelFileRepository,
+    new NodeJsonChannelFileParserService(new ChannelFileStructureChecker()),
+    new NodeCsvChannelFileParserService(),
+    psseOutFilePreviewService,
+  );
 
-  return { psseOutFileService };
-}
-
-async function createCsvTxtDependencies() {
-  const { NodeCsvTxtFileService } =
-    await import('@main/channel-file/infrastructure/services/NodeCsvTxtFileService');
-
-  const csvTxtFileService = new NodeCsvTxtFileService();
-
-  return { csvTxtFileService };
+  try {
+    const preview = await openChannelFile.run(path);
+    webContentsSend(win, 'channelFileOpened', preview);
+  } catch {
+    // file has invalid structure
+    webContentsSend(win, 'channelFileOpenFailed', { path });
+  }
 }

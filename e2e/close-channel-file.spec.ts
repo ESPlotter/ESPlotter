@@ -31,8 +31,8 @@ test.describe('Close channel files', () => {
   });
 
   test('should only remove channels from the closed file', async () => {
-    await mainPageTest.openChannelFileViaImportMenu('test1.txt');
-    await mainPageTest.openChannelFileViaImportMenu('test4.csv');
+    await mainPageTest.openChannelFile('test1.txt');
+    await mainPageTest.openChannelFile('test4.csv');
     await mainPageTest.sidebar.expandChannelFile('test1');
     await mainPageTest.sidebar.expandChannelFile('test4');
     await mainPageTest.charts.createChart();
@@ -62,8 +62,8 @@ test.describe('Close channel files', () => {
   });
 
   test('should update chart title to first remaining channel when title matched removed channel', async () => {
-    await mainPageTest.openChannelFileViaImportMenu('test1.txt');
-    await mainPageTest.openChannelFileViaImportMenu('test4.csv');
+    await mainPageTest.openChannelFile('test1.txt');
+    await mainPageTest.openChannelFile('test4.csv');
     await mainPageTest.sidebar.expandChannelFile('test1');
     await mainPageTest.sidebar.expandChannelFile('test4');
     await mainPageTest.charts.createChart();
@@ -79,8 +79,8 @@ test.describe('Close channel files', () => {
   });
 
   test('should not change chart title when it does not match removed channel', async () => {
-    await mainPageTest.openChannelFileViaImportMenu('test1.txt');
-    await mainPageTest.openChannelFileViaImportMenu('test4.csv');
+    await mainPageTest.openChannelFile('test1.txt');
+    await mainPageTest.openChannelFile('test4.csv');
     await mainPageTest.sidebar.expandChannelFile('test1');
     await mainPageTest.sidebar.expandChannelFile('test4');
     await mainPageTest.charts.createChart();
@@ -96,8 +96,8 @@ test.describe('Close channel files', () => {
   });
 
   test('should handle multiple charts with different title scenarios', async () => {
-    await mainPageTest.openChannelFileViaImportMenu('test1.txt');
-    await mainPageTest.openChannelFileViaImportMenu('test4.csv');
+    await mainPageTest.openChannelFile('test1.txt');
+    await mainPageTest.openChannelFile('test4.csv');
     await mainPageTest.sidebar.expandChannelFile('test1');
     await mainPageTest.sidebar.expandChannelFile('test4');
 

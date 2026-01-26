@@ -3,7 +3,8 @@
 import { contextBridgeExposeInMainWorld } from '@preload/ipc/contextBridgeExposeInMainWorld';
 import { ipcRendererInvoke } from '@preload/ipc/ipcRendererInvoke';
 import { ipcRendererOn } from '@preload/ipc/ipcRendererOn';
-import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
+import { type ChannelFileOpenStatusPrimitive } from '@shared/domain/primitives/ChannelFileOpenStatusPrimitive';
+import { type ChannelFilePreviewPrimitive } from '@shared/domain/primitives/ChannelFilePreviewPrimitive';
 
 contextBridgeExposeInMainWorld('versions', {
   node: () => process.versions.node,
@@ -12,8 +13,15 @@ contextBridgeExposeInMainWorld('versions', {
 });
 
 contextBridgeExposeInMainWorld('files', {
-  onChannelFileOpened: (listener: (file: ChannelFilePrimitive) => void) =>
+  onChannelFileOpenStarted: (listener: (payload: ChannelFileOpenStatusPrimitive) => void) =>
+    ipcRendererOn('channelFileOpenStarted', listener),
+  onChannelFileOpenFailed: (listener: (payload: ChannelFileOpenStatusPrimitive) => void) =>
+    ipcRendererOn('channelFileOpenFailed', listener),
+  onChannelFileOpened: (listener: (file: ChannelFilePreviewPrimitive) => void) =>
     ipcRendererOn('channelFileOpened', listener),
+  getChannelFileSeries: (path: string, channelId: string) =>
+    ipcRendererInvoke('getChannelFileSeries', path, channelId),
+  closeChannelFile: (path: string) => ipcRendererInvoke('closeChannelFile', path),
 });
 
 contextBridgeExposeInMainWorld('userPreferences', {

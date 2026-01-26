@@ -29,6 +29,11 @@ if (shouldQuitForSquirrel()) {
   app.quit();
 }
 
+const userDataDir = process.env.ESPLOTTER_USER_DATA_DIR;
+if (userDataDir) {
+  app.setPath('userData', userDataDir);
+}
+
 if (app.isPackaged && !process.argv.includes('--disable-auto-update')) {
   updateElectronApp();
 }
