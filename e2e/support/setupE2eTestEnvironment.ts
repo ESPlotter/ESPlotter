@@ -23,7 +23,7 @@ export async function setupE2eTestEnvironment(): Promise<{
     `ESPlotter-e2e-state-${Date.now()}-${crypto.randomUUID()}`,
   );
   await fs.mkdir(tmpStateDir, { recursive: true });
-  process.env.ESPLOTTER_STATE_CWD = tmpStateDir;
+  process.env.ESPLOTTER_USER_DATA_DIR = tmpStateDir;
 
   const electronApp = await getElectronAppForE2eTest();
   const mainPage = await electronApp.firstWindow();

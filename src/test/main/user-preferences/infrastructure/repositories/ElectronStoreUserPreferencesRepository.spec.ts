@@ -15,14 +15,14 @@ let repository: ElectronStoreUserPreferencesRepository;
 describe('ElectronStoreUserPreferencesRepository', () => {
   beforeEach(async () => {
     const cwd = await createIsolatedDirectory();
-    process.env.ESPLOTTER_STATE_CWD = cwd;
+    process.env.ESPLOTTER_USER_DATA_DIR = cwd;
     resetElectronStoreCache();
     repository = new ElectronStoreUserPreferencesRepository();
   });
 
   afterEach(() => {
     resetElectronStoreCache();
-    delete process.env.ESPLOTTER_STATE_CWD;
+    delete process.env.ESPLOTTER_USER_DATA_DIR;
   });
 
   it('returns default preferences when settings file is empty', async () => {

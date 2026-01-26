@@ -1,21 +1,32 @@
 import { useEffect } from 'react';
 
-import { useChannelFiles, useChannelFilesActions } from '@renderer/store/ChannelFilesStore';
-import { ChannelFilePrimitive } from '@shared/domain/primitives/ChannelFilePrimitive';
+import {
+  useChannelFiles,
+  useChannelFilesActions,
+  type OpenedChannelFile,
+} from '@renderer/store/ChannelFilesStore';
 
-export function useOpenedChannelFiles(): ChannelFilePrimitive[] {
+export function useOpenedChannelFiles(): OpenedChannelFile[] {
   const files = useChannelFiles();
-  const { addFile } = useChannelFilesActions();
+  const { addFile, startFileOpen, markFileOpenFailed } = useChannelFilesActions();
 
   useEffect(() => {
-    const off = window.files.onChannelFileOpened((file) => {
+    const offOpenStarted = window.files.onChannelFileOpenStarted((payload) => {
+      startFileOpen(payload.path);
+    });
+    const offOpenFailed = window.files.onChannelFileOpenFailed((payload) => {
+      markFileOpenFailed(payload.path);
+    });
+    const offOpenCompleted = window.files.onChannelFileOpened((file) => {
       addFile(file);
     });
 
     return () => {
-      off();
+      offOpenStarted();
+      offOpenFailed();
+      offOpenCompleted();
     };
-  }, [addFile]);
+  }, [addFile, markFileOpenFailed, startFileOpen]);
 
   return files;
 }

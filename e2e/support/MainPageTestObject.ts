@@ -10,6 +10,8 @@ import { setupE2eTestEnvironment } from './setupE2eTestEnvironment';
 import { SidebarTestObject } from './SidebarTestObject';
 
 interface WindowFilesApi {
+  onChannelFileOpenStarted: (listener: (payload: { path: string }) => void) => () => void;
+  onChannelFileOpenFailed: (listener: (payload: { path: string }) => void) => () => void;
   onChannelFileOpened: (listener: () => void) => () => void;
 }
 
@@ -48,28 +50,30 @@ export class MainPageTestObject {
     await this.app.close();
   }
 
-  async openChannelFileViaImportMenu(fixtureName: string): Promise<void> {
-    await this.setNextOpenFixturePath(fixtureName);
-    const parsedPromise = this.waitForLastOpenedChannelFileChanged();
-    await this.menu.openImportMenu();
+  async openChannelFile(fixtureName: string): Promise<void> {
+    await this.prepareNextOpenFixturePath(fixtureName);
+    const parsedPromise = this.waitForChannelFileOpened();
+    await this.menu.openFileMenu();
     await parsedPromise;
   }
 
   async openChannelFileAndExpandInSidebar(fixtureName: string): Promise<void> {
-    await this.openChannelFileViaImportMenu(fixtureName);
+    await this.openChannelFile(fixtureName);
     const fileLabel = fixtureName.split('.')[0];
     await this.sidebar.expandChannelFile(fileLabel);
   }
 
-  async attemptImportFixture(fixtureName: string): Promise<void> {
-    await this.setNextOpenFixturePath(fixtureName);
-    await this.menu.openImportMenu();
+  async attemptOpenFixture(fixtureName: string): Promise<void> {
+    await this.prepareNextOpenFixturePath(fixtureName);
+    const failedPromise = this.waitForChannelFileOpenFailed();
+    await this.menu.openFileMenu();
+    await failedPromise;
   }
 
   async openOutFixture(fixtureName: string): Promise<void> {
-    await this.setNextOpenFixturePath(fixtureName);
-    const parsedPromise = this.waitForLastOpenedChannelFileChanged();
-    await this.menu.openOutFileMenu();
+    await this.prepareNextOpenFixturePath(fixtureName);
+    const parsedPromise = this.waitForChannelFileOpened();
+    await this.menu.openFileMenu();
     await parsedPromise;
     await this.sidebar.expandFirstFile();
   }
@@ -81,7 +85,7 @@ export class MainPageTestObject {
     }
   }
 
-  private async setNextOpenFixturePath(fileName: string): Promise<string> {
+  async prepareNextOpenFixturePath(fileName: string): Promise<string> {
     const fullPath = path.resolve(process.cwd(), 'fixtures', fileName);
     await this.app.evaluate((_, fixturePath) => {
       process.env.ESPLOTTER_E2E_OPEN_PATH = fixturePath;
@@ -90,8 +94,34 @@ export class MainPageTestObject {
     return fullPath;
   }
 
-  private waitForLastOpenedChannelFileChanged(): Promise<void> {
-    return this.page.evaluate(
+  async waitForChannelFileOpenStarted(): Promise<void> {
+    await this.page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          const filesApi = window.files as WindowFilesApi;
+          const off = filesApi.onChannelFileOpenStarted(() => {
+            off();
+            resolve();
+          });
+        }),
+    );
+  }
+
+  async waitForChannelFileOpenFailed(): Promise<void> {
+    await this.page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          const filesApi = window.files as WindowFilesApi;
+          const off = filesApi.onChannelFileOpenFailed(() => {
+            off();
+            resolve();
+          });
+        }),
+    );
+  }
+
+  async waitForChannelFileOpened(): Promise<void> {
+    await this.page.evaluate(
       () =>
         new Promise<void>((resolve) => {
           const filesApi = window.files as WindowFilesApi;

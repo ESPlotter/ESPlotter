@@ -6,10 +6,10 @@ export class ChannelFileContentMetadata {
   public static fromPrimitives(
     primitives: ChannelFileContentMetadataPrimitive,
   ): ChannelFileContentMetadata {
-    return new ChannelFileContentMetadata({ ...primitives });
+    return new ChannelFileContentMetadata(primitives);
   }
 
   public toPrimitives(): ChannelFileContentMetadataPrimitive {
-    return { ...this.value };
+    return this.value;
   }
 }

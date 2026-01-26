@@ -35,6 +35,18 @@ export class SidebarTestObject {
     await expect(this.getFileTrigger(fileLabel)).toBeVisible();
   }
 
+  async waitForFileSpinner(fileLabel: string): Promise<void> {
+    await this.getFileSpinner(fileLabel).waitFor({ state: 'visible' });
+  }
+
+  async expectFileSpinnerVisible(fileLabel: string): Promise<void> {
+    await expect(this.getFileSpinner(fileLabel)).toBeVisible();
+  }
+
+  async expectFileSpinnerHidden(fileLabel: string): Promise<void> {
+    await expect(this.getFileSpinner(fileLabel)).toBeHidden();
+  }
+
   async expectFileNotVisible(fileLabel: string): Promise<void> {
     await expect(this.getFileTrigger(fileLabel)).not.toBeVisible();
   }
@@ -119,6 +131,10 @@ export class SidebarTestObject {
 
   private getFileTrigger(fileLabel: string): Locator {
     return this.page.getByRole('button', { name: fileLabel });
+  }
+
+  private getFileSpinner(fileLabel: string): Locator {
+    return this.getFileTrigger(fileLabel).locator('span.animate-spin');
   }
 
   private getChannelButton(channelLabel: string, fileLabel?: string): Locator {
