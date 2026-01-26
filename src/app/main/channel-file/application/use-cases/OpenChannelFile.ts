@@ -8,7 +8,7 @@ export class OpenChannelFile {
     private readonly repository: ChannelFileRepository,
     private readonly jsonChannelFileParserService: ChannelFileParserService,
     private readonly csvChannelFileParserService: ChannelFileParserService,
-    private readonly psseOutFilePreviewService: OutChannelFileParserService,
+    private readonly psseOutFilePreviewService?: OutChannelFileParserService,
   ) {}
 
   async run(path: string): Promise<ChannelFilePreviewPrimitive> {
@@ -22,6 +22,11 @@ export class OpenChannelFile {
 
     try {
       if (extension === 'out') {
+        // It needs to be optional since this class cannot be instantiated in CI because it would fail because it requires dependencies such as python or dyntools
+        if (!this.psseOutFilePreviewService) {
+          throw new Error('Out file parser is not configured');
+        }
+
         return await this.psseOutFilePreviewService.parse(path, cacheDir); // This parse also saves the data in the cache
       }
 
