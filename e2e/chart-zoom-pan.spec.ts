@@ -43,6 +43,8 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     const chartTitle = 'Voltage';
     await mainPageTest.charts.expectSelectedChart(chartTitle);
     await mainPageTest.charts.waitForChartData(chartTitle);
+    await mainPageTest.charts.clickZoomMode(chartTitle);
+    await mainPageTest.charts.expectZoomModeActive(chartTitle, true);
 
     const initialRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
     await mainPageTest.charts.dragOnChartByPercent(chartTitle, {
@@ -60,6 +62,8 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     const chartTitle = 'Voltage';
     await mainPageTest.charts.expectSelectedChart(chartTitle);
     await mainPageTest.charts.waitForChartData(chartTitle);
+    await mainPageTest.charts.clickZoomMode(chartTitle);
+    await mainPageTest.charts.expectZoomModeActive(chartTitle, true);
 
     const initialRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
 
@@ -81,6 +85,8 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     const chartTitle = 'Voltage';
     await mainPageTest.charts.expectSelectedChart(chartTitle);
     await mainPageTest.charts.waitForChartData(chartTitle);
+    await mainPageTest.charts.clickZoomMode(chartTitle);
+    await mainPageTest.charts.expectZoomModeActive(chartTitle, true);
 
     const initialRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
 
@@ -102,6 +108,8 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     const chartTitle = 'Voltage';
     await mainPageTest.charts.expectSelectedChart(chartTitle);
     await mainPageTest.charts.waitForChartData(chartTitle);
+    await mainPageTest.charts.clickZoomMode(chartTitle);
+    await mainPageTest.charts.expectZoomModeActive(chartTitle, true);
 
     const initialRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
 
@@ -123,6 +131,8 @@ test.describe('Chart zoom, pan, and reset controls', () => {
     const chartTitle = 'Voltage';
     await mainPageTest.charts.expectSelectedChart(chartTitle);
     await mainPageTest.charts.waitForChartData(chartTitle);
+    await mainPageTest.charts.clickZoomMode(chartTitle);
+    await mainPageTest.charts.expectZoomModeActive(chartTitle, true);
 
     const initialRanges = await mainPageTest.charts.getZoomRanges(chartTitle);
     await mainPageTest.charts.dragOnChartByPercent(chartTitle, {
