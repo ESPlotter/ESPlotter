@@ -77,18 +77,21 @@ async function showOpenFileDialog(win: BrowserWindow): Promise<string | null> {
 
 async function openChannelFile(win: BrowserWindow, path: string): Promise<void> {
   webContentsSend(win, 'channelFileOpenStarted', { path });
-  const extension = path.toLowerCase().split('.').pop();
   const stateRepository = new ElectronStoreStateRepository();
   const channelFileRepository = new FileChannelFileRepository(stateRepository);
-  const outChannelFileParserService =
-    extension === 'out' ? await createOutChannelFileParserService() : undefined;
+  const userPreferencesRepository = new ElectronStoreUserPreferencesRepository();
+  const getUserPreferences = new GetUserPreferences(userPreferencesRepository);
+
+  const preferences = await getUserPreferences.run();
+
+  const psseOutFilePreviewService = new NodeOutChannelFileParserService(preferences.general.paths);
   const openChannelFile = new (
     await import('@main/channel-file/application/use-cases/OpenChannelFile')
   ).OpenChannelFile(
     channelFileRepository,
     new NodeJsonChannelFileParserService(new ChannelFileStructureChecker()),
     new NodeCsvChannelFileParserService(),
-    outChannelFileParserService,
+    psseOutFilePreviewService,
   );
 
   try {
@@ -98,12 +101,4 @@ async function openChannelFile(win: BrowserWindow, path: string): Promise<void> 
     // file has invalid structure
     webContentsSend(win, 'channelFileOpenFailed', { path });
   }
-}
-
-async function createOutChannelFileParserService(): Promise<NodeOutChannelFileParserService> {
-  const userPreferencesRepository = new ElectronStoreUserPreferencesRepository();
-  const getUserPreferences = new GetUserPreferences(userPreferencesRepository);
-  const preferences = await getUserPreferences.run();
-
-  return new NodeOutChannelFileParserService(preferences.general.paths);
 }
