@@ -26,6 +26,9 @@ export async function setupE2eTestEnvironment(): Promise<{
   process.env.ESPLOTTER_USER_DATA_DIR = tmpStateDir;
 
   const electronApp = await getElectronAppForE2eTest();
+  await electronApp.evaluate((_, userDataDir) => {
+    process.env.ESPLOTTER_USER_DATA_DIR = userDataDir;
+  }, tmpStateDir);
   const mainPage = await electronApp.firstWindow();
 
   await applyE2eWindowSizing(electronApp);
