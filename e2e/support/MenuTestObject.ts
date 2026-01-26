@@ -9,7 +9,13 @@ export class MenuTestObject {
 
   async openFileMenu(): Promise<void> {
     await this.page.bringToFront();
-    await this.clickMenuItem(['File', 'Open File']);
+    try {
+      await this.clickMenuItem(['File', 'Open File']);
+      return;
+    } catch {
+      const shortcut = process.platform === 'darwin' ? 'Meta+O' : 'Control+O';
+      await this.page.keyboard.press(shortcut);
+    }
   }
 
   async openPreferencesMenu(): Promise<void> {
