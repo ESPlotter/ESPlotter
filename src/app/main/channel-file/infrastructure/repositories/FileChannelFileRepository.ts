@@ -71,7 +71,8 @@ export class FileChannelFileRepository implements ChannelFileRepository {
   }
 
   public async prepareCache(filePath: string): Promise<string> {
-    const baseDir = path.join(app.getPath('userData'), 'import-cache');
+    const userDataDir = process.env.ESPLOTTER_USER_DATA_DIR ?? app.getPath('userData');
+    const baseDir = path.join(userDataDir, 'import-cache');
     await fs.mkdir(baseDir, { recursive: true });
     const cacheDir = await fs.mkdtemp(path.join(baseDir, 'file-'));
     this.stateRepository.setCachedChannelFile({ path: filePath, cacheDir });
