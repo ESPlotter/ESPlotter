@@ -195,9 +195,9 @@ export class PreferencesTestObject {
   }
 
   async expectPersistedPaths(dyntoolsPath: string, pythonPath: string): Promise<void> {
-    const stateDir = process.env.ESPLOTTER_STATE_CWD;
+    const stateDir = process.env.ESPLOTTER_USER_DATA_DIR;
     if (!stateDir) {
-      throw new Error('ESPLOTTER_STATE_CWD is not set');
+      throw new Error('ESPLOTTER_USER_DATA_DIR is not set');
     }
 
     const stateFile = path.join(stateDir, 'settings.json');
