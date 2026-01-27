@@ -1,5 +1,5 @@
 import { ClockIcon, XIcon } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { type ChartSerie } from '@renderer/components/Chart/ChartSerie';
 import { useOpenedChannelFiles } from '@renderer/hooks/useOpenedChannelFiles';
@@ -196,11 +196,18 @@ function ChannelFileAccordion({
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(
     null,
   );
+  const accordionTriggerRef = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Sync input with current timeOffset when dropdown opens
   useEffect(() => {
     if (isDropdownOpen) {
       setTimeOffsetInput(String(timeOffset));
+      // Focus the input after a short delay to ensure the menu is rendered
+      setTimeout(() => {
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }, 100);
     }
   }, [isDropdownOpen, timeOffset]);
 
@@ -236,7 +243,23 @@ function ChannelFileAccordion({
   function handleContextMenu(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+
+    // Get the bounding rectangle of the accordion trigger
+    const triggerRect = accordionTriggerRef.current?.getBoundingClientRect();
+
+    if (triggerRect) {
+      // Position menu with:
+      // - X: cursor position (as requested)
+      // - Y: below the accordion trigger (bottom of the element)
+      setContextMenuPosition({
+        x: e.clientX,
+        y: triggerRect.bottom,
+      });
+    } else {
+      // Fallback to cursor position
+      setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    }
+
     setIsDropdownOpen(true);
   }
 
@@ -278,6 +301,7 @@ function ChannelFileAccordion({
       <AccordionItem value={item.filePath}>
         <div className="flex w-full items-center gap-2">
           <AccordionTrigger
+            ref={accordionTriggerRef}
             className="flex-1 text-sm font-medium"
             onContextMenu={handleContextMenu}
           >
@@ -364,14 +388,14 @@ function ChannelFileAccordion({
                 <div className="flex items-center gap-1">
                   <span className="text-sm">Time delay:</span>
                   <Input
+                    ref={inputRef}
                     type="number"
                     step="any"
                     value={timeOffsetInput}
                     onChange={handleTimeOffsetInputChange}
                     onKeyDown={handleTimeOffsetKeyDown}
                     onClick={(e) => e.stopPropagation()}
-                    onFocus={(e) => e.stopPropagation()}
-                    autoFocus
+                    onMouseDown={(e) => e.stopPropagation()}
                     className="h-6 w-24 text-xs"
                     placeholder="0"
                   />
