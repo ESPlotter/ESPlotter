@@ -267,49 +267,34 @@ function ChannelFileAccordion({
     <Accordion type="single" collapsible onValueChange={handleValueChange}>
       <AccordionItem value={item.filePath}>
         <div className="flex w-full items-center gap-2">
-          <AccordionTrigger className="flex-1 text-sm font-medium">
-            <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
-              <span className="truncate">{item.fileName}</span>
-              {item.status === 'loading' ? (
-                <span className="size-3 animate-spin rounded-full border border-muted-foreground border-t-transparent" />
-              ) : null}
-              {item.status === 'ready' && timeOffset !== 0 ? (
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <ClockIcon className="size-3" />
-                  <span>
-                    {timeOffset > 0 ? '+' : ''}
-                    {timeOffset} s
-                  </span>
-                </span>
-              ) : null}
-            </span>
-          </AccordionTrigger>
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger asChild>
-              <button
-                className="rounded p-1 hover:bg-muted"
-                aria-label="File options"
-                title="Options"
-                type="button"
-                onClick={(e) => e.stopPropagation()}
+              <AccordionTrigger
+                className="flex-1 text-sm font-medium"
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsDropdownOpen(true);
+                }}
               >
-                <svg
-                  className="size-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                  />
-                </svg>
-              </button>
+                <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
+                  <span className="truncate">{item.fileName}</span>
+                  {item.status === 'loading' ? (
+                    <span className="size-3 animate-spin rounded-full border border-muted-foreground border-t-transparent" />
+                  ) : null}
+                  {item.status === 'ready' && timeOffset !== 0 ? (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <ClockIcon className="size-3" />
+                      <span>
+                        {timeOffset > 0 ? '+' : ''}
+                        {timeOffset} s
+                      </span>
+                    </span>
+                  ) : null}
+                </span>
+              </AccordionTrigger>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-64">
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
@@ -332,11 +317,12 @@ function ChannelFileAccordion({
                   <span className="text-sm">Time delay:</span>
                   <Input
                     type="number"
+                    step="any"
                     value={timeOffsetInput}
                     onChange={handleTimeOffsetInputChange}
                     onKeyDown={handleTimeOffsetKeyDown}
                     onClick={(e) => e.stopPropagation()}
-                    className="h-6 w-16 text-xs"
+                    className="h-6 w-24 text-xs"
                     placeholder="0"
                   />
                   <span className="text-xs">s</span>
@@ -354,6 +340,31 @@ function ChannelFileAccordion({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <button
+            className="rounded p-1 hover:bg-muted"
+            aria-label="File options"
+            title="Options"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsDropdownOpen(true);
+            }}
+          >
+            <svg
+              className="size-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+              />
+            </svg>
+          </button>
         </div>
         <AccordionContent>{renderContent()}</AccordionContent>
       </AccordionItem>

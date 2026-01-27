@@ -13,7 +13,6 @@ When right-clicking (or clicking the options button) on a channel file name in t
 1. **Close file** (with X icon)
    - Closes the channel file and removes it from the sidebar
    - Removes all channels from this file from all charts
-   
 2. **Time delay** (with Clock/Chronometer icon)
    - Shows an input field where users can enter a time offset value
    - Default value: 0 seconds
@@ -24,6 +23,7 @@ When right-clicking (or clicking the options button) on a channel file name in t
 ### Visual Feedback
 
 When a time offset is applied to a channel file:
+
 - A chronometer icon (🕐) appears next to the file name in the sidebar
 - The offset value is displayed next to the icon (e.g., "+5 s", "-3 s")
 - This indicator is only shown when the offset is non-zero
@@ -31,6 +31,7 @@ When a time offset is applied to a channel file:
 ### Data Processing
 
 When a time offset is applied:
+
 1. The offset value is stored in the Zustand store for that specific file
 2. All charts that contain channels from this file are automatically updated
 3. The time offset is applied to all x-axis (time) values for channels from this file
@@ -59,7 +60,7 @@ export function mapToChartSerie(
   xValues: number[],
   timeOffset: number = 0, // New parameter
 ): ChartSerie | null {
-  // ... 
+  // ...
   acc.push([xValue + timeOffset, yValue]); // Apply offset
   // ...
 }
@@ -78,6 +79,7 @@ export function mapToChartSerie(
 ### Example 1: Synchronizing Two Data Sources
 
 If you have two channel files from different sources:
+
 - File A: Data collected starting at t=0
 - File B: Data collected starting at t=5 seconds
 
@@ -94,16 +96,19 @@ You can apply different offsets to multiple files to see how the same phenomenon
 ## Validation and Edge Cases
 
 ### Input Validation
+
 - Only accepts finite numeric values
 - Rejects NaN and Infinity values
 - Resets to current value if invalid input is entered
 
 ### Performance Considerations
+
 - Only updates charts when the offset value actually changes
 - All charts are updated simultaneously when offset changes
 - No loading indicator currently (channels update quickly for typical datasets)
 
 ### Multiple Charts
+
 - If a channel file has channels displayed in multiple charts, all charts update when the offset changes
 - Each file maintains its own independent offset value
 - Different files can have different offsets
@@ -111,6 +116,7 @@ You can apply different offsets to multiple files to see how the same phenomenon
 ## Testing
 
 ### Unit Tests
+
 - `mapToChartSerie` with positive offsets
 - `mapToChartSerie` with negative offsets
 - `mapToChartSerie` with zero offset (default)
@@ -119,6 +125,7 @@ You can apply different offsets to multiple files to see how the same phenomenon
 - Only updating when value changes
 
 ### E2E Tests (Playwright)
+
 - Opening context menu
 - Closing file from context menu
 - Applying positive time offset
@@ -129,6 +136,7 @@ You can apply different offsets to multiple files to see how the same phenomenon
 ## UI Mockup Description
 
 ### Context Menu (Closed State)
+
 ```
 ┌─────────────────────────────┐
 │ Channel File Name      [⋮]  │ ← Three-dot menu icon
@@ -136,6 +144,7 @@ You can apply different offsets to multiple files to see how the same phenomenon
 ```
 
 ### Context Menu (Open State)
+
 ```
 ┌─────────────────────────────┐
 │ Channel File Name      [⋮]  │
@@ -149,6 +158,7 @@ You can apply different offsets to multiple files to see how the same phenomenon
 ```
 
 ### With Time Offset Applied
+
 ```
 ┌─────────────────────────────┐
 │ Channel File Name 🕐 +5 s [⋮]│ ← Chronometer icon with offset
@@ -156,6 +166,7 @@ You can apply different offsets to multiple files to see how the same phenomenon
 ```
 
 ### With Negative Offset
+
 ```
 ┌─────────────────────────────┐
 │ Channel File Name 🕐 -3 s [⋮]│
@@ -177,11 +188,13 @@ Potential improvements for future versions:
 ## Code Quality
 
 ### Security
+
 - CodeQL analysis: 0 vulnerabilities found
 - Input validation prevents injection attacks
 - No execution of user-provided strings
 
 ### Code Standards
+
 - Follows project's Zustand best practices
 - Follows project's component structure conventions
 - All code formatted with Prettier
@@ -189,6 +202,7 @@ Potential improvements for future versions:
 - TypeScript strict mode compliant
 
 ### Test Coverage
+
 - 80 unit tests passing (15 test files)
 - All existing tests continue to pass
 - 5 new E2E test scenarios added
@@ -197,14 +211,17 @@ Potential improvements for future versions:
 ## Related Files
 
 ### Modified Files
+
 - `src/app/renderer/store/ChannelFilesStore.ts` - Store management
 - `src/app/renderer/components/Chart/mapToChartSerie.ts` - Data processing
 - `src/app/renderer/components/AppSidebar/AppSidebar.tsx` - UI implementation
 
 ### New Files
+
 - `src/app/renderer/shadcn/components/ui/dropdown-menu.tsx` - Dropdown component
 - `e2e/channel-file-time-offset.spec.ts` - E2E tests
 
 ### Test Files Updated
+
 - `src/test/renderer/chart/mapToChartSeries.spec.ts` - Added offset tests
 - `src/test/renderer/store/ChannelFilesStore.spec.ts` - Added store tests
