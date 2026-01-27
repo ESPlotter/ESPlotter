@@ -203,11 +203,15 @@ function ChannelFileAccordion({
   useEffect(() => {
     if (isDropdownOpen) {
       setTimeOffsetInput(String(timeOffset));
-      // Focus the input after a short delay to ensure the menu is rendered
-      setTimeout(() => {
-        inputRef.current?.focus();
-        inputRef.current?.select();
-      }, 100);
+      // Focus the input after a delay to ensure the menu is fully rendered
+      const timer = setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          inputRef.current.select();
+        }
+      }, 200);
+
+      return () => clearTimeout(timer);
     }
   }, [isDropdownOpen, timeOffset]);
 
@@ -353,15 +357,14 @@ function ChannelFileAccordion({
               align="start"
               side="bottom"
               className="w-64"
-              style={
-                contextMenuPosition
-                  ? {
-                      position: 'fixed',
-                      left: `${contextMenuPosition.x}px`,
-                      top: `${contextMenuPosition.y}px`,
-                    }
-                  : undefined
-              }
+              {...(contextMenuPosition && {
+                style: {
+                  position: 'fixed',
+                  left: `${contextMenuPosition.x}px`,
+                  top: `${contextMenuPosition.y}px`,
+                  transform: 'none',
+                },
+              })}
               onCloseAutoFocus={() => {
                 // Reset context menu position when closing
                 setContextMenuPosition(null);
@@ -383,6 +386,11 @@ function ChannelFileAccordion({
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
+                onFocus={(e) => {
+                  e.preventDefault();
+                  // Don't let the menu item take focus
+                }}
+                className="focus:bg-transparent"
               >
                 <ClockIcon className="mr-2 size-4" />
                 <div className="flex items-center gap-1">
@@ -396,6 +404,7 @@ function ChannelFileAccordion({
                     onKeyDown={handleTimeOffsetKeyDown}
                     onClick={(e) => e.stopPropagation()}
                     onMouseDown={(e) => e.stopPropagation()}
+                    onFocus={(e) => e.stopPropagation()}
                     className="h-6 w-24 text-xs"
                     placeholder="0"
                   />
