@@ -128,27 +128,31 @@ export function AppSidebar() {
     // Update the store
     setFileTimeOffset(filePath, newTimeOffset);
 
-    // Re-add all channels from this file that are currently in charts
-    if (!selectedChartId || !selectedChart) {
-      return;
-    }
-
+    // Re-add all channels from this file that are currently in ANY chart
     const prefix = `${filePath}::`;
-    const channelsToUpdate = Object.entries(selectedChart.channels).filter(([channelKey]) =>
-      channelKey.startsWith(prefix),
-    );
 
-    for (const [channelKey] of channelsToUpdate) {
-      const channelId = channelKey.replace(prefix, '');
-      try {
-        const seriesPayload = await window.files.getChannelFileSeries(filePath, channelId);
-        const serie = mapToChartSerie(seriesPayload.channel, seriesPayload.x.values, newTimeOffset);
+    // Iterate through all charts
+    for (const [chartId, chart] of Object.entries(charts)) {
+      const channelsToUpdate = Object.keys(chart.channels).filter((channelKey) =>
+        channelKey.startsWith(prefix),
+      );
 
-        if (serie) {
-          addChannelToChart(selectedChartId, channelKey, serie);
+      for (const channelKey of channelsToUpdate) {
+        const channelId = channelKey.replace(prefix, '');
+        try {
+          const seriesPayload = await window.files.getChannelFileSeries(filePath, channelId);
+          const serie = mapToChartSerie(
+            seriesPayload.channel,
+            seriesPayload.x.values,
+            newTimeOffset,
+          );
+
+          if (serie) {
+            addChannelToChart(chartId, channelKey, serie);
+          }
+        } catch {
+          // Ignore errors when re-adding channels
         }
-      } catch {
-        // Ignore errors when re-adding channels
       }
     }
   }

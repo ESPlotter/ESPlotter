@@ -199,4 +199,82 @@ describe('ChannelFilesStore', () => {
       expect(files).toHaveLength(0);
     });
   });
+
+  describe('setFileTimeOffset', () => {
+    test('should set time offset for a ready file', () => {
+      const { addFile, setFileTimeOffset } = useChannelFilesStore.getState().actions;
+      const file = createMockChannelFile('/path/to/file.csv');
+
+      addFile(file);
+      setFileTimeOffset('/path/to/file.csv', 5);
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      if (files[0].status === 'ready') {
+        expect(files[0].timeOffset).toBe(5);
+      }
+    });
+
+    test('should update time offset for an existing file', () => {
+      const { addFile, setFileTimeOffset } = useChannelFilesStore.getState().actions;
+      const file = createMockChannelFile('/path/to/file.csv');
+
+      addFile(file);
+      setFileTimeOffset('/path/to/file.csv', 10);
+      setFileTimeOffset('/path/to/file.csv', -5);
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      if (files[0].status === 'ready') {
+        expect(files[0].timeOffset).toBe(-5);
+      }
+    });
+
+    test('should not affect loading files', () => {
+      const { startFileOpen, setFileTimeOffset } = useChannelFilesStore.getState().actions;
+
+      startFileOpen('/path/to/file.csv');
+      setFileTimeOffset('/path/to/file.csv', 5);
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      expect(files[0].status).toBe('loading');
+    });
+
+    test('should only update the specified file', () => {
+      const { addFile, setFileTimeOffset } = useChannelFilesStore.getState().actions;
+      const file1 = createMockChannelFile('/path/to/file1.csv');
+      const file2 = createMockChannelFile('/path/to/file2.csv');
+
+      addFile(file1);
+      addFile(file2);
+      setFileTimeOffset('/path/to/file1.csv', 10);
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(2);
+
+      const file1State = files.find((f) => f.path === '/path/to/file1.csv');
+      const file2State = files.find((f) => f.path === '/path/to/file2.csv');
+
+      if (file1State?.status === 'ready') {
+        expect(file1State.timeOffset).toBe(10);
+      }
+      if (file2State?.status === 'ready') {
+        expect(file2State.timeOffset).toBe(0);
+      }
+    });
+
+    test('should initialize time offset to 0 when adding a file', () => {
+      const { addFile } = useChannelFilesStore.getState().actions;
+      const file = createMockChannelFile('/path/to/file.csv');
+
+      addFile(file);
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      if (files[0].status === 'ready') {
+        expect(files[0].timeOffset).toBe(0);
+      }
+    });
+  });
 });
