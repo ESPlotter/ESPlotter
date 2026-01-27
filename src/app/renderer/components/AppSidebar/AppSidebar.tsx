@@ -193,6 +193,9 @@ function ChannelFileAccordion({
   const timeOffset = item.status === 'ready' ? item.timeOffset : 0;
   const [timeOffsetInput, setTimeOffsetInput] = useState(String(timeOffset));
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(
+    null,
+  );
 
   // Sync input with current timeOffset when dropdown opens
   useEffect(() => {
@@ -228,6 +231,13 @@ function ChannelFileAccordion({
     if (e.key === 'Enter') {
       handleTimeOffsetApply();
     }
+  }
+
+  function handleContextMenu(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    setIsDropdownOpen(true);
   }
 
   function renderContent() {
@@ -267,34 +277,72 @@ function ChannelFileAccordion({
     <Accordion type="single" collapsible onValueChange={handleValueChange}>
       <AccordionItem value={item.filePath}>
         <div className="flex w-full items-center gap-2">
+          <AccordionTrigger
+            className="flex-1 text-sm font-medium"
+            onContextMenu={handleContextMenu}
+          >
+            <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
+              <span className="truncate">{item.fileName}</span>
+              {item.status === 'loading' ? (
+                <span className="size-3 animate-spin rounded-full border border-muted-foreground border-t-transparent" />
+              ) : null}
+              {item.status === 'ready' && timeOffset !== 0 ? (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <ClockIcon className="size-3" />
+                  <span>
+                    {timeOffset > 0 ? '+' : ''}
+                    {timeOffset} s
+                  </span>
+                </span>
+              ) : null}
+            </span>
+          </AccordionTrigger>
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger asChild>
-              <AccordionTrigger
-                className="flex-1 text-sm font-medium"
-                onContextMenu={(e) => {
-                  e.preventDefault();
+              <button
+                className="rounded p-1 hover:bg-muted"
+                aria-label="File options"
+                title="Options"
+                type="button"
+                onClick={(e) => {
                   e.stopPropagation();
                   setIsDropdownOpen(true);
                 }}
               >
-                <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
-                  <span className="truncate">{item.fileName}</span>
-                  {item.status === 'loading' ? (
-                    <span className="size-3 animate-spin rounded-full border border-muted-foreground border-t-transparent" />
-                  ) : null}
-                  {item.status === 'ready' && timeOffset !== 0 ? (
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <ClockIcon className="size-3" />
-                      <span>
-                        {timeOffset > 0 ? '+' : ''}
-                        {timeOffset} s
-                      </span>
-                    </span>
-                  ) : null}
-                </span>
-              </AccordionTrigger>
+                <svg
+                  className="size-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                  />
+                </svg>
+              </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuContent
+              align="start"
+              side="bottom"
+              className="w-64"
+              style={
+                contextMenuPosition
+                  ? {
+                      position: 'fixed',
+                      left: `${contextMenuPosition.x}px`,
+                      top: `${contextMenuPosition.y}px`,
+                    }
+                  : undefined
+              }
+              onCloseAutoFocus={() => {
+                // Reset context menu position when closing
+                setContextMenuPosition(null);
+              }}
+            >
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
@@ -322,6 +370,8 @@ function ChannelFileAccordion({
                     onChange={handleTimeOffsetInputChange}
                     onKeyDown={handleTimeOffsetKeyDown}
                     onClick={(e) => e.stopPropagation()}
+                    onFocus={(e) => e.stopPropagation()}
+                    autoFocus
                     className="h-6 w-24 text-xs"
                     placeholder="0"
                   />
@@ -340,31 +390,6 @@ function ChannelFileAccordion({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <button
-            className="rounded p-1 hover:bg-muted"
-            aria-label="File options"
-            title="Options"
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsDropdownOpen(true);
-            }}
-          >
-            <svg
-              className="size-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-              />
-            </svg>
-          </button>
         </div>
         <AccordionContent>{renderContent()}</AccordionContent>
       </AccordionItem>
