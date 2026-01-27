@@ -1,5 +1,5 @@
 import { ClockIcon, XIcon } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { type ChartSerie } from '@renderer/components/Chart/ChartSerie';
 import { useOpenedChannelFiles } from '@renderer/hooks/useOpenedChannelFiles';
@@ -190,10 +190,16 @@ function ChannelFileAccordion({
   onTimeOffsetChange,
 }: ChannelFileAccordionProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [timeOffsetInput, setTimeOffsetInput] = useState('0');
+  const timeOffset = item.status === 'ready' ? item.timeOffset : 0;
+  const [timeOffsetInput, setTimeOffsetInput] = useState(String(timeOffset));
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const timeOffset = item.status === 'ready' ? item.timeOffset : 0;
+  // Sync input with current timeOffset when dropdown opens
+  useEffect(() => {
+    if (isDropdownOpen) {
+      setTimeOffsetInput(String(timeOffset));
+    }
+  }, [isDropdownOpen, timeOffset]);
 
   function handleValueChange(value: string) {
     setIsOpen(value === item.filePath);
@@ -205,10 +211,17 @@ function ChannelFileAccordion({
 
   function handleTimeOffsetApply() {
     const value = parseFloat(timeOffsetInput);
-    if (!isNaN(value)) {
-      onTimeOffsetChange(item.filePath, value);
-      setIsDropdownOpen(false);
+    // Validate the input
+    if (isNaN(value) || !isFinite(value)) {
+      // Reset to current offset if invalid
+      setTimeOffsetInput(String(timeOffset));
+      return;
     }
+    // Only apply if value has changed
+    if (value !== timeOffset) {
+      onTimeOffsetChange(item.filePath, value);
+    }
+    setIsDropdownOpen(false);
   }
 
   function handleTimeOffsetKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -315,19 +328,28 @@ function ChannelFileAccordion({
                 }}
               >
                 <ClockIcon className="mr-2 size-4" />
-                <div className="flex items-center gap-2">
-                  <span>Time delay:</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm">Time delay:</span>
                   <Input
                     type="number"
                     value={timeOffsetInput}
                     onChange={handleTimeOffsetInputChange}
                     onKeyDown={handleTimeOffsetKeyDown}
-                    onBlur={handleTimeOffsetApply}
                     onClick={(e) => e.stopPropagation()}
-                    className="h-6 w-20 text-xs"
-                    placeholder="+0"
+                    className="h-6 w-16 text-xs"
+                    placeholder="0"
                   />
                   <span className="text-xs">s</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTimeOffsetApply();
+                    }}
+                    className="ml-1 rounded bg-primary px-2 py-1 text-xs text-primary-foreground hover:bg-primary/90"
+                    type="button"
+                  >
+                    Apply
+                  </button>
                 </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
