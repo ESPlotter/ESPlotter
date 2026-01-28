@@ -3,6 +3,10 @@ import { expect, type Locator, type Page } from '@playwright/test';
 export class SidebarTestObject {
   constructor(private readonly page: Page) {}
 
+  private escapeRegExp(value: string): string {
+    return value.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+  }
+
   async expandChannelFile(fileLabel: string): Promise<void> {
     const fileTrigger = this.getFileTrigger(fileLabel);
     await fileTrigger.waitFor({ state: 'visible' });
@@ -22,17 +26,36 @@ export class SidebarTestObject {
   }
 
   async closeChannelFile(fileLabel: string): Promise<void> {
-    const fileTrigger = this.getFileTrigger(fileLabel);
-    const closeButton = fileTrigger
-      .locator('xpath=ancestor::*[@data-slot="accordion-item"]')
-      .getByRole('button', { name: /close file/i })
-      .first();
+    await this.openFileOptionsMenu(fileLabel);
+    await this.page.getByTestId('channel-file-menu-close').click();
+  }
 
-    await closeButton.click();
+  async setChannelFileTimeOffset(fileLabel: string, offsetSeconds: number): Promise<void> {
+    await this.openFileOptionsMenu(fileLabel);
+    const menu = this.page.getByTestId('channel-file-menu');
+    const input = menu.getByTestId('channel-file-menu-time-offset-input');
+    await input.fill(String(offsetSeconds));
+    await input.press('Enter');
+  }
+
+  async openFileOptionsMenu(fileLabel: string): Promise<void> {
+    const fileTrigger = this.getFileTrigger(fileLabel);
+    const accordionItem = fileTrigger.locator('xpath=ancestor::*[@data-slot="accordion-item"]');
+    const optionsButton = accordionItem.getByTestId('channel-file-options-button').first();
+    await optionsButton.click();
+    await this.page.getByTestId('channel-file-menu').waitFor({ state: 'visible' });
   }
 
   async expectFileVisible(fileLabel: string): Promise<void> {
     await expect(this.getFileTrigger(fileLabel)).toBeVisible();
+  }
+
+  async expectFileTriggerContainsText(fileLabel: string, text: string | RegExp): Promise<void> {
+    await expect(this.getFileTrigger(fileLabel)).toContainText(text);
+  }
+
+  async expectFileTriggerNotContainsText(fileLabel: string, text: string | RegExp): Promise<void> {
+    await expect(this.getFileTrigger(fileLabel)).not.toContainText(text);
   }
 
   async waitForFileSpinner(fileLabel: string): Promise<void> {
@@ -130,7 +153,9 @@ export class SidebarTestObject {
   }
 
   private getFileTrigger(fileLabel: string): Locator {
-    return this.page.getByRole('button', { name: fileLabel });
+    // File accessible name may include extra badges like "+10 s".
+    const pattern = new RegExp(`^${this.escapeRegExp(fileLabel)}(\\b|\\s|$)`, 'i');
+    return this.page.getByRole('button', { name: pattern }).first();
   }
 
   private getFileSpinner(fileLabel: string): Locator {

@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 import { mapToChartSerie } from '@renderer/components/Chart/mapToChartSerie';
 
@@ -24,32 +24,15 @@ test.describe('Channel file time offset', () => {
   });
 
   test('should open context menu on file options button', async () => {
-    // Right-click on the file options button (three dots)
-    const fileOptionsButton = mainPageTest.page
-      .getByRole('button', { name: 'test3' })
-      .locator('xpath=ancestor::*[@data-slot="accordion-item"]')
-      .getByRole('button', { name: /options/i })
-      .first();
-
-    await fileOptionsButton.click();
-
-    // Check that context menu is visible with expected options
-    await mainPageTest.page.getByRole('menuitem', { name: /close file/i }).waitFor();
-    await mainPageTest.page.getByRole('menuitem', { name: /time delay/i }).waitFor();
+    await mainPageTest.sidebar.openFileOptionsMenu('test3');
+    await expect(mainPageTest.mainPage.getByTestId('channel-file-menu-close')).toBeVisible();
+    await expect(
+      mainPageTest.mainPage.getByTestId('channel-file-menu-time-offset-input'),
+    ).toBeVisible();
   });
 
   test('should close file from context menu', async () => {
-    // Open context menu
-    const fileOptionsButton = mainPageTest.page
-      .getByRole('button', { name: 'test3' })
-      .locator('xpath=ancestor::*[@data-slot="accordion-item"]')
-      .getByRole('button', { name: /options/i })
-      .first();
-
-    await fileOptionsButton.click();
-
-    // Click close file
-    await mainPageTest.page.getByRole('menuitem', { name: /close file/i }).click();
+    await mainPageTest.sidebar.closeChannelFile('test3');
 
     // File should be removed
     await mainPageTest.sidebar.expectFileNotVisible('test3');
@@ -65,38 +48,8 @@ test.describe('Channel file time offset', () => {
       throw new Error('Failed to map original series');
     }
 
-    // Open context menu and set time offset
-    const fileOptionsButton = mainPageTest.page
-      .getByRole('button', { name: 'test3' })
-      .locator('xpath=ancestor::*[@data-slot="accordion-item"]')
-      .getByRole('button', { name: /options/i })
-      .first();
-
-    await fileOptionsButton.click();
-
-    // Find and interact with the time delay input
-    const timeDelayInput = mainPageTest.page.getByRole('textbox', { name: /time delay/i });
-    await timeDelayInput.waitFor({ state: 'visible', timeout: 1000 }).catch(() => {
-      // Input might not have explicit label, try finding by placeholder or type
-    });
-
-    // If the above doesn't work, try finding the input in the menu item
-    const menuItem = mainPageTest.page
-      .locator('[role="menuitem"]')
-      .filter({ hasText: /time delay/i });
-    const input = menuItem.locator('input[type="number"]');
-    await input.fill('5');
-    await input.press('Enter');
-
-    // Wait a bit for the update to process
-    await mainPageTest.page.waitForTimeout(500);
-
-    // Verify chronometer icon is visible with +5 s
-    const chronometer = mainPageTest.page
-      .getByRole('button', { name: 'test3' })
-      .locator('xpath=ancestor::*[@data-slot="accordion-item"]')
-      .locator('svg')
-      .filter({ has: mainPageTest.page.locator('text="+5 s"') });
+    await mainPageTest.sidebar.setChannelFileTimeOffset('test3', 5);
+    await mainPageTest.sidebar.expectFileTriggerContainsText('test3', '+5 s');
 
     // Verify that the series data has been updated (time values shifted by +5)
     const expectedSerieWithOffset = mapToChartSerie(voltageChannel, timeValues, 5);
@@ -118,24 +71,8 @@ test.describe('Channel file time offset', () => {
     await mainPageTest.charts.createAndSelectChart();
     await mainPageTest.sidebar.toggleChannel('Voltage (V)');
 
-    // Open context menu and set negative time offset
-    const fileOptionsButton = mainPageTest.page
-      .getByRole('button', { name: 'test3' })
-      .locator('xpath=ancestor::*[@data-slot="accordion-item"]')
-      .getByRole('button', { name: /options/i })
-      .first();
-
-    await fileOptionsButton.click();
-
-    const menuItem = mainPageTest.page
-      .locator('[role="menuitem"]')
-      .filter({ hasText: /time delay/i });
-    const input = menuItem.locator('input[type="number"]');
-    await input.fill('-3');
-    await input.press('Enter');
-
-    // Wait a bit for the update to process
-    await mainPageTest.page.waitForTimeout(500);
+    await mainPageTest.sidebar.setChannelFileTimeOffset('test3', -3);
+    await mainPageTest.sidebar.expectFileTriggerContainsText('test3', '-3 s');
 
     // Verify that the series data has been updated (time values shifted by -3)
     const expectedSerieWithOffset = mapToChartSerie(voltageChannel, timeValues, -3);
@@ -155,30 +92,17 @@ test.describe('Channel file time offset', () => {
 
   test('should update all charts when time offset changes', async () => {
     // Create two charts with the same channel
-    await mainPageTest.charts.createAndSelectChart();
+    const chartA = await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.charts.renameChartTitle(chartA, 'Chart A');
     await mainPageTest.sidebar.toggleChannel('Voltage (V)');
 
-    await mainPageTest.charts.createAndSelectChart();
+    const chartB = await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.charts.renameChartTitle(chartB, 'Chart B');
     await mainPageTest.sidebar.toggleChannel('Voltage (V)');
 
     // Apply time offset
-    const fileOptionsButton = mainPageTest.page
-      .getByRole('button', { name: 'test3' })
-      .locator('xpath=ancestor::*[@data-slot="accordion-item"]')
-      .getByRole('button', { name: /options/i })
-      .first();
-
-    await fileOptionsButton.click();
-
-    const menuItem = mainPageTest.page
-      .locator('[role="menuitem"]')
-      .filter({ hasText: /time delay/i });
-    const input = menuItem.locator('input[type="number"]');
-    await input.fill('10');
-    await input.press('Enter');
-
-    // Wait a bit for the update to process
-    await mainPageTest.page.waitForTimeout(500);
+    await mainPageTest.sidebar.setChannelFileTimeOffset('test3', 10);
+    await mainPageTest.sidebar.expectFileTriggerContainsText('test3', '+10 s');
 
     // Verify both charts have updated data
     const expectedSerieWithOffset = mapToChartSerie(voltageChannel, timeValues, 10);
@@ -193,9 +117,9 @@ test.describe('Channel file time offset', () => {
       lastPoint: expectedSerieWithOffset.data.at(-1) ?? null,
     };
 
-    await mainPageTest.charts.expectSeriesSummary('Voltage', [expectedSummary]);
-    await mainPageTest.charts.selectChartByTitle('Chart 1');
-    await mainPageTest.charts.expectSeriesSummary('Voltage', [expectedSummary]);
+    await mainPageTest.charts.expectSeriesSummary('Chart B', [expectedSummary]);
+    await mainPageTest.charts.selectChartByTitle('Chart A');
+    await mainPageTest.charts.expectSeriesSummary('Chart A', [expectedSummary]);
   });
 
   test('should reset time offset to zero', async () => {
@@ -203,38 +127,12 @@ test.describe('Channel file time offset', () => {
     await mainPageTest.sidebar.toggleChannel('Voltage (V)');
 
     // Apply time offset first
-    let fileOptionsButton = mainPageTest.page
-      .getByRole('button', { name: 'test3' })
-      .locator('xpath=ancestor::*[@data-slot="accordion-item"]')
-      .getByRole('button', { name: /options/i })
-      .first();
-
-    await fileOptionsButton.click();
-
-    let menuItem = mainPageTest.page
-      .locator('[role="menuitem"]')
-      .filter({ hasText: /time delay/i });
-    let input = menuItem.locator('input[type="number"]');
-    await input.fill('5');
-    await input.press('Enter');
-
-    await mainPageTest.page.waitForTimeout(500);
+    await mainPageTest.sidebar.setChannelFileTimeOffset('test3', 5);
+    await mainPageTest.sidebar.expectFileTriggerContainsText('test3', '+5 s');
 
     // Reset to zero
-    fileOptionsButton = mainPageTest.page
-      .getByRole('button', { name: 'test3' })
-      .locator('xpath=ancestor::*[@data-slot="accordion-item"]')
-      .getByRole('button', { name: /options/i })
-      .first();
-
-    await fileOptionsButton.click();
-
-    menuItem = mainPageTest.page.locator('[role="menuitem"]').filter({ hasText: /time delay/i });
-    input = menuItem.locator('input[type="number"]');
-    await input.fill('0');
-    await input.press('Enter');
-
-    await mainPageTest.page.waitForTimeout(500);
+    await mainPageTest.sidebar.setChannelFileTimeOffset('test3', 0);
+    await mainPageTest.sidebar.expectFileTriggerNotContainsText('test3', /[+-]\d+(?:\.\d+)?\s*s/);
 
     // Verify that the series data is back to original (no offset)
     const originalSerie = mapToChartSerie(voltageChannel, timeValues, 0);

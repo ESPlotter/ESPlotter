@@ -414,6 +414,7 @@ function ChannelFileAccordion({
             title="Options"
             type="button"
             onClick={handleOptionsButtonClick}
+            data-testid="channel-file-options-button"
           >
             <svg
               className="size-4"
@@ -436,6 +437,8 @@ function ChannelFileAccordion({
                 <div
                   ref={menuRef}
                   role="menu"
+                  aria-label="Channel file menu"
+                  data-testid="channel-file-menu"
                   className="z-50 w-64 overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
                   style={{
                     position: 'fixed',
@@ -450,6 +453,7 @@ function ChannelFileAccordion({
                   <button
                     type="button"
                     role="menuitem"
+                    data-testid="channel-file-menu-close"
                     className="relative flex w-full select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                     onClick={() => {
                       onCloseFile(item.filePath);
@@ -461,7 +465,11 @@ function ChannelFileAccordion({
                   </button>
 
                   {item.status === 'ready' ? (
-                    <div className="relative mt-1 flex select-none items-center rounded-sm px-2 py-1.5 text-sm">
+                    <div
+                      role="menuitem"
+                      aria-label="Time delay"
+                      className="relative mt-1 flex select-none items-center rounded-sm px-2 py-1.5 text-sm"
+                    >
                       <ClockIcon className="mr-2 size-4" />
                       <div className="flex items-center gap-1">
                         <span className="text-sm">Time delay:</span>
@@ -469,6 +477,8 @@ function ChannelFileAccordion({
                           ref={inputRef}
                           type="number"
                           step="any"
+                          aria-label="Time delay"
+                          data-testid="channel-file-menu-time-offset-input"
                           value={timeOffsetInput}
                           onChange={handleTimeOffsetInputChange}
                           onKeyDown={handleTimeOffsetKeyDown}
@@ -482,6 +492,7 @@ function ChannelFileAccordion({
                           }}
                           className="ml-1 rounded bg-primary px-2 py-1 text-xs text-primary-foreground hover:bg-primary/90"
                           type="button"
+                          data-testid="channel-file-menu-time-offset-apply"
                         >
                           Apply
                         </button>
