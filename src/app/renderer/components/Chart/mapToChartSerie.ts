@@ -5,6 +5,7 @@ import { ChartSerie } from './ChartSerie';
 export function mapToChartSerie(
   channel: ChannelFileContentSeriePrimitive,
   xValues: number[],
+  timeOffset: number = 0,
 ): ChartSerie | null {
   const yValues = channel.values;
 
@@ -19,7 +20,7 @@ export function mapToChartSerie(
       return acc;
     }
 
-    acc.push([xValue, yValue]);
+    acc.push([xValue + timeOffset, yValue]);
     return acc;
   }, []);
 

@@ -14,6 +14,7 @@ export interface OpenedChannelFileLoading extends OpenedChannelFileBase {
 export interface OpenedChannelFileReady extends OpenedChannelFileBase {
   status: 'ready';
   file: ChannelFilePreviewPrimitive;
+  timeOffset: number;
 }
 
 export type OpenedChannelFile = OpenedChannelFileLoading | OpenedChannelFileReady;
@@ -26,6 +27,7 @@ interface ChannelFilesState {
     markFileOpenFailed: (path: string) => void;
     removeFile: (path: string) => void;
     clearFiles: () => void;
+    setFileTimeOffset: (path: string, timeOffset: number) => void;
   };
 }
 
@@ -41,7 +43,12 @@ const useChannelFilesStore = create<ChannelFilesState>()((set) => ({
     addFile: (file: ChannelFilePreviewPrimitive) =>
       set((state) => {
         const remaining = state.files.filter((entry) => entry.path !== file.path);
-        const entry: OpenedChannelFileReady = { path: file.path, status: 'ready', file };
+        const entry: OpenedChannelFileReady = {
+          path: file.path,
+          status: 'ready',
+          file,
+          timeOffset: 0,
+        };
         return { files: [entry, ...remaining] };
       }),
     markFileOpenFailed: (path: string) =>
@@ -53,6 +60,16 @@ const useChannelFilesStore = create<ChannelFilesState>()((set) => ({
         files: state.files.filter((f) => f.path !== path),
       })),
     clearFiles: () => set({ files: [] }),
+    setFileTimeOffset: (path: string, timeOffset: number) =>
+      set((state) => {
+        const files = state.files.map((file) => {
+          if (file.path === path && file.status === 'ready') {
+            return { ...file, timeOffset };
+          }
+          return file;
+        });
+        return { files };
+      }),
   },
 }));
 
