@@ -1,5 +1,6 @@
 import { ClockIcon, XIcon } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { type ChartSerie } from '@renderer/components/Chart/ChartSerie';
 import { useOpenedChannelFiles } from '@renderer/hooks/useOpenedChannelFiles';
@@ -15,12 +16,6 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@shadcn/components/ui/accordion';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@shadcn/components/ui/dropdown-menu';
 import { Input } from '@shadcn/components/ui/input';
 import {
   Sidebar,
@@ -192,16 +187,17 @@ function ChannelFileAccordion({
   const [isOpen, setIsOpen] = useState(false);
   const timeOffset = item.status === 'ready' ? item.timeOffset : 0;
   const [timeOffsetInput, setTimeOffsetInput] = useState(String(timeOffset));
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(
-    null,
-  );
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const accordionTriggerRef = useRef<HTMLButtonElement>(null);
+  const optionsButtonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync input with current timeOffset when dropdown opens
+  const isMenuOpen = menuPosition !== null;
+
+  // Sync input with current timeOffset when menu opens
   useEffect(() => {
-    if (isDropdownOpen) {
+    if (isMenuOpen) {
       setTimeOffsetInput(String(timeOffset));
       // Focus the input after a delay to ensure the menu is fully rendered
       const timer = setTimeout(() => {
@@ -213,7 +209,83 @@ function ChannelFileAccordion({
 
       return () => clearTimeout(timer);
     }
-  }, [isDropdownOpen, timeOffset]);
+  }, [isMenuOpen, timeOffset]);
+
+  // Close menu on outside click / escape / scroll / resize
+  useEffect(() => {
+    if (!isMenuOpen) {
+      return;
+    }
+
+    function closeMenu() {
+      setMenuPosition(null);
+    }
+
+    function onMouseDownCapture(event: MouseEvent) {
+      const target = event.target as Node | null;
+      if (!target) {
+        return;
+      }
+
+      if (menuRef.current?.contains(target)) {
+        return;
+      }
+
+      closeMenu();
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeMenu();
+      }
+    }
+
+    window.addEventListener('mousedown', onMouseDownCapture, true);
+    window.addEventListener('keydown', onKeyDown, true);
+    window.addEventListener('resize', closeMenu);
+    // Close on any scroll (including nested scroll containers)
+    window.addEventListener('scroll', closeMenu, true);
+
+    return () => {
+      window.removeEventListener('mousedown', onMouseDownCapture, true);
+      window.removeEventListener('keydown', onKeyDown, true);
+      window.removeEventListener('resize', closeMenu);
+      window.removeEventListener('scroll', closeMenu, true);
+    };
+  }, [isMenuOpen]);
+
+  // If the menu would go off-screen, nudge it back in.
+  useEffect(() => {
+    if (!menuPosition) {
+      return;
+    }
+
+    const raf = window.requestAnimationFrame(() => {
+      const rect = menuRef.current?.getBoundingClientRect();
+      if (!rect) {
+        return;
+      }
+
+      const margin = 4;
+      let nextX = menuPosition.x;
+      let nextY = menuPosition.y;
+
+      if (rect.right > window.innerWidth - margin) {
+        nextX = Math.max(margin, window.innerWidth - rect.width - margin);
+      }
+
+      if (rect.bottom > window.innerHeight - margin) {
+        nextY = Math.max(margin, window.innerHeight - rect.height - margin);
+      }
+
+      if (nextX !== menuPosition.x || nextY !== menuPosition.y) {
+        setMenuPosition({ x: nextX, y: nextY });
+      }
+    });
+
+    return () => window.cancelAnimationFrame(raf);
+  }, [menuPosition]);
 
   function handleValueChange(value: string) {
     setIsOpen(value === item.filePath);
@@ -235,7 +307,7 @@ function ChannelFileAccordion({
     if (value !== timeOffset) {
       onTimeOffsetChange(item.filePath, value);
     }
-    setIsDropdownOpen(false);
+    setMenuPosition(null);
   }
 
   function handleTimeOffsetKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -255,16 +327,26 @@ function ChannelFileAccordion({
       // Position menu with:
       // - X: cursor position (as requested)
       // - Y: below the accordion trigger (bottom of the element)
-      setContextMenuPosition({
+      setMenuPosition({
         x: e.clientX,
         y: triggerRect.bottom,
       });
     } else {
       // Fallback to cursor position
-      setContextMenuPosition({ x: e.clientX, y: e.clientY });
+      setMenuPosition({ x: e.clientX, y: e.clientY });
+    }
+  }
+
+  function handleOptionsButtonClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const rect = optionsButtonRef.current?.getBoundingClientRect();
+    if (!rect) {
+      return;
     }
 
-    setIsDropdownOpen(true);
+    setMenuPosition({ x: rect.left, y: rect.bottom });
   }
 
   function renderContent() {
@@ -325,104 +407,91 @@ function ChannelFileAccordion({
               ) : null}
             </span>
           </AccordionTrigger>
-          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="rounded p-1 hover:bg-muted"
-                aria-label="File options"
-                title="Options"
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDropdownOpen(true);
-                }}
-              >
-                <svg
-                  className="size-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                  />
-                </svg>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              side="bottom"
-              className="w-64"
-              {...(contextMenuPosition && {
-                style: {
-                  position: 'fixed',
-                  left: `${contextMenuPosition.x}px`,
-                  top: `${contextMenuPosition.y}px`,
-                  transform: 'none',
-                },
-              })}
-              onCloseAutoFocus={() => {
-                // Reset context menu position when closing
-                setContextMenuPosition(null);
-              }}
+          <button
+            ref={optionsButtonRef}
+            className="rounded p-1 hover:bg-muted"
+            aria-label="File options"
+            title="Options"
+            type="button"
+            onClick={handleOptionsButtonClick}
+          >
+            <svg
+              className="size-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCloseFile(item.filePath);
-                }}
-              >
-                <XIcon className="mr-2 size-4" />
-                <span>Close file</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                onFocus={(e) => {
-                  e.preventDefault();
-                  // Don't let the menu item take focus
-                }}
-                className="focus:bg-transparent"
-              >
-                <ClockIcon className="mr-2 size-4" />
-                <div className="flex items-center gap-1">
-                  <span className="text-sm">Time delay:</span>
-                  <Input
-                    ref={inputRef}
-                    type="number"
-                    step="any"
-                    value={timeOffsetInput}
-                    onChange={handleTimeOffsetInputChange}
-                    onKeyDown={handleTimeOffsetKeyDown}
-                    onClick={(e) => e.stopPropagation()}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onFocus={(e) => e.stopPropagation()}
-                    className="h-6 w-24 text-xs"
-                    placeholder="0"
-                  />
-                  <span className="text-xs">s</span>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+              />
+            </svg>
+          </button>
+
+          {isMenuOpen
+            ? createPortal(
+                <div
+                  ref={menuRef}
+                  role="menu"
+                  className="z-50 w-64 overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                  style={{
+                    position: 'fixed',
+                    left: `${menuPosition.x}px`,
+                    top: `${menuPosition.y}px`,
+                  }}
+                  onContextMenu={(e) => {
+                    // Prevent the native context menu inside our custom menu
+                    e.preventDefault();
+                  }}
+                >
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleTimeOffsetApply();
-                    }}
-                    className="ml-1 rounded bg-primary px-2 py-1 text-xs text-primary-foreground hover:bg-primary/90"
                     type="button"
+                    role="menuitem"
+                    className="relative flex w-full select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    onClick={() => {
+                      onCloseFile(item.filePath);
+                      setMenuPosition(null);
+                    }}
                   >
-                    Apply
+                    <XIcon className="mr-2 size-4" />
+                    <span>Close file</span>
                   </button>
-                </div>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+
+                  {item.status === 'ready' ? (
+                    <div className="relative mt-1 flex select-none items-center rounded-sm px-2 py-1.5 text-sm">
+                      <ClockIcon className="mr-2 size-4" />
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm">Time delay:</span>
+                        <Input
+                          ref={inputRef}
+                          type="number"
+                          step="any"
+                          value={timeOffsetInput}
+                          onChange={handleTimeOffsetInputChange}
+                          onKeyDown={handleTimeOffsetKeyDown}
+                          className="h-6 w-24 text-xs"
+                          placeholder="0"
+                        />
+                        <span className="text-xs">s</span>
+                        <button
+                          onClick={() => {
+                            handleTimeOffsetApply();
+                          }}
+                          className="ml-1 rounded bg-primary px-2 py-1 text-xs text-primary-foreground hover:bg-primary/90"
+                          type="button"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>,
+                document.body,
+              )
+            : null}
         </div>
         <AccordionContent>{renderContent()}</AccordionContent>
       </AccordionItem>
