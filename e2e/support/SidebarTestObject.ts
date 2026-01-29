@@ -27,13 +27,13 @@ export class SidebarTestObject {
 
   async closeChannelFile(fileLabel: string): Promise<void> {
     await this.openFileOptionsMenu(fileLabel);
-    await this.page.getByTestId('channel-file-menu-close').click();
+    await this.page.getByRole('menuitem', { name: 'Close file' }).click();
   }
 
   async setChannelFileTimeOffset(fileLabel: string, offsetSeconds: number): Promise<void> {
     await this.openFileOptionsMenu(fileLabel);
-    const menu = this.page.getByTestId('channel-file-menu');
-    const input = menu.getByTestId('channel-file-menu-time-offset-input');
+    const menu = this.page.getByRole('menu', { name: 'Channel file menu' });
+    const input = menu.getByRole('spinbutton', { name: 'Time delay' });
     await input.fill(String(offsetSeconds));
     await input.press('Enter');
   }
@@ -41,9 +41,9 @@ export class SidebarTestObject {
   async openFileOptionsMenu(fileLabel: string): Promise<void> {
     const fileTrigger = this.getFileTrigger(fileLabel);
     const accordionItem = fileTrigger.locator('xpath=ancestor::*[@data-slot="accordion-item"]');
-    const optionsButton = accordionItem.getByTestId('channel-file-options-button').first();
+    const optionsButton = accordionItem.getByRole('button', { name: 'File options' }).first();
     await optionsButton.click();
-    await this.page.getByTestId('channel-file-menu').waitFor({ state: 'visible' });
+    await this.page.getByRole('menu', { name: 'Channel file menu' }).waitFor({ state: 'visible' });
   }
 
   async expectFileVisible(fileLabel: string): Promise<void> {
