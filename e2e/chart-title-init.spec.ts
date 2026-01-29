@@ -27,7 +27,6 @@ test.describe('Chart title initialization', () => {
   test('renames chart to channel name when adding first channel', async () => {
     await mainPageTest.openChannelFileAndExpandInSidebar('test3.json');
 
-    // Chart 1 already exists, select it
     await mainPageTest.charts.selectChartByTitle('Chart 1');
     await mainPageTest.sidebar.toggleChannel('Voltage (V)');
 

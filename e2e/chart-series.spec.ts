@@ -86,7 +86,6 @@ test.describe('Chart channel selection', () => {
     const channelTitle = 'Voltage (V)';
     const channelChartTitle = 'Voltage';
 
-    // Use the existing Chart 1 instead of creating a new one
     await mainPageTest.charts.selectChartByTitle('Chart 1');
 
     await mainPageTest.sidebar.toggleChannel(channelTitle);
@@ -128,14 +127,13 @@ test.describe('Chart channel selection', () => {
   });
 
   test('creates new charts from the New Chart button', async () => {
-    // Chart 1 already exists
-    const firstChartTitle = await mainPageTest.charts.createChart(); // Chart 2
+    const firstChartTitle = await mainPageTest.charts.createChart();
     await mainPageTest.charts.expectTitleButtonText(firstChartTitle);
 
-    const secondChartTitle = await mainPageTest.charts.createChart(); // Chart 3
+    const secondChartTitle = await mainPageTest.charts.createChart();
 
     await mainPageTest.charts.expectTitleButtonText(secondChartTitle);
-    await mainPageTest.charts.expectChartCount(3); // Chart 1 + Chart 2 + Chart 3
+    await mainPageTest.charts.expectChartCount(3);
   });
 
   test('switches the selected chart when clicking different charts', async () => {

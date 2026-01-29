@@ -101,21 +101,20 @@ test.describe('Close channel files', () => {
     await mainPageTest.sidebar.expandChannelFile('test1');
     await mainPageTest.sidebar.expandChannelFile('test4');
 
-    // Chart 1 already exists, use it for first channel
     await mainPageTest.charts.selectChartByTitle('Chart 1');
     await mainPageTest.sidebar.toggleChannel('Voltage ()', 'test1');
     await mainPageTest.charts.expectTitleHeadingVisible('Voltage', 0);
 
-    await mainPageTest.charts.createChart(); // Chart 2
+    await mainPageTest.charts.createChart();
     await mainPageTest.sidebar.toggleChannel('Voltage ()', 'test1');
     await mainPageTest.sidebar.toggleChannel('Active Power ()', 'test4');
 
-    await mainPageTest.charts.createChart(); // Chart 3
+    await mainPageTest.charts.createChart();
     await mainPageTest.sidebar.toggleChannel('Reactive Power ()', 'test1');
 
     await mainPageTest.sidebar.closeChannelFile('test1');
 
-    await mainPageTest.charts.expectTitleHeadingVisible('Chart 1'); // Renamed back to Chart 1
+    await mainPageTest.charts.expectTitleHeadingVisible('Chart 1');
     await mainPageTest.charts.expectTitleHeadingVisible('Active Power');
     await mainPageTest.charts.expectTitleHeadingVisible('Chart 3');
 
