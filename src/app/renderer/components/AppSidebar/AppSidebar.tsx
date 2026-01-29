@@ -385,19 +385,19 @@ function ChannelFileAccordion({
   return (
     <Accordion type="single" collapsible onValueChange={handleValueChange}>
       <AccordionItem value={item.filePath}>
-        <div className="flex w-full items-center gap-2">
+        <div className="flex w-full min-w-0 items-center gap-2">
           <AccordionTrigger
             ref={accordionTriggerRef}
-            className="flex-1 text-sm font-medium"
+            className="min-w-0 flex-1 text-sm font-medium"
             onContextMenu={handleContextMenu}
           >
             <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
-              <span className="truncate">{item.fileName}</span>
+              <span className="min-w-0 flex-1 basis-0 truncate">{item.fileName}</span>
               {item.status === 'loading' ? (
-                <span className="size-3 animate-spin rounded-full border border-muted-foreground border-t-transparent" />
+                <span className="shrink-0 size-3 animate-spin rounded-full border border-muted-foreground border-t-transparent" />
               ) : null}
               {item.status === 'ready' && timeOffset !== 0 ? (
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <span className="shrink-0 flex items-center gap-1 text-xs text-muted-foreground">
                   <ClockIcon className="size-3" />
                   <span>
                     {timeOffset > 0 ? '+' : ''}
