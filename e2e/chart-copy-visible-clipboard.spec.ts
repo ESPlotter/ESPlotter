@@ -15,7 +15,6 @@ test.describe('Chart grid copy to clipboard', () => {
   });
 
   test('shows the copy button when two charts exist', async () => {
-    await mainPageTest.createChartsWithChannel('Voltage (V)', 1);
     await mainPageTest.charts.expectCopyVisibleChartsButtonHidden();
 
     await mainPageTest.createChartsWithChannel('Voltage (V)', 1);
@@ -23,7 +22,6 @@ test.describe('Chart grid copy to clipboard', () => {
   });
 
   test('does not copy visible charts shortcut when button is hidden', async () => {
-    await mainPageTest.createChartsWithChannel('Voltage (V)', 1);
     await mainPageTest.charts.expectCopyVisibleChartsButtonHidden();
 
     await mainPageTest.clipboard.clearImage();

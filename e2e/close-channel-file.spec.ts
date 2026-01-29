@@ -101,7 +101,7 @@ test.describe('Close channel files', () => {
     await mainPageTest.sidebar.expandChannelFile('test1');
     await mainPageTest.sidebar.expandChannelFile('test4');
 
-    await mainPageTest.charts.createChart();
+    await mainPageTest.charts.selectChartByTitle('Chart 1');
     await mainPageTest.sidebar.toggleChannel('Voltage ()', 'test1');
     await mainPageTest.charts.expectTitleHeadingVisible('Voltage', 0);
 

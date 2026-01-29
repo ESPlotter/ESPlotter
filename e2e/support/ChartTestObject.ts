@@ -17,6 +17,13 @@ interface AxisRange {
   end: number;
 }
 
+interface ChartRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 interface ZoomRanges {
   xAxis: AxisRange;
   yAxis: AxisRange;
@@ -76,11 +83,20 @@ interface DataZoomModel {
   getPercentRange?: () => [number, number] | undefined;
 }
 
+interface GridCoordinateSystem {
+  getRect?: () => ChartRect;
+}
+
+interface GridModel {
+  coordinateSystem?: GridCoordinateSystem;
+}
+
 interface GlobalModel {
   findComponents: (condition: {
     mainType: string;
     query?: Record<string, unknown>;
   }) => DataZoomModel[];
+  getComponent?: (mainType: string, index?: number) => GridModel | undefined;
 }
 
 interface EChartsInstanceWithModel {
@@ -542,10 +558,8 @@ export class ChartTestObject {
   async dragOnChartByPercent(chartTitle: string, drag: DragPercent): Promise<void> {
     const chartElement = this.getChartElement(chartTitle);
     await expect(chartElement).toBeVisible();
-    const box = await chartElement.boundingBox();
-    if (!box) {
-      throw new Error('Chart element not found');
-    }
+    await chartElement.scrollIntoViewIfNeeded();
+    const box = await this.waitForChartGridRect(chartTitle);
 
     const startX = box.x + box.width * drag.startX;
     const startY = box.y + box.height * drag.startY;
@@ -557,6 +571,94 @@ export class ChartTestObject {
     await this.page.mouse.down();
     await this.page.mouse.move(endX, endY, { steps });
     await this.page.mouse.up();
+  }
+
+  private async waitForChartGridRect(chartTitle: string): Promise<ChartRect> {
+    let gridRect: ChartRect | null = null;
+    await expect
+      .poll(
+        async () => {
+          gridRect = await this.getChartGridRect(chartTitle);
+          return gridRect !== null;
+        },
+        { timeout: 10000 },
+      )
+      .toBe(true);
+
+    if (!gridRect) {
+      throw new Error('Chart grid not available');
+    }
+
+    return gridRect;
+  }
+
+  private async getChartGridRect(chartTitle: string): Promise<ChartRect | null> {
+    const chartIndex = await this.getChartIndex(chartTitle);
+
+    return this.page.evaluate(
+      async ({ chartIndex: idx }) => {
+        const containers = Array.from(
+          document.querySelectorAll<HTMLDivElement>('.echarts-for-react'),
+        );
+        const target = containers[idx];
+        if (!target) {
+          return null;
+        }
+
+        const fiberKey = Object.getOwnPropertyNames(target).find((key: string) =>
+          key.startsWith('__reactFiber'),
+        );
+        const host = target as unknown as Record<string, unknown>;
+        const rootFiber = fiberKey ? (host[fiberKey] as FiberNode | null) : null;
+
+        let current: FiberNode | null = rootFiber;
+        let echartsComponent: ReactEChartsComponent | null = null;
+
+        while (current && !echartsComponent) {
+          const component = current.stateNode as ReactEChartsComponent | null | undefined;
+          if (component?.getEchartsInstance) {
+            const instance = component.getEchartsInstance();
+            if (instance) {
+              echartsComponent = component;
+              break;
+            }
+          }
+          current = current.return ?? null;
+        }
+
+        if (!echartsComponent) {
+          return null;
+        }
+
+        const instance = echartsComponent.getEchartsInstance();
+        if (!instance) {
+          return null;
+        }
+
+        const model = (instance as unknown as EChartsInstanceWithModel).getModel?.();
+        if (!model) {
+          return null;
+        }
+
+        const gridModel = model.getComponent?.('grid', 0) as GridModel | undefined;
+        const gridRect = gridModel?.coordinateSystem?.getRect?.();
+        if (!gridRect || gridRect.width <= 0 || gridRect.height <= 0) {
+          return null;
+        }
+
+        const bounds = target.getBoundingClientRect();
+        const offsetX = typeof window.scrollX === 'number' ? window.scrollX : 0;
+        const offsetY = typeof window.scrollY === 'number' ? window.scrollY : 0;
+
+        return {
+          x: bounds.left + offsetX + gridRect.x,
+          y: bounds.top + offsetY + gridRect.y,
+          width: gridRect.width,
+          height: gridRect.height,
+        };
+      },
+      { chartIndex },
+    );
   }
 
   async getZoomRanges(chartTitle: string): Promise<ZoomRanges> {
