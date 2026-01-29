@@ -25,6 +25,7 @@ test.describe('Close channel files', () => {
     await mainPageTest.charts.createChart();
     await mainPageTest.sidebar.toggleChannel('Voltage ()');
 
+    await mainPageTest.charts.expectTitleHeadingVisible('Voltage');
     await mainPageTest.charts.expectSeriesCount('Voltage', 1);
     await mainPageTest.sidebar.closeChannelFile('test1');
     await mainPageTest.charts.expectSeriesCount('Chart 1', 0);
