@@ -13,12 +13,9 @@ test.describe('Chart initialization', () => {
     await mainPageTest.close();
   });
 
-  test('should have at least one chart when application starts', async () => {
+  test('should show the default chart when application starts', async () => {
     await mainPageTest.charts.expectChartTitlesCount(1);
     await mainPageTest.charts.expectChartTitlesEqual(['Chart 1']);
-  });
-
-  test('should have chart element visible when application starts', async () => {
     await mainPageTest.charts.expectChartCount(1);
     await mainPageTest.charts.expectTitleHeadingVisible('Chart 1');
   });
