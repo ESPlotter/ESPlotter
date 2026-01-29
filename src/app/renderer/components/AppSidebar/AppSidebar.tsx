@@ -1,6 +1,5 @@
 import { ClockIcon, XIcon } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 
 import { type ChartSerie } from '@renderer/components/Chart/ChartSerie';
 import { useOpenedChannelFiles } from '@renderer/hooks/useOpenedChannelFiles';
@@ -16,6 +15,14 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@shadcn/components/ui/accordion';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@shadcn/components/ui/dropdown-menu';
 import { Input } from '@shadcn/components/ui/input';
 import {
   Sidebar,
@@ -187,17 +194,18 @@ function ChannelFileAccordion({
   const [isOpen, setIsOpen] = useState(false);
   const timeOffset = item.status === 'ready' ? item.timeOffset : 0;
   const [timeOffsetInput, setTimeOffsetInput] = useState(String(timeOffset));
-  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
-  const accordionTriggerRef = useRef<HTMLButtonElement>(null);
-  const optionsButtonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const isMenuOpen = menuPosition !== null;
+  const timeDelayInputId = `time-delay-${item.filePath.replace(/[^a-z0-9]/gi, '-')}`;
+  const isAnyMenuOpen = isOptionsMenuOpen || isContextMenuOpen;
 
   // Sync input with current timeOffset when menu opens
   useEffect(() => {
-    if (isMenuOpen) {
+    if (isAnyMenuOpen) {
       setTimeOffsetInput(String(timeOffset));
       // Focus the input after a delay to ensure the menu is fully rendered
       const timer = setTimeout(() => {
@@ -209,83 +217,7 @@ function ChannelFileAccordion({
 
       return () => clearTimeout(timer);
     }
-  }, [isMenuOpen, timeOffset]);
-
-  // Close menu on outside click / escape / scroll / resize
-  useEffect(() => {
-    if (!isMenuOpen) {
-      return;
-    }
-
-    function closeMenu() {
-      setMenuPosition(null);
-    }
-
-    function onMouseDownCapture(event: MouseEvent) {
-      const target = event.target as Node | null;
-      if (!target) {
-        return;
-      }
-
-      if (menuRef.current?.contains(target)) {
-        return;
-      }
-
-      closeMenu();
-    }
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        closeMenu();
-      }
-    }
-
-    window.addEventListener('mousedown', onMouseDownCapture, true);
-    window.addEventListener('keydown', onKeyDown, true);
-    window.addEventListener('resize', closeMenu);
-    // Close on any scroll (including nested scroll containers)
-    window.addEventListener('scroll', closeMenu, true);
-
-    return () => {
-      window.removeEventListener('mousedown', onMouseDownCapture, true);
-      window.removeEventListener('keydown', onKeyDown, true);
-      window.removeEventListener('resize', closeMenu);
-      window.removeEventListener('scroll', closeMenu, true);
-    };
-  }, [isMenuOpen]);
-
-  // If the menu would go off-screen, nudge it back in.
-  useEffect(() => {
-    if (!menuPosition) {
-      return;
-    }
-
-    const raf = window.requestAnimationFrame(() => {
-      const rect = menuRef.current?.getBoundingClientRect();
-      if (!rect) {
-        return;
-      }
-
-      const margin = 4;
-      let nextX = menuPosition.x;
-      let nextY = menuPosition.y;
-
-      if (rect.right > window.innerWidth - margin) {
-        nextX = Math.max(margin, window.innerWidth - rect.width - margin);
-      }
-
-      if (rect.bottom > window.innerHeight - margin) {
-        nextY = Math.max(margin, window.innerHeight - rect.height - margin);
-      }
-
-      if (nextX !== menuPosition.x || nextY !== menuPosition.y) {
-        setMenuPosition({ x: nextX, y: nextY });
-      }
-    });
-
-    return () => window.cancelAnimationFrame(raf);
-  }, [menuPosition]);
+  }, [isAnyMenuOpen, timeOffset]);
 
   function handleValueChange(value: string) {
     setIsOpen(value === item.filePath);
@@ -307,7 +239,9 @@ function ChannelFileAccordion({
     if (value !== timeOffset) {
       onTimeOffsetChange(item.filePath, value);
     }
-    setMenuPosition(null);
+    setIsOptionsMenuOpen(false);
+    setIsContextMenuOpen(false);
+    setContextMenuPosition(null);
   }
 
   function handleTimeOffsetKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -319,34 +253,9 @@ function ChannelFileAccordion({
   function handleContextMenu(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-
-    // Get the bounding rectangle of the accordion trigger
-    const triggerRect = accordionTriggerRef.current?.getBoundingClientRect();
-
-    if (triggerRect) {
-      // Position menu with:
-      // - X: cursor position (as requested)
-      // - Y: below the accordion trigger (bottom of the element)
-      setMenuPosition({
-        x: e.clientX,
-        y: triggerRect.bottom,
-      });
-    } else {
-      // Fallback to cursor position
-      setMenuPosition({ x: e.clientX, y: e.clientY });
-    }
-  }
-
-  function handleOptionsButtonClick(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const rect = optionsButtonRef.current?.getBoundingClientRect();
-    if (!rect) {
-      return;
-    }
-
-    setMenuPosition({ x: rect.left, y: rect.bottom });
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    setIsOptionsMenuOpen(false);
+    setIsContextMenuOpen(true);
   }
 
   function renderContent() {
@@ -387,7 +296,6 @@ function ChannelFileAccordion({
       <AccordionItem value={item.filePath}>
         <div className="flex w-full min-w-0 items-center gap-2">
           <AccordionTrigger
-            ref={accordionTriggerRef}
             className="min-w-0 flex-1 text-sm font-medium"
             onContextMenu={handleContextMenu}
           >
@@ -407,74 +315,160 @@ function ChannelFileAccordion({
               ) : null}
             </span>
           </AccordionTrigger>
-          <button
-            ref={optionsButtonRef}
-            className="rounded p-1 hover:bg-muted"
-            aria-label="File options"
-            title="Options"
-            type="button"
-            onClick={handleOptionsButtonClick}
-            data-testid="channel-file-options-button"
+          <DropdownMenu
+            open={isOptionsMenuOpen}
+            onOpenChange={(open) => {
+              setIsOptionsMenuOpen(open);
+              if (open) {
+                setIsContextMenuOpen(false);
+                setContextMenuPosition(null);
+              }
+            }}
           >
-            <svg
-              className="size-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+            <DropdownMenuTrigger asChild>
+              <button
+                className="rounded p-1 hover:bg-muted"
+                aria-label="File options"
+                title="Options"
+                type="button"
+                data-testid="channel-file-options-button"
+                onClick={() => {
+                  setIsOptionsMenuOpen(true);
+                  setIsContextMenuOpen(false);
+                  setContextMenuPosition(null);
+                }}
+              >
+                <svg
+                  className="size-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                  />
+                </svg>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-80"
+              sideOffset={6}
+              aria-label="Channel file menu"
+              aria-labelledby={undefined}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-              />
-            </svg>
-          </button>
-
-          {isMenuOpen
-            ? createPortal(
-                <div
-                  ref={menuRef}
-                  role="menu"
-                  aria-label="Channel file menu"
-                  data-testid="channel-file-menu"
-                  className="z-50 w-64 overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+              <DropdownMenuLabel className="text-xs uppercase tracking-wide text-muted-foreground">
+                File settings
+              </DropdownMenuLabel>
+              {item.status === 'ready' ? (
+                <DropdownMenuItem
+                  className="focus:bg-transparent"
+                  onSelect={(event) => event.preventDefault()}
+                >
+                  <div className="flex w-full items-center gap-2">
+                    <ClockIcon className="size-4 text-muted-foreground" />
+                    <div className="flex w-full items-center gap-2">
+                      <label className="text-xs text-muted-foreground" htmlFor={timeDelayInputId}>
+                        Time delay (s)
+                      </label>
+                      <Input
+                        ref={inputRef}
+                        id={timeDelayInputId}
+                        type="number"
+                        step="any"
+                        aria-label="Time delay"
+                        data-testid="channel-file-menu-time-offset-input"
+                        value={timeOffsetInput}
+                        onChange={handleTimeOffsetInputChange}
+                        onKeyDown={handleTimeOffsetKeyDown}
+                        className="h-7 w-24 text-xs"
+                        placeholder="0.0"
+                      />
+                      <button
+                        onClick={handleTimeOffsetApply}
+                        className="rounded border border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
+                        type="button"
+                      >
+                        Apply
+                      </button>
+                      <button
+                        onClick={() => {
+                          setTimeOffsetInput('0');
+                          onTimeOffsetChange(item.filePath, 0);
+                          setIsOptionsMenuOpen(false);
+                        }}
+                        className="rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+                        type="button"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  </div>
+                </DropdownMenuItem>
+              ) : null}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() => {
+                  onCloseFile(item.filePath);
+                }}
+              >
+                <XIcon className="mr-2 size-4" />
+                <span>Close file</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {contextMenuPosition ? (
+            <DropdownMenu
+              open={isContextMenuOpen}
+              onOpenChange={(open) => {
+                setIsContextMenuOpen(open);
+                if (!open) {
+                  setContextMenuPosition(null);
+                }
+              }}
+            >
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-hidden
+                  tabIndex={-1}
                   style={{
                     position: 'fixed',
-                    left: `${menuPosition.x}px`,
-                    top: `${menuPosition.y}px`,
+                    left: contextMenuPosition.x,
+                    top: contextMenuPosition.y,
+                    width: 1,
+                    height: 1,
+                    opacity: 0,
                   }}
-                  onContextMenu={(e) => {
-                    // Prevent the native context menu inside our custom menu
-                    e.preventDefault();
-                  }}
-                >
-                  <button
-                    type="button"
-                    role="menuitem"
-                    data-testid="channel-file-menu-close"
-                    className="relative flex w-full select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                    onClick={() => {
-                      onCloseFile(item.filePath);
-                      setMenuPosition(null);
-                    }}
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-80"
+                sideOffset={6}
+                aria-label="Channel file menu"
+                aria-labelledby={undefined}
+              >
+                <DropdownMenuLabel className="text-xs uppercase tracking-wide text-muted-foreground">
+                  File settings
+                </DropdownMenuLabel>
+                {item.status === 'ready' ? (
+                  <DropdownMenuItem
+                    className="focus:bg-transparent"
+                    onSelect={(event) => event.preventDefault()}
                   >
-                    <XIcon className="mr-2 size-4" />
-                    <span>Close file</span>
-                  </button>
-
-                  {item.status === 'ready' ? (
-                    <div
-                      role="menuitem"
-                      aria-label="Time delay"
-                      className="relative mt-1 flex select-none items-center rounded-sm px-2 py-1.5 text-sm"
-                    >
-                      <ClockIcon className="mr-2 size-4" />
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm">Time delay:</span>
+                    <div className="flex w-full items-center gap-2">
+                      <ClockIcon className="size-4 text-muted-foreground" />
+                      <div className="flex w-full items-center gap-2">
+                        <label className="text-xs text-muted-foreground" htmlFor={timeDelayInputId}>
+                          Time delay (s)
+                        </label>
                         <Input
                           ref={inputRef}
+                          id={timeDelayInputId}
                           type="number"
                           step="any"
                           aria-label="Time delay"
@@ -482,27 +476,45 @@ function ChannelFileAccordion({
                           value={timeOffsetInput}
                           onChange={handleTimeOffsetInputChange}
                           onKeyDown={handleTimeOffsetKeyDown}
-                          className="h-6 w-24 text-xs"
-                          placeholder="0"
+                          className="h-7 w-24 text-xs"
+                          placeholder="0.0"
                         />
-                        <span className="text-xs">s</span>
                         <button
-                          onClick={() => {
-                            handleTimeOffsetApply();
-                          }}
-                          className="ml-1 rounded bg-primary px-2 py-1 text-xs text-primary-foreground hover:bg-primary/90"
+                          onClick={handleTimeOffsetApply}
+                          className="rounded border border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
                           type="button"
-                          data-testid="channel-file-menu-time-offset-apply"
                         >
                           Apply
                         </button>
+                        <button
+                          onClick={() => {
+                            setTimeOffsetInput('0');
+                            onTimeOffsetChange(item.filePath, 0);
+                            setIsContextMenuOpen(false);
+                            setContextMenuPosition(null);
+                          }}
+                          className="rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+                          type="button"
+                        >
+                          Reset
+                        </button>
                       </div>
                     </div>
-                  ) : null}
-                </div>,
-                document.body,
-              )
-            : null}
+                  </DropdownMenuItem>
+                ) : null}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onSelect={() => {
+                    onCloseFile(item.filePath);
+                  }}
+                >
+                  <XIcon className="mr-2 size-4" />
+                  <span>Close file</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
         </div>
         <AccordionContent>{renderContent()}</AccordionContent>
       </AccordionItem>

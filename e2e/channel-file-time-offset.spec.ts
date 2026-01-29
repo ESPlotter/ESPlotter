@@ -25,9 +25,9 @@ test.describe('Channel file time offset', () => {
 
   test('should open context menu on file options button', async () => {
     await mainPageTest.sidebar.openFileOptionsMenu('test3');
-    await expect(mainPageTest.mainPage.getByTestId('channel-file-menu-close')).toBeVisible();
+    await expect(mainPageTest.mainPage.getByRole('menuitem', { name: 'Close file' })).toBeVisible();
     await expect(
-      mainPageTest.mainPage.getByTestId('channel-file-menu-time-offset-input'),
+      mainPageTest.mainPage.getByRole('spinbutton', { name: 'Time delay' }),
     ).toBeVisible();
   });
 
