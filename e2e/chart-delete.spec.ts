@@ -68,4 +68,37 @@ test.describe('Chart deletion', () => {
     await mainPageTest.sidebar.toggleChannel(channelTitle);
     await mainPageTest.charts.expectShowDeletedButton('Voltage');
   });
+
+  test('keeps an empty chart after deleting the only chart with data', async () => {
+    await mainPageTest.openChannelFileAndExpandInSidebar('test3.json');
+
+    await mainPageTest.charts.selectChartByTitle('Chart 1');
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
+    await mainPageTest.charts.expectSeriesCount('Voltage', 1);
+
+    await mainPageTest.charts.deleteChart('Voltage');
+
+    await mainPageTest.charts.expectChartTitlesCount(1);
+    await mainPageTest.charts.expectChartTitlesEqual(['Chart 1']);
+    await mainPageTest.charts.expectSeriesCount('Chart 1', 0);
+  });
+
+  test('keeps one empty chart after deleting all charts with data', async () => {
+    await mainPageTest.openChannelFileAndExpandInSidebar('test3.json');
+
+    await mainPageTest.charts.selectChartByTitle('Chart 1');
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
+
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel('Frequency (Hz)');
+
+    await mainPageTest.charts.createAndSelectChart();
+    await mainPageTest.sidebar.toggleChannel('Voltage (V)');
+
+    await mainPageTest.charts.deleteAllCharts();
+
+    await mainPageTest.charts.expectChartTitlesCount(1);
+    await mainPageTest.charts.expectChartTitlesEqual(['Chart 1']);
+    await mainPageTest.charts.expectSeriesCount('Chart 1', 0);
+  });
 });
