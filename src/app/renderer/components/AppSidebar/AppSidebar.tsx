@@ -1,4 +1,4 @@
-import { ClockIcon, XIcon } from 'lucide-react';
+import { ClockIcon, PlusIcon, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { type ChartSerie } from '@renderer/components/Chart/ChartSerie';
@@ -8,7 +8,11 @@ import {
   useCharts,
   useChannelChartsActions,
 } from '@renderer/store/ChannelChartsStore';
-import { type OpenedChannelFile, useChannelFilesActions } from '@renderer/store/ChannelFilesStore';
+import {
+  type OpenedChannelFile,
+  type OpenedChannelFileReady,
+  useChannelFilesActions,
+} from '@renderer/store/ChannelFilesStore';
 import {
   Accordion,
   AccordionItem,
@@ -56,6 +60,8 @@ interface ChannelMenuItemReady extends ChannelMenuItemBase {
   status: 'ready';
   channels: ChannelFileContentSerieDescriptorPrimitive[];
   timeOffset: number;
+  channelGains: Record<string, number>;
+  channelOffsets: Record<string, number>;
 }
 
 type ChannelMenuItem = ChannelMenuItemLoading | ChannelMenuItemReady;
@@ -69,6 +75,8 @@ interface ChannelFileAccordionProps {
   ) => void;
   onCloseFile: (filePath: string) => void;
   onTimeOffsetChange: (filePath: string, timeOffset: number) => void;
+  onChannelGainChange: (filePath: string, channelId: string, gain: number) => void;
+  onChannelOffsetChange: (filePath: string, channelId: string, offset: number) => void;
 }
 
 export function AppSidebar() {
@@ -77,7 +85,8 @@ export function AppSidebar() {
   const charts = useCharts();
   const { addChannelToChart, removeChannelFromChart, removeChannelsFromAllCharts } =
     useChannelChartsActions();
-  const { removeFile, setFileTimeOffset } = useChannelFilesActions();
+  const { removeFile, setFileTimeOffset, setChannelGain, setChannelOffset } =
+    useChannelFilesActions();
 
   const allItems = useMemo(() => {
     return openedChannelFiles.map(mapToMenuItems);
@@ -108,6 +117,8 @@ export function AppSidebar() {
         seriesPayload.channel,
         seriesPayload.x.values,
         menuItem.timeOffset,
+        menuItem.channelGains[channel.id] ?? 1,
+        menuItem.channelOffsets[channel.id] ?? 0,
       );
 
       if (!serie) {
@@ -127,6 +138,7 @@ export function AppSidebar() {
   }
 
   async function handleTimeOffsetChange(filePath: string, newTimeOffset: number) {
+    const readyFile = getReadyFile(openedChannelFiles, filePath);
     // Update the store
     setFileTimeOffset(filePath, newTimeOffset);
 
@@ -141,12 +153,16 @@ export function AppSidebar() {
 
       for (const channelKey of channelsToUpdate) {
         const channelId = channelKey.replace(prefix, '');
+        const gain = readyFile?.channelGains[channelId] ?? 1;
+        const offset = readyFile?.channelOffsets[channelId] ?? 0;
         try {
           const seriesPayload = await window.files.getChannelFileSeries(filePath, channelId);
           const serie = mapToChartSerie(
             seriesPayload.channel,
             seriesPayload.x.values,
             newTimeOffset,
+            gain,
+            offset,
           );
 
           if (serie) {
@@ -155,6 +171,74 @@ export function AppSidebar() {
         } catch {
           // Ignore errors when re-adding channels
         }
+      }
+    }
+  }
+
+  async function handleChannelGainChange(filePath: string, channelId: string, newGain: number) {
+    setChannelGain(filePath, channelId, newGain);
+
+    const fileEntry = getReadyFile(openedChannelFiles, filePath);
+    const timeOffset = fileEntry?.timeOffset ?? 0;
+    const offset = fileEntry?.channelOffsets[channelId] ?? 0;
+    const channelKey = buildChannelKey(filePath, channelId);
+
+    for (const [chartId, chart] of Object.entries(charts)) {
+      if (!chart.channels[channelKey]) {
+        continue;
+      }
+
+      try {
+        const seriesPayload = await window.files.getChannelFileSeries(filePath, channelId);
+        const serie = mapToChartSerie(
+          seriesPayload.channel,
+          seriesPayload.x.values,
+          timeOffset,
+          newGain,
+          offset,
+        );
+
+        if (serie) {
+          addChannelToChart(chartId, channelKey, serie);
+        }
+      } catch {
+        // Ignore errors when re-adding channels
+      }
+    }
+  }
+
+  async function handleChannelOffsetChange(
+    filePath: string,
+    channelId: string,
+    newOffset: number,
+  ) {
+    setChannelOffset(filePath, channelId, newOffset);
+
+    const fileEntry = getReadyFile(openedChannelFiles, filePath);
+    const timeOffset = fileEntry?.timeOffset ?? 0;
+    const gain = fileEntry?.channelGains[channelId] ?? 1;
+    const channelKey = buildChannelKey(filePath, channelId);
+
+    for (const [chartId, chart] of Object.entries(charts)) {
+      if (!chart.channels[channelKey]) {
+        continue;
+      }
+
+      try {
+        const seriesPayload = await window.files.getChannelFileSeries(filePath, channelId);
+        const serie = mapToChartSerie(
+          seriesPayload.channel,
+          seriesPayload.x.values,
+          timeOffset,
+          gain,
+          newOffset,
+        );
+
+        if (serie) {
+          addChannelToChart(chartId, channelKey, serie);
+        }
+      } catch {
+        // Ignore errors when re-adding channels
       }
     }
   }
@@ -174,6 +258,8 @@ export function AppSidebar() {
                   onChannelClick={handleChannelClick}
                   onCloseFile={handleCloseFile}
                   onTimeOffsetChange={handleTimeOffsetChange}
+                  onChannelGainChange={handleChannelGainChange}
+                  onChannelOffsetChange={handleChannelOffsetChange}
                 />
               ))}
             </SidebarMenu>
@@ -190,34 +276,79 @@ function ChannelFileAccordion({
   onChannelClick,
   onCloseFile,
   onTimeOffsetChange,
+  onChannelGainChange,
+  onChannelOffsetChange,
 }: ChannelFileAccordionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const timeOffset = item.status === 'ready' ? item.timeOffset : 0;
   const [timeOffsetInput, setTimeOffsetInput] = useState(String(timeOffset));
   const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const [isChannelMenuOpen, setIsChannelMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(
     null,
   );
+  const [channelMenuPosition, setChannelMenuPosition] = useState<{ x: number; y: number } | null>(
+    null,
+  );
+  const [channelMenuChannel, setChannelMenuChannel] =
+    useState<ChannelFileContentSerieDescriptorPrimitive | null>(null);
+  const [channelGainInput, setChannelGainInput] = useState('1');
   const inputRef = useRef<HTMLInputElement>(null);
+  const channelGainInputRef = useRef<HTMLInputElement>(null);
+  const [channelOffsetInput, setChannelOffsetInput] = useState('0');
+  const channelOffsetInputRef = useRef<HTMLInputElement>(null);
+  const hasInitializedChannelMenuFocus = useRef(false);
+  const hasInitializedTimeMenuFocus = useRef(false);
   const timeDelayInputId = `time-delay-${item.filePath.replace(/[^a-z0-9]/gi, '-')}`;
+  const channelGainInputId = `channel-gain-${item.filePath.replace(/[^a-z0-9]/gi, '-')}-${
+    channelMenuChannel?.id ?? 'unknown'
+  }`;
   const isAnyMenuOpen = isOptionsMenuOpen || isContextMenuOpen;
 
   // Sync input with current timeOffset when menu opens
   useEffect(() => {
     if (isAnyMenuOpen) {
       setTimeOffsetInput(String(timeOffset));
-      // Focus the input after a delay to ensure the menu is fully rendered
-      const timer = setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-          inputRef.current.select();
-        }
-      }, 200);
+      if (!hasInitializedTimeMenuFocus.current) {
+        hasInitializedTimeMenuFocus.current = true;
+        // Focus the input after a delay to ensure the menu is fully rendered
+        const timer = setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+          }
+        }, 200);
 
-      return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
+      }
+    } else {
+      hasInitializedTimeMenuFocus.current = false;
     }
   }, [isAnyMenuOpen, timeOffset]);
+
+  useEffect(() => {
+    if (isChannelMenuOpen && item.status === 'ready' && channelMenuChannel) {
+      const currentGain = item.channelGains[channelMenuChannel.id] ?? 1;
+      setChannelGainInput(String(currentGain));
+      const currentOffset = item.channelOffsets[channelMenuChannel.id] ?? 0;
+      setChannelOffsetInput(String(currentOffset));
+
+      if (!hasInitializedChannelMenuFocus.current) {
+        hasInitializedChannelMenuFocus.current = true;
+        const timer = setTimeout(() => {
+          if (channelGainInputRef.current) {
+            channelGainInputRef.current.focus();
+            channelGainInputRef.current.select();
+          }
+        }, 200);
+
+        return () => clearTimeout(timer);
+      }
+    } else if (!isChannelMenuOpen) {
+      hasInitializedChannelMenuFocus.current = false;
+    }
+  }, [channelMenuChannel, isChannelMenuOpen, item]);
 
   function handleValueChange(value: string) {
     setIsOpen(value === item.filePath);
@@ -256,6 +387,110 @@ function ChannelFileAccordion({
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
     setIsOptionsMenuOpen(false);
     setIsContextMenuOpen(true);
+    setIsChannelMenuOpen(false);
+    setChannelMenuPosition(null);
+    setChannelMenuChannel(null);
+  }
+
+  function handleChannelContextMenu(
+    e: React.MouseEvent,
+    channel: ChannelFileContentSerieDescriptorPrimitive,
+  ) {
+    e.preventDefault();
+    e.stopPropagation();
+    setChannelMenuPosition({ x: e.clientX, y: e.clientY });
+    setChannelMenuChannel(channel);
+    setIsChannelMenuOpen(true);
+    setIsOptionsMenuOpen(false);
+    setIsContextMenuOpen(false);
+    setContextMenuPosition(null);
+  }
+
+  function handleChannelGainInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setChannelGainInput(e.target.value);
+  }
+
+  function handleChannelGainApply() {
+    if (item.status !== 'ready' || !channelMenuChannel) {
+      return;
+    }
+
+    const value = parseFloat(channelGainInput);
+    const currentGain = item.channelGains[channelMenuChannel.id] ?? 1;
+
+    if (isNaN(value) || !isFinite(value)) {
+      setChannelGainInput(String(currentGain));
+      return;
+    }
+
+    if (value !== currentGain) {
+      onChannelGainChange(item.filePath, channelMenuChannel.id, value);
+    }
+
+    if (channelGainInputRef.current) {
+      channelGainInputRef.current.focus();
+      channelGainInputRef.current.select();
+    }
+  }
+
+  function handleChannelGainKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      handleChannelGainApply();
+    }
+    if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault();
+      handleChannelGainApply();
+      if (channelOffsetInputRef.current) {
+        channelOffsetInputRef.current.focus();
+      }
+    }
+  }
+
+  function handleChannelOffsetInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setChannelOffsetInput(e.target.value);
+  }
+
+  function handleChannelOffsetApply() {
+    if (item.status !== 'ready' || !channelMenuChannel) {
+      return;
+    }
+
+    const value = parseFloat(channelOffsetInput);
+    const currentOffset = item.channelOffsets[channelMenuChannel.id] ?? 0;
+
+    if (isNaN(value) || !isFinite(value)) {
+      setChannelOffsetInput(String(currentOffset));
+      return;
+    }
+
+    if (value !== currentOffset) {
+      onChannelOffsetChange(item.filePath, channelMenuChannel.id, value);
+    }
+
+    if (channelOffsetInputRef.current) {
+      channelOffsetInputRef.current.focus();
+      channelOffsetInputRef.current.select();
+    }
+  }
+
+  function handleChannelOffsetKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      handleChannelOffsetApply();
+    }
+    if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault();
+      handleChannelOffsetApply();
+      setIsChannelMenuOpen(false);
+      setChannelMenuPosition(null);
+      setChannelMenuChannel(null);
+    }
+    if (e.key === 'Tab' && e.shiftKey) {
+      e.preventDefault();
+      handleChannelOffsetApply();
+      if (channelGainInputRef.current) {
+        channelGainInputRef.current.focus();
+      }
+    }
   }
 
   function renderContent() {
@@ -274,6 +509,8 @@ function ChannelFileAccordion({
     return item.channels.map((channel) => {
       const channelKey = buildChannelKey(item.filePath, channel.id);
       const isChannelSelected = Boolean(selectedChannels[channelKey]);
+      const gain = item.channelGains[channel.id] ?? 1;
+      const offset = item.channelOffsets[channel.id] ?? 0;
 
       return (
         <SidebarMenuItem key={channelKey}>
@@ -281,9 +518,31 @@ function ChannelFileAccordion({
             isActive={isChannelSelected}
             className="data-[active=true]:bg-neutral-600 data-[active=true]:text-white data-[active=true]:hover:bg-neutral-800 data-[active=true]:hover:text-white data-[active=false]:hover:bg-neutral-200 my-1"
             onClick={() => void onChannelClick(item, channel)}
+            onContextMenu={(event) => handleChannelContextMenu(event, channel)}
           >
-            <span>
-              {channel.label} ({channel.unit})
+            <span className="flex items-center gap-2">
+              <span>
+                {channel.label} ({channel.unit})
+              </span>
+              {gain !== 1 ? (
+                <span
+                  className={`text-xs ${
+                    isChannelSelected ? 'text-white/90' : 'text-muted-foreground'
+                  }`}
+                >
+                  x{gain}
+                </span>
+              ) : null}
+              {offset !== 0 ? (
+                <span
+                  className={`text-xs ${
+                    isChannelSelected ? 'text-white/90' : 'text-muted-foreground'
+                  }`}
+                >
+                  {offset > 0 ? '+' : ''}
+                  {offset}
+                </span>
+              ) : null}
             </span>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -367,6 +626,8 @@ function ChannelFileAccordion({
                 <DropdownMenuItem
                   className="focus:bg-transparent"
                   onSelect={(event) => event.preventDefault()}
+                  onPointerMove={(event) => event.preventDefault()}
+                  onPointerLeave={(event) => event.preventDefault()}
                 >
                   <div className="flex w-full items-center gap-2">
                     <ClockIcon className="size-4 text-muted-foreground" />
@@ -388,7 +649,13 @@ function ChannelFileAccordion({
                         placeholder="0.0"
                       />
                       <button
-                        onClick={handleTimeOffsetApply}
+                        onClick={() => {
+                          handleTimeOffsetApply();
+                          if (inputRef.current) {
+                            inputRef.current.focus();
+                            inputRef.current.select();
+                          }
+                        }}
                         className="rounded border border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
                         type="button"
                       >
@@ -398,7 +665,10 @@ function ChannelFileAccordion({
                         onClick={() => {
                           setTimeOffsetInput('0');
                           onTimeOffsetChange(item.filePath, 0);
-                          setIsOptionsMenuOpen(false);
+                          if (inputRef.current) {
+                            inputRef.current.focus();
+                            inputRef.current.select();
+                          }
                         }}
                         className="rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
                         type="button"
@@ -416,7 +686,7 @@ function ChannelFileAccordion({
                   onCloseFile(item.filePath);
                 }}
               >
-                <XIcon className="mr-2 size-4" />
+                <X className="mr-2 size-4" />
                 <span>Close file</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -451,6 +721,8 @@ function ChannelFileAccordion({
                 sideOffset={6}
                 aria-label="Channel file menu"
                 aria-labelledby={undefined}
+                onPointerMove={(event) => event.preventDefault()}
+                onPointerLeave={(event) => event.preventDefault()}
               >
                 <DropdownMenuLabel className="text-xs uppercase tracking-wide text-muted-foreground">
                   File settings
@@ -459,6 +731,8 @@ function ChannelFileAccordion({
                   <DropdownMenuItem
                     className="focus:bg-transparent"
                     onSelect={(event) => event.preventDefault()}
+                    onPointerMove={(event) => event.preventDefault()}
+                    onPointerLeave={(event) => event.preventDefault()}
                   >
                     <div className="flex w-full items-center gap-2">
                       <ClockIcon className="size-4 text-muted-foreground" />
@@ -480,7 +754,13 @@ function ChannelFileAccordion({
                           placeholder="0.0"
                         />
                         <button
-                          onClick={handleTimeOffsetApply}
+                          onClick={() => {
+                            handleTimeOffsetApply();
+                            if (inputRef.current) {
+                              inputRef.current.focus();
+                              inputRef.current.select();
+                            }
+                          }}
                           className="rounded border border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
                           type="button"
                         >
@@ -490,8 +770,10 @@ function ChannelFileAccordion({
                           onClick={() => {
                             setTimeOffsetInput('0');
                             onTimeOffsetChange(item.filePath, 0);
-                            setIsContextMenuOpen(false);
-                            setContextMenuPosition(null);
+                            if (inputRef.current) {
+                              inputRef.current.focus();
+                              inputRef.current.select();
+                            }
                           }}
                           className="rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
                           type="button"
@@ -508,10 +790,152 @@ function ChannelFileAccordion({
                   onSelect={() => {
                     onCloseFile(item.filePath);
                   }}
+                  onPointerMove={(event) => event.preventDefault()}
+                  onPointerLeave={(event) => event.preventDefault()}
                 >
-                  <XIcon className="mr-2 size-4" />
+                  <X className="mr-2 size-4" />
                   <span>Close file</span>
                 </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
+          {channelMenuPosition ? (
+            <DropdownMenu
+              open={isChannelMenuOpen}
+              onOpenChange={(open) => {
+                setIsChannelMenuOpen(open);
+                if (!open) {
+                  setChannelMenuPosition(null);
+                  setChannelMenuChannel(null);
+                }
+              }}
+            >
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-hidden
+                  tabIndex={-1}
+                  style={{
+                    position: 'fixed',
+                    left: channelMenuPosition.x,
+                    top: channelMenuPosition.y,
+                    width: 1,
+                    height: 1,
+                    opacity: 0,
+                  }}
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-80"
+                sideOffset={6}
+                aria-label="Channel menu"
+                aria-labelledby={undefined}
+                onPointerMove={(event) => event.preventDefault()}
+                onPointerLeave={(event) => event.preventDefault()}
+              >
+                <DropdownMenuLabel className="text-xs uppercase tracking-wide text-muted-foreground">
+                  {channelMenuChannel
+                    ? `Channel settings: ${channelMenuChannel.label} (${channelMenuChannel.unit})`
+                    : 'Channel settings'}
+                </DropdownMenuLabel>
+                {item.status === 'ready' && channelMenuChannel ? (
+                  <>
+                    <DropdownMenuItem
+                      className="focus:bg-transparent"
+                      onSelect={(event) => event.preventDefault()}
+                      onPointerMove={(event) => event.preventDefault()}
+                      onPointerLeave={(event) => event.preventDefault()}
+                    >
+                      <div className="flex w-full items-center gap-2">
+                        <X className="size-4 flex-shrink-0 text-muted-foreground" />
+                        <label className="w-12 text-xs text-muted-foreground" htmlFor={channelGainInputId}>
+                          Gain
+                        </label>
+                        <Input
+                          ref={channelGainInputRef}
+                          id={channelGainInputId}
+                          type="number"
+                          step="any"
+                          aria-label="Gain"
+                          data-testid="channel-menu-gain-input"
+                          value={channelGainInput}
+                          onChange={handleChannelGainInputChange}
+                          onKeyDown={handleChannelGainKeyDown}
+                          className="h-7 w-24 text-xs"
+                          placeholder="1.0"
+                        />
+                        <button
+                          onClick={handleChannelGainApply}
+                          className="rounded border border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
+                          type="button"
+                        >
+                          Apply
+                        </button>
+                        <button
+                          onClick={() => {
+                            setChannelGainInput('1');
+                            onChannelGainChange(item.filePath, channelMenuChannel.id, 1);                              if (channelGainInputRef.current) {
+                                channelGainInputRef.current.focus();
+                                channelGainInputRef.current.select();
+                              }                          }}
+                          className="rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+                          type="button"
+                        >
+                          Reset
+                        </button>
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="focus:bg-transparent"
+                      onSelect={(event) => event.preventDefault()}
+                      onPointerMove={(event) => event.preventDefault()}
+                      onPointerLeave={(event) => event.preventDefault()}
+                    >
+                      <div className="flex w-full items-center gap-2">
+                        <PlusIcon className="size-4 flex-shrink-0 text-muted-foreground" />
+                        <label
+                          className="w-12 text-xs text-muted-foreground"
+                          htmlFor={`channel-offset-${item.filePath.replace(/[^a-z0-9]/gi, '-')}-${channelMenuChannel.id}`}
+                        >
+                          Offset
+                        </label>
+                        <Input
+                          ref={channelOffsetInputRef}
+                          id={`channel-offset-${item.filePath.replace(/[^a-z0-9]/gi, '-')}-${channelMenuChannel.id}`}
+                          type="number"
+                          step="any"
+                          aria-label="Offset"
+                          data-testid="channel-menu-offset-input"
+                          value={channelOffsetInput}
+                          onChange={handleChannelOffsetInputChange}
+                          onKeyDown={handleChannelOffsetKeyDown}
+                          className="h-7 w-24 text-xs"
+                          placeholder="0.0"
+                        />
+                        <button
+                          onClick={handleChannelOffsetApply}
+                          className="rounded border border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
+                          type="button"
+                        >
+                          Apply
+                        </button>
+                        <button
+                          onClick={() => {
+                            setChannelOffsetInput('0');
+                            onChannelOffsetChange(item.filePath, channelMenuChannel.id, 0);                              if (channelOffsetInputRef.current) {
+                                channelOffsetInputRef.current.focus();
+                                channelOffsetInputRef.current.select();
+                              }                          }}
+                          className="rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+                          type="button"
+                        >
+                          Reset
+                        </button>
+                      </div>
+                    </DropdownMenuItem>
+                  </>
+                ) : null}
               </DropdownMenuContent>
             </DropdownMenu>
           ) : null}
@@ -537,7 +961,21 @@ function mapToMenuItems(data: OpenedChannelFile): ChannelMenuItem {
     status: 'ready',
     channels: data.file.content.series,
     timeOffset: data.timeOffset,
+    channelGains: data.channelGains,
+    channelOffsets: data.channelOffsets,
   };
+}
+
+function getReadyFile(
+  files: OpenedChannelFile[],
+  filePath: string,
+): OpenedChannelFileReady | null {
+  const match = files.find((file) => file.path === filePath);
+  if (!match || match.status !== 'ready') {
+    return null;
+  }
+
+  return match;
 }
 
 function getFileName(filePath: string): string {
