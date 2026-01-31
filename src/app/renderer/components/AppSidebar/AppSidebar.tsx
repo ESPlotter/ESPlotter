@@ -299,6 +299,7 @@ function ChannelFileAccordion({
   const [channelOffsetInput, setChannelOffsetInput] = useState('0');
   const channelOffsetInputRef = useRef<HTMLInputElement>(null);
   const hasInitializedChannelMenuFocus = useRef(false);
+  const hasInitializedTimeMenuFocus = useRef(false);
   const timeDelayInputId = `time-delay-${item.filePath.replace(/[^a-z0-9]/gi, '-')}`;
   const channelGainInputId = `channel-gain-${item.filePath.replace(/[^a-z0-9]/gi, '-')}-${
     channelMenuChannel?.id ?? 'unknown'
@@ -309,15 +310,20 @@ function ChannelFileAccordion({
   useEffect(() => {
     if (isAnyMenuOpen) {
       setTimeOffsetInput(String(timeOffset));
-      // Focus the input after a delay to ensure the menu is fully rendered
-      const timer = setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-          inputRef.current.select();
-        }
-      }, 200);
+      if (!hasInitializedTimeMenuFocus.current) {
+        hasInitializedTimeMenuFocus.current = true;
+        // Focus the input after a delay to ensure the menu is fully rendered
+        const timer = setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+          }
+        }, 200);
 
-      return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
+      }
+    } else {
+      hasInitializedTimeMenuFocus.current = false;
     }
   }, [isAnyMenuOpen, timeOffset]);
 
@@ -620,6 +626,8 @@ function ChannelFileAccordion({
                 <DropdownMenuItem
                   className="focus:bg-transparent"
                   onSelect={(event) => event.preventDefault()}
+                  onPointerMove={(event) => event.preventDefault()}
+                  onPointerLeave={(event) => event.preventDefault()}
                 >
                   <div className="flex w-full items-center gap-2">
                     <ClockIcon className="size-4 text-muted-foreground" />
@@ -641,7 +649,13 @@ function ChannelFileAccordion({
                         placeholder="0.0"
                       />
                       <button
-                        onClick={handleTimeOffsetApply}
+                        onClick={() => {
+                          handleTimeOffsetApply();
+                          if (inputRef.current) {
+                            inputRef.current.focus();
+                            inputRef.current.select();
+                          }
+                        }}
                         className="rounded border border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
                         type="button"
                       >
@@ -651,7 +665,10 @@ function ChannelFileAccordion({
                         onClick={() => {
                           setTimeOffsetInput('0');
                           onTimeOffsetChange(item.filePath, 0);
-                          setIsOptionsMenuOpen(false);
+                          if (inputRef.current) {
+                            inputRef.current.focus();
+                            inputRef.current.select();
+                          }
                         }}
                         className="rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
                         type="button"
@@ -704,6 +721,8 @@ function ChannelFileAccordion({
                 sideOffset={6}
                 aria-label="Channel file menu"
                 aria-labelledby={undefined}
+                onPointerMove={(event) => event.preventDefault()}
+                onPointerLeave={(event) => event.preventDefault()}
               >
                 <DropdownMenuLabel className="text-xs uppercase tracking-wide text-muted-foreground">
                   File settings
@@ -712,6 +731,8 @@ function ChannelFileAccordion({
                   <DropdownMenuItem
                     className="focus:bg-transparent"
                     onSelect={(event) => event.preventDefault()}
+                    onPointerMove={(event) => event.preventDefault()}
+                    onPointerLeave={(event) => event.preventDefault()}
                   >
                     <div className="flex w-full items-center gap-2">
                       <ClockIcon className="size-4 text-muted-foreground" />
@@ -733,7 +754,13 @@ function ChannelFileAccordion({
                           placeholder="0.0"
                         />
                         <button
-                          onClick={handleTimeOffsetApply}
+                          onClick={() => {
+                            handleTimeOffsetApply();
+                            if (inputRef.current) {
+                              inputRef.current.focus();
+                              inputRef.current.select();
+                            }
+                          }}
                           className="rounded border border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
                           type="button"
                         >
@@ -743,8 +770,10 @@ function ChannelFileAccordion({
                           onClick={() => {
                             setTimeOffsetInput('0');
                             onTimeOffsetChange(item.filePath, 0);
-                            setIsContextMenuOpen(false);
-                            setContextMenuPosition(null);
+                            if (inputRef.current) {
+                              inputRef.current.focus();
+                              inputRef.current.select();
+                            }
                           }}
                           className="rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
                           type="button"
@@ -761,6 +790,8 @@ function ChannelFileAccordion({
                   onSelect={() => {
                     onCloseFile(item.filePath);
                   }}
+                  onPointerMove={(event) => event.preventDefault()}
+                  onPointerLeave={(event) => event.preventDefault()}
                 >
                   <X className="mr-2 size-4" />
                   <span>Close file</span>
@@ -799,6 +830,8 @@ function ChannelFileAccordion({
                 sideOffset={6}
                 aria-label="Channel menu"
                 aria-labelledby={undefined}
+                onPointerMove={(event) => event.preventDefault()}
+                onPointerLeave={(event) => event.preventDefault()}
               >
                 <DropdownMenuLabel className="text-xs uppercase tracking-wide text-muted-foreground">
                   {channelMenuChannel
