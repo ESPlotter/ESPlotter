@@ -30,6 +30,29 @@ export class SidebarTestObject {
     await this.page.getByRole('menuitem', { name: 'Close file' }).click();
   }
 
+  async openChannelContextMenu(channelLabel: string, fileLabel?: string): Promise<void> {
+    const channelButton = this.getChannelButton(channelLabel, fileLabel);
+    await channelButton.waitFor({ state: 'visible', timeout: 5000 });
+    await channelButton.click({ button: 'right' });
+    await this.page.getByRole('menu', { name: 'Channel menu' }).waitFor({ state: 'visible' });
+  }
+
+  async setChannelGain(channelLabel: string, gain: number, fileLabel?: string): Promise<void> {
+    await this.openChannelContextMenu(channelLabel, fileLabel);
+    const menu = this.page.getByRole('menu', { name: 'Channel menu' });
+    const input = menu.getByRole('spinbutton', { name: 'Gain' });
+    await input.fill(String(gain));
+    await input.press('Enter');
+  }
+
+  async setChannelOffset(channelLabel: string, offset: number, fileLabel?: string): Promise<void> {
+    await this.openChannelContextMenu(channelLabel, fileLabel);
+    const menu = this.page.getByRole('menu', { name: 'Channel menu' });
+    const input = menu.getByRole('spinbutton', { name: 'Offset' });
+    await input.fill(String(offset));
+    await input.press('Enter');
+  }
+
   async setChannelFileTimeOffset(fileLabel: string, offsetSeconds: number): Promise<void> {
     await this.openFileOptionsMenu(fileLabel);
     const menu = this.page.getByRole('menu', { name: 'Channel file menu' });

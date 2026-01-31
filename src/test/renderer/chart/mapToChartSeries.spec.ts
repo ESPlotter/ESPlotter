@@ -151,6 +151,99 @@ describe('mapToChartSerie', () => {
     });
   });
 
+  test('should apply gain to channel values', () => {
+    const testData = ChannelFileContentPrimitiveMother.with({
+      x: {
+        id: 'time',
+        label: 'Time',
+        unit: 's',
+        values: [1, 2, 3],
+      },
+      series: [
+        {
+          id: 'V',
+          label: 'Voltage',
+          unit: 'V',
+          values: [10, 20, 30],
+        },
+      ],
+    });
+
+    const result = mapToChartSerie(testData.series[0], testData.x.values, 0, 2);
+
+    expect(result).toEqual({
+      name: 'Voltage',
+      type: 'line',
+      data: [
+        [1, 20],
+        [2, 40],
+        [3, 60],
+      ],
+    });
+  });
+
+  test('should apply channel offset to channel values', () => {
+    const testData = ChannelFileContentPrimitiveMother.with({
+      x: {
+        id: 'time',
+        label: 'Time',
+        unit: 's',
+        values: [1, 2, 3],
+      },
+      series: [
+        {
+          id: 'V',
+          label: 'Voltage',
+          unit: 'V',
+          values: [10, 20, 30],
+        },
+      ],
+    });
+
+    const result = mapToChartSerie(testData.series[0], testData.x.values, 0, 1, 5);
+
+    expect(result).toEqual({
+      name: 'Voltage',
+      type: 'line',
+      data: [
+        [1, 15],
+        [2, 25],
+        [3, 35],
+      ],
+    });
+  });
+
+  test('should apply both gain and channel offset', () => {
+    const testData = ChannelFileContentPrimitiveMother.with({
+      x: {
+        id: 'time',
+        label: 'Time',
+        unit: 's',
+        values: [1, 2, 3],
+      },
+      series: [
+        {
+          id: 'V',
+          label: 'Voltage',
+          unit: 'V',
+          values: [10, 20, 30],
+        },
+      ],
+    });
+
+    const result = mapToChartSerie(testData.series[0], testData.x.values, 0, 2, 5);
+
+    expect(result).toEqual({
+      name: 'Voltage',
+      type: 'line',
+      data: [
+        [1, 25],
+        [2, 45],
+        [3, 65],
+      ],
+    });
+  });
+
   test('should map test data with zero time offset (default)', () => {
     const testData = ChannelFileContentPrimitiveMother.with({
       x: {

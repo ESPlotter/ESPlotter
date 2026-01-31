@@ -277,4 +277,155 @@ describe('ChannelFilesStore', () => {
       }
     });
   });
+
+  describe('setChannelGain', () => {
+    test('should initialize channel gains to 1 when adding a file', () => {
+      const { addFile } = useChannelFilesStore.getState().actions;
+      const file = createMockChannelFile('/path/to/file.csv');
+
+      addFile(file);
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      if (files[0].status === 'ready') {
+        expect(files[0].channelGains['channel-1']).toBe(1);
+      }
+    });
+
+    test('should set gain for a ready file channel', () => {
+      const { addFile, setChannelGain } = useChannelFilesStore.getState().actions;
+      const file = createMockChannelFile('/path/to/file.csv');
+
+      addFile(file);
+      setChannelGain('/path/to/file.csv', 'channel-1', 2.5);
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      if (files[0].status === 'ready') {
+        expect(files[0].channelGains['channel-1']).toBe(2.5);
+      }
+    });
+
+    test('should update gain for an existing channel', () => {
+      const { addFile, setChannelGain } = useChannelFilesStore.getState().actions;
+      const file = createMockChannelFile('/path/to/file.csv');
+
+      addFile(file);
+      setChannelGain('/path/to/file.csv', 'channel-1', 3);
+      setChannelGain('/path/to/file.csv', 'channel-1', 0.5);
+
+      const { files } = useChannelFilesStore.getState();
+      if (files[0].status === 'ready') {
+        expect(files[0].channelGains['channel-1']).toBe(0.5);
+      }
+    });
+
+    test('should not affect loading files', () => {
+      const { startFileOpen, setChannelGain } = useChannelFilesStore.getState().actions;
+
+      startFileOpen('/path/to/file.csv');
+      setChannelGain('/path/to/file.csv', 'channel-1', 2);
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      expect(files[0].status).toBe('loading');
+    });
+
+    test('should only update the specified file', () => {
+      const { addFile, setChannelGain } = useChannelFilesStore.getState().actions;
+      const file1 = createMockChannelFile('/path/to/file1.csv');
+      const file2 = createMockChannelFile('/path/to/file2.csv');
+
+      addFile(file1);
+      addFile(file2);
+      setChannelGain('/path/to/file1.csv', 'channel-1', 4);
+
+      const { files } = useChannelFilesStore.getState();
+      const file1State = files.find((f) => f.path === '/path/to/file1.csv');
+      const file2State = files.find((f) => f.path === '/path/to/file2.csv');
+
+      if (file1State?.status === 'ready') {
+        expect(file1State.channelGains['channel-1']).toBe(4);
+      }
+      if (file2State?.status === 'ready') {
+        expect(file2State.channelGains['channel-1']).toBe(1);
+      }
+    });
+  });
+
+  describe('setChannelOffset', () => {
+    test('should initialize channel offsets to 0 when adding a file', () => {
+      const { addFile } = useChannelFilesStore.getState().actions;
+      const file = createMockChannelFile('/path/to/file.csv');
+
+      addFile(file);
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      if (files[0].status === 'ready') {
+        expect(files[0].channelOffsets['channel-1']).toBe(0);
+      }
+    });
+
+    test('should set offset for a ready file channel', () => {
+      const { addFile, setChannelOffset } = useChannelFilesStore.getState().actions;
+      const file = createMockChannelFile('/path/to/file.csv');
+
+      addFile(file);
+      setChannelOffset('/path/to/file.csv', 'channel-1', 10);
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      if (files[0].status === 'ready') {
+        expect(files[0].channelOffsets['channel-1']).toBe(10);
+      }
+    });
+
+    test('should update offset for an existing channel', () => {
+      const { addFile, setChannelOffset } = useChannelFilesStore.getState().actions;
+      const file = createMockChannelFile('/path/to/file.csv');
+
+      addFile(file);
+      setChannelOffset('/path/to/file.csv', 'channel-1', 5);
+      setChannelOffset('/path/to/file.csv', 'channel-1', -3);
+
+      const { files } = useChannelFilesStore.getState();
+      if (files[0].status === 'ready') {
+        expect(files[0].channelOffsets['channel-1']).toBe(-3);
+      }
+    });
+
+    test('should not affect loading files', () => {
+      const { startFileOpen, setChannelOffset } = useChannelFilesStore.getState().actions;
+
+      startFileOpen('/path/to/file.csv');
+      setChannelOffset('/path/to/file.csv', 'channel-1', 10);
+
+      const { files } = useChannelFilesStore.getState();
+      expect(files).toHaveLength(1);
+      expect(files[0].status).toBe('loading');
+    });
+
+    test('should only update the specified file', () => {
+      const { addFile, setChannelOffset } = useChannelFilesStore.getState().actions;
+      const file1 = createMockChannelFile('/path/to/file1.csv');
+      const file2 = createMockChannelFile('/path/to/file2.csv');
+
+      addFile(file1);
+      addFile(file2);
+      setChannelOffset('/path/to/file1.csv', 'channel-1', 8);
+
+      const { files } = useChannelFilesStore.getState();
+      const file1State = files.find((f) => f.path === '/path/to/file1.csv');
+      const file2State = files.find((f) => f.path === '/path/to/file2.csv');
+
+      if (file1State?.status === 'ready') {
+        expect(file1State.channelOffsets['channel-1']).toBe(8);
+      }
+      if (file2State?.status === 'ready') {
+        expect(file2State.channelOffsets['channel-1']).toBe(0);
+      }
+    });
+  });
 });
+

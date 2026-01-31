@@ -6,6 +6,8 @@ export function mapToChartSerie(
   channel: ChannelFileContentSeriePrimitive,
   xValues: number[],
   timeOffset: number = 0,
+  gain: number = 1,
+  channelOffset: number = 0,
 ): ChartSerie | null {
   const yValues = channel.values;
 
@@ -20,7 +22,7 @@ export function mapToChartSerie(
       return acc;
     }
 
-    acc.push([xValue + timeOffset, yValue]);
+    acc.push([xValue + timeOffset, yValue * gain + channelOffset]);
     return acc;
   }, []);
 
